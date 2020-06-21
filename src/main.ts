@@ -1,6 +1,5 @@
 import arial10x10 from '../res/arial10x10.png';
 import {
-	BlendMode,
 	Colours,
 	console_init_root,
 	console_set_custom_font,
@@ -21,6 +20,10 @@ async function main() {
 	const mapWidth = 80;
 	const mapHeight = 45;
 
+	const roomMaxSize = 10;
+	const roomMinSize = 6;
+	const maxRooms = 30;
+
 	const colours = {
 		dark_wall: toRGB(0, 0, 100),
 		dark_ground: toRGB(50, 50, 150),
@@ -31,6 +34,14 @@ async function main() {
 	const entities = [player, npc];
 
 	const gameMap = new GameMap(mapWidth, mapHeight);
+	gameMap.makeMap(
+		maxRooms,
+		roomMinSize,
+		roomMaxSize,
+		mapWidth,
+		mapHeight,
+		player
+	);
 
 	const font = await console_set_custom_font(
 		arial10x10,
