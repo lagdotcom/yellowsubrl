@@ -7,6 +7,7 @@ import {
 	FontFlags,
 	KeyPress,
 	sys,
+	toRGB,
 } from './tcod';
 import { handle_keys } from './inputHandlers';
 
@@ -22,11 +23,28 @@ async function main() {
 		FontFlags.TypeGreyscale | FontFlags.LayoutTCOD
 	);
 
-	console_init_root(width, height, font).main(con => {
+	var lastReportTime = new Date().getTime();
+	var ticks = 0;
+	var fpsString = '';
+
+	console_init_root(width, height, font).main(function main_loop(con) {
 		const { key, mouse } = sys.check_for_event(KeyPress);
 
 		con.set_default_foreground(Colours.red);
 		con.put_char(player_x, player_y, '@', BlendMode.None);
+
+		const time = new Date().getTime();
+		ticks++;
+
+		if (time - lastReportTime > 1000) {
+			fpsString = `${ticks} fps`;
+
+			lastReportTime = time;
+			ticks = 0;
+		}
+
+		con.set_default_foreground(Colours.white);
+		con.print_rect(0, 0, 10, 1, fpsString);
 		con.flush();
 
 		con.put_char(player_x, player_y, ' ', BlendMode.None);

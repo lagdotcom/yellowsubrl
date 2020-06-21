@@ -52,11 +52,14 @@ export const MouseEvents: SysEventType[] = [
 	MouseRelease,
 ];
 
-type Colour = [number, number, number];
-export const Colours: { [name: string]: Colour } = {
-	black: [0, 0, 0],
-	white: [255, 255, 255],
-	red: [255, 0, 0],
+export function toRGB(r: number, g: number, b: number) {
+	return `rgb(${r},${g},${b})`;
+}
+
+export const Colours = {
+	black: toRGB(0, 0, 0),
+	white: toRGB(255, 255, 255),
+	red: toRGB(255, 0, 0),
 };
 
 const tcodLayout = [
@@ -71,6 +74,8 @@ const tcodLayout = [
 ];
 
 class Font {
+	canvas: HTMLCanvasElement;
+	context: CanvasRenderingContext2D;
 	flags: FontFlags;
 	layout: string[];
 	lookup: { [ch: string]: [number, number] };
@@ -121,27 +126,31 @@ class Font {
 				];
 			}
 		}
+
+		// reserve a canvas for text drawing
+		this.canvas = document.createElement('canvas');
+		this.canvas.width = this.width;
+		this.canvas.height = this.height;
+
+		const ctx = this.canvas.getContext('2d');
+		if (!ctx) throw 'Could not reserve canvas for text drawing';
+		this.context = ctx;
 	}
 
-	getChar(ch: string, fg: Colour) {
+	getChar(ch: string, fg: string) {
 		const loc = this.lookup[ch];
 		if (!loc) return undefined;
 
-		const { width, height } = this;
-		const chc = document.createElement('canvas');
-		chc.width = width;
-		chc.height = height;
+		const { canvas, context, src, width, height } = this;
 
-		const ctx = chc.getContext('2d');
-		if (!ctx) return undefined;
+		context.globalCompositeOperation = 'copy';
+		context.fillStyle = fg;
+		context.fillRect(0, 0, width, height);
 
-		ctx.fillStyle = toRGB(fg);
-		ctx.fillRect(0, 0, width, height);
+		context.globalCompositeOperation = 'destination-in';
+		context.drawImage(src, loc[0], loc[1], width, height, 0, 0, width, height);
 
-		ctx.globalCompositeOperation = 'destination-in';
-		ctx.drawImage(this.src, loc[0], loc[1], width, height, 0, 0, width, height);
-
-		return chc;
+		return canvas;
 	}
 }
 
@@ -149,8 +158,8 @@ interface ConsoleUpdate {
 	x: number;
 	y: number;
 	ch: string;
-	fg: Colour;
-	bg: Colour;
+	fg: string;
+	bg: string;
 	mode: BlendMode;
 }
 
@@ -179,16 +188,11 @@ export interface Key {
 	keyCode: number;
 }
 
-function toRGB(col: Colour) {
-	const [r, g, b] = col;
-	return `rgb(${r},${g},${b})`;
-}
-
 class Console {
 	callback?: (con: Console) => any;
 	context: CanvasRenderingContext2D;
-	default_bg: Colour;
-	default_fg: Colour;
+	default_bg: string;
+	default_fg: string;
 	element: HTMLCanvasElement;
 	font: Font;
 	handle: number;
@@ -216,7 +220,7 @@ class Console {
 		if (!context) throw 'Could not get 2D context';
 		this.context = context;
 		context.imageSmoothingEnabled = false;
-		context.fillStyle = toRGB(this.default_bg);
+		context.fillStyle = this.default_bg;
 		context.fillRect(0, 0, this.element.width, this.element.height);
 
 		this.tick = this.tick.bind(this);
@@ -237,7 +241,7 @@ class Console {
 				dy = u.y * height;
 
 			this.context.globalCompositeOperation = 'source-over';
-			this.context.fillStyle = toRGB(u.bg);
+			this.context.fillStyle = u.bg;
 			this.context.fillRect(dx, dy, width, height);
 
 			const img = this.font.getChar(u.ch, u.fg);
@@ -271,8 +275,25 @@ class Console {
 		});
 	}
 
-	set_default_foreground(c: Colour) {
-		this.default_fg = c;
+	print_rect(x: number, y: number, w: number, h: number, s: string) {
+		const sx = x;
+		const ex = x + w;
+		for (var i = 0; i < s.length; i++) {
+			const ch = s[i];
+			this.put_char(x, y, ch);
+
+			x++;
+			if (x > ex) {
+				x = sx;
+				y++;
+
+				// TODO: wrapping stuff
+			}
+		}
+	}
+
+	set_default_foreground(col: string) {
+		this.default_fg = col;
 	}
 
 	stop() {
