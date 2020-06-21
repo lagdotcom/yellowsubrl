@@ -1,6 +1,6 @@
 import { SysKeyEvent } from './tcod';
 
-export function handle_keys(key?: SysKeyEvent) {
+export function handleKeys(key?: SysKeyEvent) {
 	if (!key) return {};
 
 	if (key.key == 'ArrowUp') return { move: [0, -1] };

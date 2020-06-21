@@ -1,11 +1,3 @@
-export enum FontFlags {
-	LayoutASCIIInCol = 1,
-	LayoutASCIIInRow = 2,
-	TypeGreyscale = 4,
-	LayoutTCOD = 8,
-	LayoutCP437 = 16,
-}
-
 export enum BlendMode {
 	None = 'source-over', // TODO?
 	Set = 'source-over', // TODO?
@@ -74,48 +66,69 @@ const tcodLayout = [
 	'',
 ];
 
-export class Font {
+export enum Charmap {
+	TCOD,
+}
+
+export class Tileset {
 	canvas: HTMLCanvasElement;
+	charmap: Charmap;
 	context: CanvasRenderingContext2D;
-	flags: FontFlags;
 	layout: string[];
 	lookup: { [ch: string]: [number, number] };
 	src: CanvasImageSource;
 	height: number;
 	width: number;
 
+	static async createFromUrl(
+		source: string,
+		columns: number,
+		rows: number,
+		charmap: Charmap
+	) {
+		const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+			const el = document.createElement('img');
+			el.onerror = e => {
+				reject(e);
+			};
+			el.onload = () => {
+				resolve(el);
+			};
+			el.src = source;
+		});
+
+		return new Tileset(img, charmap, columns, rows);
+	}
+
 	constructor(
 		src: HTMLImageElement,
-		flags: FontFlags,
-		chars_x?: number,
-		chars_y?: number
+		charmap: Charmap,
+		rows: number,
+		cols: number
 	) {
-		this.flags = flags;
+		this.charmap = charmap;
 
-		if (flags & FontFlags.LayoutTCOD) this.layout = tcodLayout;
-		else throw 'Unsupported font layout';
+		if (charmap == Charmap.TCOD) this.layout = tcodLayout;
+		else throw 'Unsupported charmap';
 
-		// get the font size
+		// get the tile size
 		const { width, height } = src;
-		this.width = width / (chars_x || this.layout[0].length);
-		this.height = height / (chars_y || this.layout.length);
+		this.width = width / rows;
+		this.height = height / cols;
 
-		// turn image data into a mask
-		if (flags & FontFlags.TypeGreyscale) {
-			const mask = document.createElement('canvas');
-			mask.width = width;
-			mask.height = height;
-			const context = mask.getContext('2d');
-			if (!context) throw "Can't process font";
+		const mask = document.createElement('canvas');
+		mask.width = width;
+		mask.height = height;
+		const context = mask.getContext('2d');
+		if (!context) throw "Can't process tilesheet";
 
-			context.drawImage(src, 0, 0);
-			const data = context.getImageData(0, 0, width, height);
-			for (var i = 0; i < data.data.length; i += 4)
-				data.data[i + 3] = data.data[i];
+		context.drawImage(src, 0, 0);
+		const data = context.getImageData(0, 0, width, height);
+		for (var i = 0; i < data.data.length; i += 4)
+			data.data[i + 3] = data.data[i];
 
-			context.putImageData(data, 0, 0);
-			this.src = mask;
-		} else throw 'Unsupported font type';
+		context.putImageData(data, 0, 0);
+		this.src = mask;
 
 		// process the lookup table
 		this.lookup = {};
@@ -172,31 +185,86 @@ interface ForegroundUpdate {
 
 export class Console {
 	bgUpdates: BackgroundUpdate[];
-	callback?: (con: Console) => any;
-	context: CanvasRenderingContext2D;
-	default_fg: string;
-	element: HTMLCanvasElement;
-	font: Font;
+	defaultFg: string;
 	fgUpdates: ForegroundUpdate[];
+	height: number;
+	width: number;
+
+	constructor(w: number, h: number) {
+		this.width = w;
+		this.height = h;
+
+		this.defaultFg = Colours.white;
+		this.bgUpdates = [];
+		this.fgUpdates = [];
+	}
+
+	checkForKeypress() {
+		return sys.checkForEvents(KeyPress).key;
+	}
+
+	putChar(
+		x: number,
+		y: number,
+		c: number | string,
+		mode: BlendMode = BlendMode.Default
+	) {
+		const ch = typeof c === 'number' ? String.fromCharCode(c) : c;
+		this.fgUpdates.push({
+			x,
+			y,
+			ch,
+			mode,
+			colour: this.defaultFg,
+		});
+	}
+
+	printRect(x: number, y: number, w: number, h: number, s: string) {
+		const sx = x;
+		const ex = x + w;
+		for (var i = 0; i < s.length; i++) {
+			const ch = s[i];
+			this.putChar(x, y, ch);
+
+			x++;
+			if (x > ex) {
+				x = sx;
+				y++;
+
+				// TODO: wrapping stuff
+			}
+		}
+	}
+
+	setCharBackground(x: number, y: number, colour: string, mode: BlendMode) {
+		this.bgUpdates.push({ x, y, colour, mode });
+	}
+
+	setDefaultForeground(col: string) {
+		this.defaultFg = col;
+	}
+}
+
+export class Terminal {
+	callback?: Function;
+	context: CanvasRenderingContext2D;
+	element: HTMLCanvasElement;
+	width: number;
 	handle: number;
 	height: number;
 	running: boolean;
-	width: number;
+	tileset: Tileset;
 
-	constructor(w: number, h: number, f: Font) {
+	constructor(w: number, h: number, tileset: Tileset) {
 		this.width = w;
 		this.height = h;
-		this.font = f;
+		this.tileset = tileset;
 
 		this.element = document.createElement('canvas');
-		this.element.width = w * f.width;
-		this.element.height = h * f.height;
+		this.element.width = w * tileset.width;
+		this.element.height = h * tileset.height;
 		document.body.appendChild(this.element);
 		sys.addConsole(this.element);
-
-		this.default_fg = Colours.white;
-		this.bgUpdates = [];
-		this.fgUpdates = [];
 
 		const context = this.element.getContext('2d');
 		if (!context) throw 'Could not get 2D context';
@@ -211,14 +279,10 @@ export class Console {
 		this.schedule();
 	}
 
-	check_for_keypress() {
-		return sys.check_for_event(KeyEvents).key;
-	}
+	present(con: Console) {
+		const { width, height } = this.tileset;
 
-	flush() {
-		const { width, height } = this.font;
-
-		this.bgUpdates.forEach(u => {
+		con.bgUpdates.forEach(u => {
 			const dx = u.x * width,
 				dy = u.y * height;
 
@@ -226,64 +290,23 @@ export class Console {
 			this.context.fillStyle = u.colour;
 			this.context.fillRect(dx, dy, width, height);
 		});
-		this.bgUpdates = [];
+		con.bgUpdates = [];
 
-		this.fgUpdates.forEach(u => {
+		con.fgUpdates.forEach(u => {
 			const dx = u.x * width,
 				dy = u.y * height;
 
-			const img = this.font.getChar(u.ch, u.colour);
+			const img = this.tileset.getChar(u.ch, u.colour);
 			if (!img) return;
 
 			this.context.globalCompositeOperation = u.mode;
 			this.context.drawImage(img, dx, dy);
 		});
-		this.fgUpdates = [];
+		con.fgUpdates = [];
 	}
 
-	main(fn: (con: Console) => any) {
-		this.callback = fn.bind(this);
-	}
-
-	put_char(
-		x: number,
-		y: number,
-		c: number | string,
-		mode: BlendMode = BlendMode.Default
-	) {
-		const ch = typeof c === 'number' ? String.fromCharCode(c) : c;
-		this.fgUpdates.push({
-			x,
-			y,
-			ch,
-			mode,
-			colour: this.default_fg,
-		});
-	}
-
-	print_rect(x: number, y: number, w: number, h: number, s: string) {
-		const sx = x;
-		const ex = x + w;
-		for (var i = 0; i < s.length; i++) {
-			const ch = s[i];
-			this.put_char(x, y, ch);
-
-			x++;
-			if (x > ex) {
-				x = sx;
-				y++;
-
-				// TODO: wrapping stuff
-			}
-		}
-	}
-
-	set_char_background(x: number, y: number, colour: string, mode: BlendMode) {
-		this.bgUpdates.push({ x, y, colour, mode });
-	}
-
-	set_default_foreground(col: string) {
-		this.default_fg = col;
+	main(f: Function) {
+		this.callback = f;
 	}
 
 	stop() {
@@ -299,33 +322,6 @@ export class Console {
 		this.callback && this.callback(this);
 		this.schedule();
 	}
-}
-
-export async function console_set_custom_font(
-	fontFile: string,
-	flags: FontFlags,
-	nb_char_horiz = 0,
-	nb_char_vertic = 0
-) {
-	const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-		const el = document.createElement('img');
-		el.onerror = e => {
-			reject(e);
-		};
-		el.onload = () => {
-			resolve(el);
-		};
-		el.src = fontFile;
-	});
-
-	return new Font(img, flags, nb_char_horiz, nb_char_vertic);
-}
-
-export function console_init_root(w: number, h: number, font: Font) {
-	const con = new Console(w, h, font);
-
-	(window as any).tcodCon = con;
-	return con;
 }
 
 export interface SysKeyEvent {
@@ -392,7 +388,7 @@ class Sys {
 		});
 	}
 
-	check_for_event(type: SysEventType | SysEventType[]) {
+	checkForEvents(type: SysEventType | SysEventType[]) {
 		const events: SysEvents = {};
 		const types = typeof type === 'string' ? [type] : type;
 

@@ -6,16 +6,14 @@ export function renderAll(
 	con: Console,
 	entities: Entity[],
 	gameMap: GameMap,
-	screenWidth: number,
-	screenHeight: number,
 	colours: { [name: string]: string }
 ) {
 	for (var y = 0; y < gameMap.height; y++) {
 		for (var x = 0; x < gameMap.width; x++) {
 			const wall = gameMap.tiles[x][y];
-			const colour = wall.block_sight ? colours.dark_wall : colours.dark_ground;
+			const colour = wall.blockSight ? colours.darkWall : colours.darkGround;
 
-			con.set_char_background(x, y, colour, BlendMode.Set);
+			con.setCharBackground(x, y, colour, BlendMode.Set);
 		}
 	}
 
@@ -27,10 +25,10 @@ export function clearAll(con: Console, entities: Entity[]) {
 }
 
 export function drawEntity(con: Console, e: Entity) {
-	con.set_default_foreground(e.colour);
-	con.put_char(e.x, e.y, e.char, BlendMode.None);
+	con.setDefaultForeground(e.colour);
+	con.putChar(e.x, e.y, e.char, BlendMode.None);
 }
 
 export function clearEntity(con: Console, e: Entity) {
-	con.put_char(e.x, e.y, ' ', BlendMode.None);
+	con.putChar(e.x, e.y, ' ', BlendMode.None);
 }

@@ -74,7 +74,7 @@ export default class GameMap {
 		for (var x = room.x1 + 1; x < room.x2; x++) {
 			for (var y = room.y1 + 1; y < room.y2; y++) {
 				this.tiles[x][y].blocked = false;
-				this.tiles[x][y].block_sight = false;
+				this.tiles[x][y].blockSight = false;
 			}
 		}
 	}
@@ -82,14 +82,14 @@ export default class GameMap {
 	createHTunnel(x1: number, x2: number, y: number) {
 		for (var x = Math.min(x1, x2); x < Math.max(x1, x2) + 1; x++) {
 			this.tiles[x][y].blocked = false;
-			this.tiles[x][y].block_sight = false;
+			this.tiles[x][y].blockSight = false;
 		}
 	}
 
 	createVTunnel(y1: number, y2: number, x: number) {
 		for (var y = Math.min(y1, y2); y < Math.max(y1, y2) + 1; y++) {
 			this.tiles[x][y].blocked = false;
-			this.tiles[x][y].block_sight = false;
+			this.tiles[x][y].blockSight = false;
 		}
 	}
 

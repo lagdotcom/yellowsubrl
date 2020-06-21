@@ -1,14 +1,15 @@
 import arial10x10 from '../res/arial10x10.png';
 import {
+	Charmap,
 	Colours,
-	console_init_root,
-	console_set_custom_font,
-	FontFlags,
+	Console,
 	KeyPress,
 	sys,
+	Terminal,
 	toRGB,
+	Tileset,
 } from './tcod';
-import { handle_keys } from './inputHandlers';
+import { handleKeys } from './inputHandlers';
 import Entity from './Entity';
 import { renderAll, clearAll } from './renderFunctions';
 import GameMap from './GameMap';
@@ -25,8 +26,8 @@ async function main() {
 	const maxRooms = 30;
 
 	const colours = {
-		dark_wall: toRGB(0, 0, 100),
-		dark_ground: toRGB(50, 50, 150),
+		darkWall: toRGB(0, 0, 100),
+		darkGround: toRGB(50, 50, 150),
 	};
 
 	const player = new Entity(width / 2, height / 2, '@', Colours.white);
@@ -43,18 +44,18 @@ async function main() {
 		player
 	);
 
-	const font = await console_set_custom_font(
-		arial10x10,
-		FontFlags.TypeGreyscale | FontFlags.LayoutTCOD
-	);
+	const tileset = await Tileset.createFromUrl(arial10x10, 32, 8, Charmap.TCOD);
 
 	var lastReportTime = new Date().getTime();
 	var ticks = 0;
 	var fpsString = '';
 
-	console_init_root(width, height, font).main(function main_loop(con) {
-		const { key, mouse } = sys.check_for_event(KeyPress);
-		renderAll(con, entities, gameMap, width, height, colours);
+	const context = new Terminal(width, height, tileset);
+	const rootConsole = new Console(width, height);
+
+	context.main(function loop() {
+		const { key } = sys.checkForEvents(KeyPress);
+		renderAll(rootConsole, entities, gameMap, colours);
 
 		const time = new Date().getTime();
 		ticks++;
@@ -66,12 +67,12 @@ async function main() {
 			ticks = 0;
 		}
 
-		con.set_default_foreground(Colours.white);
-		con.print_rect(0, 0, 10, 1, fpsString);
-		con.flush();
+		rootConsole.setDefaultForeground(Colours.white);
+		rootConsole.printRect(0, 0, 10, 1, fpsString);
+		context.present(rootConsole);
 
-		clearAll(con, entities);
-		const action = handle_keys(key);
+		clearAll(rootConsole, entities);
+		const action = handleKeys(key);
 
 		if (action.move) {
 			const [dx, dy] = action.move;
@@ -79,7 +80,7 @@ async function main() {
 			if (!gameMap.isBlocked(player.x + dx, player.y + dy)) player.move(dx, dy);
 		}
 
-		if (action.exit) return con.stop();
+		if (action.exit) return context.stop();
 
 		if (action.fullscreen) {
 			alert('No idea how to do that yet');
