@@ -10,13 +10,27 @@ import {
 	toRGB,
 } from './tcod';
 import { handle_keys } from './inputHandlers';
+import Entity from './Entity';
+import { renderAll, clearAll } from './renderFunctions';
+import GameMap from './GameMap';
 
 async function main() {
 	const width = 80;
 	const height = 50;
 
-	var player_x = width / 2;
-	var player_y = height / 2;
+	const mapWidth = 80;
+	const mapHeight = 45;
+
+	const colours = {
+		dark_wall: toRGB(0, 0, 100),
+		dark_ground: toRGB(50, 50, 150),
+	};
+
+	const player = new Entity(width / 2, height / 2, '@', Colours.white);
+	const npc = new Entity(width / 2 - 5, height / 2, '@', Colours.yellow);
+	const entities = [player, npc];
+
+	const gameMap = new GameMap(mapWidth, mapHeight);
 
 	const font = await console_set_custom_font(
 		arial10x10,
@@ -29,9 +43,7 @@ async function main() {
 
 	console_init_root(width, height, font).main(function main_loop(con) {
 		const { key, mouse } = sys.check_for_event(KeyPress);
-
-		con.set_default_foreground(Colours.red);
-		con.put_char(player_x, player_y, '@', BlendMode.None);
+		renderAll(con, entities, gameMap, width, height, colours);
 
 		const time = new Date().getTime();
 		ticks++;
@@ -47,14 +59,13 @@ async function main() {
 		con.print_rect(0, 0, 10, 1, fpsString);
 		con.flush();
 
-		con.put_char(player_x, player_y, ' ', BlendMode.None);
+		clearAll(con, entities);
 		const action = handle_keys(key);
 
 		if (action.move) {
 			const [dx, dy] = action.move;
 
-			player_x += dx;
-			player_y += dy;
+			if (!gameMap.isBlocked(player.x + dx, player.y + dy)) player.move(dx, dy);
 		}
 
 		if (action.exit) return con.stop();

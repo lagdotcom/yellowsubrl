@@ -60,6 +60,7 @@ export const Colours = {
 	black: toRGB(0, 0, 0),
 	white: toRGB(255, 255, 255),
 	red: toRGB(255, 0, 0),
+	yellow: toRGB(255, 255, 0),
 };
 
 const tcodLayout = [
@@ -73,7 +74,7 @@ const tcodLayout = [
 	'',
 ];
 
-class Font {
+export class Font {
 	canvas: HTMLCanvasElement;
 	context: CanvasRenderingContext2D;
 	flags: FontFlags;
@@ -154,51 +155,32 @@ class Font {
 	}
 }
 
-interface ConsoleUpdate {
+interface BackgroundUpdate {
 	x: number;
 	y: number;
-	ch: string;
-	fg: string;
-	bg: string;
+	colour: string;
 	mode: BlendMode;
 }
 
-export interface SysKeyEvent {
-	type: 'KeyPress' | 'KeyRelease';
-	key: string;
-	keyCode: number;
-	lalt: boolean;
-}
-
-export interface SysMouseEvent {
-	type: 'MouseMove' | 'MousePress' | 'MouseRelease';
-	button: number;
+interface ForegroundUpdate {
 	x: number;
 	y: number;
+	ch: string;
+	colour: string;
+	mode: BlendMode;
 }
 
-export interface SysFingerEvent {
-	type: 'FingerMove' | 'FingerPress' | 'FingerRelease';
-	x: number;
-	y: number;
-}
-
-export interface Key {
-	key: string;
-	keyCode: number;
-}
-
-class Console {
+export class Console {
+	bgUpdates: BackgroundUpdate[];
 	callback?: (con: Console) => any;
 	context: CanvasRenderingContext2D;
-	default_bg: string;
 	default_fg: string;
 	element: HTMLCanvasElement;
 	font: Font;
+	fgUpdates: ForegroundUpdate[];
 	handle: number;
 	height: number;
 	running: boolean;
-	updates: ConsoleUpdate[];
 	width: number;
 
 	constructor(w: number, h: number, f: Font) {
@@ -212,15 +194,15 @@ class Console {
 		document.body.appendChild(this.element);
 		sys.addConsole(this.element);
 
-		this.default_bg = Colours.black;
 		this.default_fg = Colours.white;
-		this.updates = [];
+		this.bgUpdates = [];
+		this.fgUpdates = [];
 
 		const context = this.element.getContext('2d');
 		if (!context) throw 'Could not get 2D context';
 		this.context = context;
 		context.imageSmoothingEnabled = false;
-		context.fillStyle = this.default_bg;
+		context.fillStyle = Colours.black;
 		context.fillRect(0, 0, this.element.width, this.element.height);
 
 		this.tick = this.tick.bind(this);
@@ -234,24 +216,29 @@ class Console {
 	}
 
 	flush() {
-		const updates = this.updates.slice();
-		updates.forEach(u => {
-			const { width, height } = this.font;
+		const { width, height } = this.font;
+
+		this.bgUpdates.forEach(u => {
 			const dx = u.x * width,
 				dy = u.y * height;
 
-			this.context.globalCompositeOperation = 'source-over';
-			this.context.fillStyle = u.bg;
+			this.context.globalCompositeOperation = u.mode;
+			this.context.fillStyle = u.colour;
 			this.context.fillRect(dx, dy, width, height);
+		});
+		this.bgUpdates = [];
 
-			const img = this.font.getChar(u.ch, u.fg);
+		this.fgUpdates.forEach(u => {
+			const dx = u.x * width,
+				dy = u.y * height;
+
+			const img = this.font.getChar(u.ch, u.colour);
 			if (!img) return;
 
 			this.context.globalCompositeOperation = u.mode;
 			this.context.drawImage(img, dx, dy);
 		});
-
-		this.updates = [];
+		this.fgUpdates = [];
 	}
 
 	main(fn: (con: Console) => any) {
@@ -265,13 +252,12 @@ class Console {
 		mode: BlendMode = BlendMode.Default
 	) {
 		const ch = typeof c === 'number' ? String.fromCharCode(c) : c;
-		this.updates.push({
+		this.fgUpdates.push({
 			x,
 			y,
 			ch,
 			mode,
-			fg: this.default_fg,
-			bg: this.default_bg,
+			colour: this.default_fg,
 		});
 	}
 
@@ -290,6 +276,10 @@ class Console {
 				// TODO: wrapping stuff
 			}
 		}
+	}
+
+	set_char_background(x: number, y: number, colour: string, mode: BlendMode) {
+		this.bgUpdates.push({ x, y, colour, mode });
 	}
 
 	set_default_foreground(col: string) {
@@ -336,6 +326,31 @@ export function console_init_root(w: number, h: number, font: Font) {
 
 	(window as any).tcodCon = con;
 	return con;
+}
+
+export interface SysKeyEvent {
+	type: 'KeyPress' | 'KeyRelease';
+	key: string;
+	keyCode: number;
+	lalt: boolean;
+}
+
+export interface SysMouseEvent {
+	type: 'MouseMove' | 'MousePress' | 'MouseRelease';
+	button: number;
+	x: number;
+	y: number;
+}
+
+export interface SysFingerEvent {
+	type: 'FingerMove' | 'FingerPress' | 'FingerRelease';
+	x: number;
+	y: number;
+}
+
+export interface Key {
+	key: string;
+	keyCode: number;
 }
 
 interface SysEvents {
