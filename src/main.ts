@@ -13,8 +13,12 @@ import { handleKeys } from './inputHandlers';
 import Entity from './Entity';
 import { renderAll, clearAll } from './renderFunctions';
 import GameMap from './GameMap';
+import RNG from './RNG';
 
 async function main() {
+	const rng = new RNG();
+	(window as any).rng = rng;
+
 	const width = 80;
 	const height = 50;
 
@@ -34,8 +38,10 @@ async function main() {
 	const npc = new Entity(width / 2 - 5, height / 2, '@', Colours.yellow);
 	const entities = [player, npc];
 
-	const gameMap = new GameMap(mapWidth, mapHeight);
+	const gameMap = new GameMap(rng.seed, mapWidth, mapHeight);
+	(window as any).map = gameMap;
 	gameMap.makeMap(
+		rng,
 		maxRooms,
 		roomMinSize,
 		roomMaxSize,
@@ -51,7 +57,10 @@ async function main() {
 	var fpsString = '';
 
 	const context = new Terminal(width, height, tileset);
+	(window as any).term = context;
+
 	const rootConsole = new Console(width, height);
+	(window as any).con = rootConsole;
 
 	context.main(function loop() {
 		const { key } = sys.checkForEvents(KeyPress);
@@ -84,6 +93,19 @@ async function main() {
 
 		if (action.fullscreen) {
 			alert('No idea how to do that yet');
+		}
+
+		if (action.remake) {
+			gameMap.reset(rng.seed, mapWidth, mapHeight);
+			gameMap.makeMap(
+				rng,
+				maxRooms,
+				roomMinSize,
+				roomMaxSize,
+				mapWidth,
+				mapHeight,
+				player
+			);
 		}
 	});
 }

@@ -11,5 +11,7 @@ export function handleKeys(key?: SysKeyEvent) {
 	if (key.key == 'Enter' && key.lalt) return { fullscreen: true };
 	else if (key.key == 'Escape') return { exit: true };
 
+	if (key.type === 'KeyRelease' && key.key == 'r') return { remake: true };
+
 	return {};
 }

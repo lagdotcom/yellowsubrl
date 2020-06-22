@@ -1,14 +1,20 @@
 import Tile from './Tile';
 import { Rect } from './mapObjects';
 import Entity from './Entity';
-import { randint } from './random';
+import RNG, { RNGSeed } from './RNG';
 
 export default class GameMap {
-	width: number;
-	height: number;
-	tiles: Tile[][];
+	width!: number;
+	height!: number;
+	seed!: RNGSeed;
+	tiles!: Tile[][];
 
-	constructor(width: number, height: number) {
+	constructor(seed: RNGSeed, width: number, height: number) {
+		this.reset(seed, width, height);
+	}
+
+	reset(seed: RNGSeed, width: number, height: number) {
+		this.seed = seed;
 		this.width = width;
 		this.height = height;
 
@@ -22,6 +28,7 @@ export default class GameMap {
 	}
 
 	makeMap(
+		rng: RNG,
 		maxRooms: number,
 		roomMinSize: number,
 		roomMaxSize: number,
@@ -29,13 +36,14 @@ export default class GameMap {
 		mapHeight: number,
 		player: Entity
 	) {
+		rng.seed = this.seed;
 		const rooms: Rect[] = [];
 
 		for (var r = 0; r < maxRooms; r++) {
-			const w = randint(roomMinSize, roomMaxSize);
-			const h = randint(roomMinSize, roomMaxSize);
-			const x = randint(0, mapWidth - w - 1);
-			const y = randint(0, mapHeight - h - 1);
+			const w = rng.randint(roomMinSize, roomMaxSize);
+			const h = rng.randint(roomMinSize, roomMaxSize);
+			const x = rng.randint(0, mapWidth - w - 1);
+			const y = rng.randint(0, mapHeight - h - 1);
 
 			const newRoom = new Rect(x, y, w, h);
 			var ok = true;
@@ -56,7 +64,7 @@ export default class GameMap {
 				} else {
 					const [prevX, prevY] = rooms[rooms.length - 1].centre();
 
-					if (randint(0, 1) == 1) {
+					if (rng.randint(0, 1) == 1) {
 						this.createHTunnel(prevX, newX, prevY);
 						this.createVTunnel(prevY, newY, newX);
 					} else {
