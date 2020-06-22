@@ -264,7 +264,7 @@ export class Terminal {
 		this.element.width = w * tileset.width;
 		this.element.height = h * tileset.height;
 		document.body.appendChild(this.element);
-		sys.addConsole(this.element);
+		sys.addEventSource(this.element);
 
 		const context = this.element.getContext('2d');
 		if (!context) throw 'Could not get 2D context';
@@ -355,6 +355,14 @@ interface SysEvents {
 	finger?: SysFingerEvent;
 }
 
+interface GeneratesEvents {
+	addEventListener<K extends keyof HTMLElementEventMap>(
+		type: K,
+		listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
+		options?: boolean | AddEventListenerOptions
+	): void;
+}
+
 class Sys {
 	key: SysKeyEvent[];
 	mouse: SysMouseEvent[];
@@ -365,10 +373,10 @@ class Sys {
 		this.mouse = [];
 		this.finger = [];
 
-		this.addConsole(document.body);
+		this.addEventSource(window);
 	}
 
-	addConsole(el: HTMLElement) {
+	addEventSource(el: GeneratesEvents) {
 		el.addEventListener('keypress', e => {
 			this.key.push({
 				type: KeyPress,
