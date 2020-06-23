@@ -75,7 +75,6 @@ export class Console {
 			this.tiles.push(col);
 		}
 		this.tilesFlat = this.tiles.flat();
-		this.drawTile = this.drawTile.bind(this);
 
 		const canvas = document.createElement('canvas');
 		this.element = canvas;
@@ -176,7 +175,7 @@ export class Console {
 	}
 
 	render() {
-		this.tilesFlat.filter(t => t.dirty).forEach(this.drawTile);
+		this.tilesFlat.filter(t => t.dirty).forEach(this.drawTile, this);
 		return this.element;
 	}
 
