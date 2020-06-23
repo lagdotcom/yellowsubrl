@@ -2,6 +2,7 @@ export type SysEventType =
 	| 'FingerMove'
 	| 'FingerPress'
 	| 'FingerRelease'
+	| 'KeyDown'
 	| 'KeyPress'
 	| 'KeyRelease'
 	| 'MouseMove'
@@ -10,6 +11,7 @@ export type SysEventType =
 export const FingerMove = 'FingerMove',
 	FingerPress = 'FingerPress',
 	FingerRelease = 'FingerRelease',
+	KeyDown = 'KeyDown',
 	KeyPress = 'KeyPress',
 	KeyRelease = 'KeyRelease',
 	MouseMove = 'MouseMove',
@@ -20,7 +22,7 @@ export const FingerEvents: SysEventType[] = [
 	FingerPress,
 	FingerRelease,
 ];
-export const KeyEvents: SysEventType[] = [KeyPress, KeyRelease];
+export const KeyEvents: SysEventType[] = [KeyDown, KeyPress];
 export const MouseEvents: SysEventType[] = [
 	MouseMove,
 	MousePress,
@@ -28,7 +30,7 @@ export const MouseEvents: SysEventType[] = [
 ];
 
 export interface SysKeyEvent {
-	type: 'KeyPress' | 'KeyRelease';
+	type: 'KeyDown' | 'KeyPress' | 'KeyRelease';
 	key: string;
 	keyCode: number;
 	alt: boolean;
@@ -82,6 +84,17 @@ export class Sys {
 	}
 
 	addEventSource(el: GeneratesEvents) {
+		el.addEventListener('keydown', e => {
+			this.key.push({
+				type: KeyDown,
+				key: e.key,
+				keyCode: e.keyCode,
+				alt: e.altKey,
+				shift: e.shiftKey,
+				ctrl: e.ctrlKey,
+			});
+		});
+
 		el.addEventListener('keypress', e => {
 			this.key.push({
 				type: KeyPress,
