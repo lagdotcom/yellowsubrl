@@ -5,12 +5,12 @@ import {
 	Charmap,
 	Colours,
 	Console,
-	KeyPress,
+	FovAlgorithm,
+	KeyDown,
 	sys,
 	Terminal,
-	toRGB,
 	Tileset,
-	FovAlgorithm,
+	toRGB,
 } from './tcod';
 import { handleKeys } from './inputHandlers';
 import Entity, { getBlockingEntitiesAtLocation } from './Entity';
@@ -88,7 +88,7 @@ async function main() {
 	var gameState = GameState.PlayerTurn;
 
 	context.main(function loop() {
-		const { key } = sys.checkForEvents(KeyPress);
+		const { key } = sys.checkForEvents(KeyDown);
 
 		if (fovRecompute)
 			recomputeFov(

@@ -51,10 +51,7 @@ export interface SysFingerEvent {
 	y: number;
 }
 
-export interface Key {
-	key: string;
-	keyCode: number;
-}
+export type SysEvent = SysKeyEvent | SysMouseEvent | SysFingerEvent;
 
 export interface SysEvents {
 	key?: SysKeyEvent;
@@ -122,8 +119,12 @@ export class Sys {
 		const events: SysEvents = {};
 		const types = typeof type === 'string' ? [type] : type;
 
-		if (types.includes(KeyPress) || types.includes(KeyRelease)) {
-			events.key = this.key.shift();
+		if (
+			types.includes(KeyDown) ||
+			types.includes(KeyPress) ||
+			types.includes(KeyRelease)
+		) {
+			events.key = this.fetchEvent(this.key, types);
 		}
 
 		if (
@@ -131,7 +132,7 @@ export class Sys {
 			types.includes(MousePress) ||
 			types.includes(MouseRelease)
 		) {
-			events.mouse = this.mouse.shift();
+			events.mouse = this.fetchEvent(this.mouse, types);
 		}
 
 		if (
@@ -139,9 +140,16 @@ export class Sys {
 			types.includes(FingerPress) ||
 			types.includes(FingerRelease)
 		) {
-			events.finger = this.finger.shift();
+			events.finger = this.fetchEvent(this.finger, types);
 		}
 
 		return events;
+	}
+
+	private fetchEvent<T extends SysEvent>(events: T[], types: SysEventType[]) {
+		while (events.length) {
+			const e = events.shift();
+			if (types.includes(e!.type)) return e;
+		}
 	}
 }

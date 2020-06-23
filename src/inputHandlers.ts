@@ -10,9 +10,8 @@ export function handleKeys(key?: SysKeyEvent) {
 
 	if (key.key == 'Enter' && key.alt) return { fullscreen: true };
 	else if (key.key == 'Escape') return { exit: true };
-
-	if (key.type == 'KeyRelease' && key.key == 'R') return { remake: true };
-	if (key.type == 'KeyRelease' && key.key == 'F') return { changeFont: true };
+	else if (key.key == 'R') return { remake: true };
+	else if (key.key == 'F') return { changeFont: true };
 
 	return {};
 }
