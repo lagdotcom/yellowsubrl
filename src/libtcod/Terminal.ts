@@ -1,4 +1,3 @@
-import { Tileset } from './Tileset';
 import { Console } from './Console';
 import { sys, Colours } from '../tcod';
 

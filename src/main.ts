@@ -19,6 +19,7 @@ import GameMap from './GameMap';
 import RNG from './RNG';
 import { initializeFov, recomputeFov } from './fovFunctions';
 import GameState from './GameState';
+import BoxesAndCorridors from './generator/BoxesAndCorridors';
 
 async function main() {
 	const rng = new RNG();
@@ -50,19 +51,18 @@ async function main() {
 	const player = new Entity(0, 0, '@', Colours.white, 'Player', true);
 	const entities = [player];
 
-	const gameMap = new GameMap(rng.seed, mapWidth, mapHeight);
-	(window as any).map = gameMap;
-	gameMap.makeMap(
-		rng,
+	const mapGenerator = new BoxesAndCorridors(
 		maxRooms,
 		roomMinSize,
 		roomMaxSize,
 		mapWidth,
 		mapHeight,
-		player,
-		entities,
 		maxMonstersPerRoom
 	);
+
+	const gameMap = new GameMap(rng.seed, mapWidth, mapHeight);
+	(window as any).map = gameMap;
+	mapGenerator.generate(rng, gameMap, player, entities);
 
 	var fovRecompute = true;
 	var fovMap = initializeFov(gameMap);
@@ -127,9 +127,9 @@ async function main() {
 			if (!gameMap.isBlocked(dx, dy)) {
 				const target = getBlockingEntitiesAtLocation(entities, dx, dy);
 				if (target) {
-					console.log(
-						`You kick the ${target.name} in the shins, much to its annoyance!`
-					);
+					// console.log(
+					// 	`You kick the ${target.name} in the shins, much to its annoyance!`
+					// );
 				} else {
 					player.move(mx, my);
 					fovRecompute = true;
@@ -149,17 +149,7 @@ async function main() {
 			entities.splice(0, entities.length, player);
 
 			gameMap.reset(rng.seed, mapWidth, mapHeight);
-			gameMap.makeMap(
-				rng,
-				maxRooms,
-				roomMinSize,
-				roomMaxSize,
-				mapWidth,
-				mapHeight,
-				player,
-				entities,
-				maxMonstersPerRoom
-			);
+			mapGenerator.generate(rng, gameMap, player, entities);
 
 			fovMap = initializeFov(gameMap);
 			fovRecompute = true;
@@ -172,10 +162,18 @@ async function main() {
 			fovRecompute = true;
 		}
 
+		if (action.explore) {
+			for (var x = 0; x < mapWidth; x++)
+				for (var y = 0; y < mapHeight; y++) gameMap.tiles[x][y].explored = true;
+
+			fovRecompute = true;
+		}
+
 		if (gameState == GameState.EnemyTurn) {
 			entities.forEach(e => {
-				if (e != player)
-					console.log(`The ${e.name} ponders the meaning of its existence.`);
+				if (e != player) {
+					//console.log(`The ${e.name} ponders the meaning of its existence.`);
+				}
 			});
 
 			gameState = GameState.PlayerTurn;

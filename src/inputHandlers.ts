@@ -12,6 +12,7 @@ export function handleKeys(key?: SysKeyEvent) {
 	else if (key.key == 'Escape') return { exit: true };
 	else if (key.key == 'R') return { remake: true };
 	else if (key.key == 'F') return { changeFont: true };
+	else if (key.key == 'X') return { explore: true };
 
 	return {};
 }

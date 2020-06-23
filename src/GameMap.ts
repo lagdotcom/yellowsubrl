@@ -4,6 +4,15 @@ import Entity from './Entity';
 import RNG, { RNGSeed } from './RNG';
 import { Colours } from './tcod';
 
+export interface MapGenerator {
+	generate(
+		rng: RNG,
+		gameMap: GameMap,
+		player: Entity,
+		entities: Entity[]
+	): void;
+}
+
 export default class GameMap {
 	width!: number;
 	height!: number;
@@ -28,60 +37,6 @@ export default class GameMap {
 		return false;
 	}
 
-	makeMap(
-		rng: RNG,
-		maxRooms: number,
-		roomMinSize: number,
-		roomMaxSize: number,
-		mapWidth: number,
-		mapHeight: number,
-		player: Entity,
-		entities: Entity[],
-		maxMonstersPerRoom: number
-	) {
-		rng.seed = this.seed;
-		const rooms: Rect[] = [];
-
-		for (var r = 0; r < maxRooms; r++) {
-			const w = rng.randint(roomMinSize, roomMaxSize);
-			const h = rng.randint(roomMinSize, roomMaxSize);
-			const x = rng.randint(0, mapWidth - w - 1);
-			const y = rng.randint(0, mapHeight - h - 1);
-
-			const newRoom = new Rect(x, y, w, h);
-			var ok = true;
-			for (var i = 0; i < rooms.length; i++) {
-				if (rooms[i].intersect(newRoom)) {
-					ok = false;
-					break;
-				}
-			}
-
-			if (ok) {
-				this.createRoom(newRoom);
-				const [newX, newY] = newRoom.centre();
-
-				if (!rooms.length) {
-					player.x = newX;
-					player.y = newY;
-				} else {
-					const [prevX, prevY] = rooms[rooms.length - 1].centre();
-
-					if (rng.randint(0, 1) == 1) {
-						this.createHTunnel(prevX, newX, prevY);
-						this.createVTunnel(prevY, newY, newX);
-					} else {
-						this.createVTunnel(prevY, newY, prevX);
-						this.createHTunnel(prevX, newX, newY);
-					}
-				}
-
-				this.placeEntities(rng, newRoom, entities, maxMonstersPerRoom);
-				rooms.push(newRoom);
-			}
-		}
-	}
-
 	createRoom(room: Rect) {
 		for (var x = room.x1 + 1; x < room.x2; x++) {
 			for (var y = room.y1 + 1; y < room.y2; y++) {
@@ -102,29 +57,6 @@ export default class GameMap {
 		for (var y = Math.min(y1, y2); y < Math.max(y1, y2) + 1; y++) {
 			this.tiles[x][y].blocked = false;
 			this.tiles[x][y].blockSight = false;
-		}
-	}
-
-	placeEntities(
-		rng: RNG,
-		room: Rect,
-		entities: Entity[],
-		maxMonstersPerRoom: number
-	) {
-		const numberOfMonsters = rng.randint(0, maxMonstersPerRoom);
-
-		for (var i = 0; i < numberOfMonsters; i++) {
-			const x = rng.randint(room.x1 + 1, room.x2 - 1);
-			const y = rng.randint(room.y1 + 1, room.y2 - 1);
-
-			if (!entities.find(e => e.x == x && e.y == y)) {
-				var monster: Entity;
-				if (rng.randint(0, 100) < 80)
-					monster = new Entity(x, y, 'o', Colours.green, 'Orc', true);
-				else monster = new Entity(x, y, 'T', Colours.darkGreen, 'Troll', true);
-
-				entities.push(monster);
-			}
 		}
 	}
 
