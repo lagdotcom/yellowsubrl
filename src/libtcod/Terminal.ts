@@ -34,7 +34,7 @@ export class Terminal {
 	}
 
 	present(
-		con: Console,
+		console: Console,
 		options: {
 			keepAspect: boolean;
 			integerScaling: boolean;
@@ -52,7 +52,7 @@ export class Terminal {
 		this.context.fillStyle = options.clearColour;
 		this.context.fillRect(0, 0, this.width, this.height);
 
-		this.context.drawImage(con.render(), 0, 0);
+		this.context.drawImage(console.render(), 0, 0);
 	}
 
 	main(f: FrameRequestCallback) {

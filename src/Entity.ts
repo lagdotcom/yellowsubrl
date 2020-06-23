@@ -6,14 +6,21 @@ export default class Entity {
 	name: string;
 	blocks: boolean;
 
-	constructor(
-		x: number,
-		y: number,
-		char: string,
-		colour: string,
-		name: string,
-		blocks: boolean = false
-	) {
+	constructor({
+		x,
+		y,
+		char,
+		colour,
+		name,
+		blocks = false,
+	}: {
+		x: number;
+		y: number;
+		char: string;
+		colour: string;
+		name: string;
+		blocks?: boolean;
+	}) {
 		this.x = x;
 		this.y = y;
 		this.char = char;

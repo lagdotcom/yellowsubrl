@@ -31,6 +31,10 @@ export default class GameMap {
 		this.tiles = this.initializeTiles();
 	}
 
+	inBounds(x: number, y: number) {
+		return x >= 0 && x < this.width && y >= 0 && y < this.height;
+	}
+
 	isBlocked(x: number, y: number) {
 		if (this.tiles[x][y].blocked) return true;
 

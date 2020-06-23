@@ -12,14 +12,21 @@ export default class BoxesAndCorridors {
 	mapHeight: number;
 	maxMonstersPerRoom: number;
 
-	constructor(
-		maxRooms: number,
-		roomMinSize: number,
-		roomMaxSize: number,
-		mapWidth: number,
-		mapHeight: number,
-		maxMonstersPerRoom: number
-	) {
+	constructor({
+		maxRooms,
+		roomMinSize,
+		roomMaxSize,
+		mapWidth,
+		mapHeight,
+		maxMonstersPerRoom,
+	}: {
+		maxRooms: number;
+		roomMinSize: number;
+		roomMaxSize: number;
+		mapWidth: number;
+		mapHeight: number;
+		maxMonstersPerRoom: number;
+	}) {
 		this.maxRooms = maxRooms;
 		this.roomMaxSize = roomMaxSize;
 		this.roomMinSize = roomMinSize;
@@ -84,14 +91,14 @@ export default class BoxesAndCorridors {
 					[2, { name: 'Troll', colour: Colours.darkGreen, char: 'T' }],
 				]);
 
-				const monster = new Entity(
+				const monster = new Entity({
 					x,
 					y,
-					type.char,
-					type.colour,
-					type.name,
-					true
-				);
+					char: type.char,
+					colour: type.colour,
+					name: type.name,
+					blocks: true,
+				});
 				entities.push(monster);
 			}
 		}

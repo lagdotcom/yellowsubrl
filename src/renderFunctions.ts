@@ -2,14 +2,23 @@ import Entity from './Entity';
 import { Console, BlendMode, Map } from './tcod';
 import GameMap from './GameMap';
 
-export function renderAll(
-	con: Console,
-	entities: Entity[],
-	gameMap: GameMap,
-	fovMap: Map,
-	fovRecompute: boolean,
-	colours: { [name: string]: string }
-) {
+export type ColourMap = { [name: string]: string };
+
+export function renderAll({
+	console,
+	entities,
+	gameMap,
+	fovMap,
+	fovRecompute,
+	colours,
+}: {
+	console: Console;
+	entities: Entity[];
+	gameMap: GameMap;
+	fovMap: Map;
+	fovRecompute: boolean;
+	colours: ColourMap;
+}) {
 	if (fovRecompute)
 		for (var y = 0; y < gameMap.height; y++) {
 			for (var x = 0; x < gameMap.width; x++) {
@@ -23,24 +32,24 @@ export function renderAll(
 					key = tile.blocked ? 'darkWall' : 'darkGround';
 				} else continue;
 
-				con.setCharBackground(x, y, colours[key], BlendMode.Set);
+				console.setCharBackground(x, y, colours[key], BlendMode.Set);
 			}
 		}
 
-	entities.forEach(e => drawEntity(con, e, fovMap));
+	entities.forEach(e => drawEntity(console, e, fovMap));
 }
 
 export function clearAll(con: Console, entities: Entity[]) {
 	entities.forEach(e => clearEntity(con, e));
 }
 
-export function drawEntity(con: Console, e: Entity, fovMap: Map) {
+export function drawEntity(console: Console, e: Entity, fovMap: Map) {
 	if (fovMap.isInFov(e.x, e.y)) {
-		con.setDefaultForeground(e.colour);
-		con.putChar(e.x, e.y, e.char);
+		console.setDefaultForeground(e.colour);
+		console.putChar(e.x, e.y, e.char);
 	}
 }
 
-export function clearEntity(con: Console, e: Entity) {
-	con.putChar(e.x, e.y, ' ');
+export function clearEntity(console: Console, e: Entity) {
+	console.putChar(e.x, e.y, ' ');
 }
