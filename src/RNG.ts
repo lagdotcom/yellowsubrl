@@ -108,7 +108,31 @@ export default class RNG {
 		return (this.a = t ^ s ^ (s >> 19));
 	}
 
+	flip() {
+		return this.random() % 2;
+	}
+
 	randint(min: number, max: number) {
 		return min + (this.random() % (max - min + 1));
+	}
+
+	choose<T>(options: T[]) {
+		return options[this.randint(0, options.length - 1)];
+	}
+
+	weighted<T>(options: [number, T][]) {
+		const total = options.map(o => o[0]).reduce((a, b) => a + b);
+		const roll = this.randint(0, total - 1);
+		var running = 0;
+
+		for (var i = 0; i < options.length; i++) {
+			const [chance, option] = options[i];
+			running += chance;
+
+			if (running > roll) return option;
+		}
+
+		// TODO: this will never happen, but TypeScript doesn't like it otherwise
+		throw 'today, a + b != b + a';
 	}
 }

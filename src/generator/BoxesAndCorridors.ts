@@ -56,7 +56,7 @@ export default class BoxesAndCorridors {
 				} else {
 					const [prevX, prevY] = rooms[rooms.length - 1].centre();
 
-					if (rng.randint(0, 1) == 1) {
+					if (rng.flip()) {
 						gameMap.createHTunnel(prevX, newX, prevY);
 						gameMap.createVTunnel(prevY, newY, newX);
 					} else {
@@ -65,30 +65,33 @@ export default class BoxesAndCorridors {
 					}
 				}
 
-				this.placeEntities(rng, newRoom, entities, this.maxMonstersPerRoom);
+				this.placeEntities(rng, newRoom, entities);
 				rooms.push(newRoom);
 			}
 		}
 	}
 
-	placeEntities(
-		rng: RNG,
-		room: Rect,
-		entities: Entity[],
-		maxMonstersPerRoom: number
-	) {
-		const numberOfMonsters = rng.randint(0, maxMonstersPerRoom);
+	placeEntities(rng: RNG, room: Rect, entities: Entity[]) {
+		const numberOfMonsters = rng.randint(0, this.maxMonstersPerRoom);
 
 		for (var i = 0; i < numberOfMonsters; i++) {
 			const x = rng.randint(room.x1 + 1, room.x2 - 1);
 			const y = rng.randint(room.y1 + 1, room.y2 - 1);
 
 			if (!entities.find(e => e.x == x && e.y == y)) {
-				var monster: Entity;
-				if (rng.randint(0, 100) < 80)
-					monster = new Entity(x, y, 'o', Colours.green, 'Orc', true);
-				else monster = new Entity(x, y, 'T', Colours.darkGreen, 'Troll', true);
+				const type = rng.weighted([
+					[8, { name: 'Orc', colour: Colours.green, char: 'o' }],
+					[2, { name: 'Troll', colour: Colours.darkGreen, char: 'T' }],
+				]);
 
+				const monster = new Entity(
+					x,
+					y,
+					type.char,
+					type.colour,
+					type.name,
+					true
+				);
 				entities.push(monster);
 			}
 		}
