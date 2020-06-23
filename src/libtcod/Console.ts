@@ -31,7 +31,7 @@ interface ConsoleTile {
 	screenX: number;
 	screenY: number;
 	dirty: boolean;
-	char: string;
+	ch: string;
 	fg: string;
 	bg: string;
 	blend: BlendMode;
@@ -67,7 +67,7 @@ export class Console {
 					screenX: x * tileset.tileWidth,
 					screenY: y * tileset.tileHeight,
 					dirty: false,
-					char: ' ',
+					ch: ' ',
 					fg: this.defaultFg,
 					bg: this.defaultBg,
 					blend: this.defaultBgBlend,
@@ -84,29 +84,33 @@ export class Console {
 		const context = canvas.getContext('2d');
 		if (!context) throw 'Could not get 2D context';
 		this.context = context;
-		context.fillStyle = Colours.black;
+		context.fillStyle = this.defaultBg;
 		context.fillRect(0, 0, canvas.width, canvas.height);
 	}
 
-	clear(
-		ch: string = ' ',
-		fg: string = Colours.white,
-		bg: string = Colours.black
-	) {
-		if (bg) {
-			this.context.fillStyle = bg;
-			this.context.fillRect(0, 0, this.element.width, this.element.height);
-		}
+	clear(ch: string = ' ', fgc?: string, bgc?: string) {
+		const bg = bgc || this.defaultBg;
+		const fg = fgc || this.defaultFg;
 
-		if (fg) {
-			this.setDefaultForeground(fg);
+		this.context.fillStyle = bg;
+		this.context.fillRect(0, 0, this.element.width, this.element.height);
 
-			for (var x = 0; x < this.width; x++) {
-				for (var y = 0; y < this.height; y++) {
-					this.putChar(x, y, ch);
-				}
-			}
-		}
+		this.tilesFlat.forEach(t => {
+			t.ch = ch;
+			t.fg = fg;
+			t.bg = bg;
+			t.blend = this.defaultBgBlend;
+
+			if (ch != ' ') this.drawTile(t);
+		});
+	}
+
+	setTileset(tileset: Tileset) {
+		this.tileset = tileset;
+
+		this.tilesFlat.forEach(t => {
+			if (t.ch != ' ') this.drawTile(t);
+		});
 	}
 
 	checkForKeypress() {
@@ -118,11 +122,9 @@ export class Console {
 		const fg = this.defaultFg;
 		const tile = this.tiles[x][y];
 
-		if (tile.char != ch || tile.fg != fg) {
-			tile.char = ch;
-			tile.fg = fg;
-			tile.dirty = true;
-		}
+		tile.ch = ch;
+		tile.fg = fg;
+		tile.dirty = true;
 	}
 
 	printBox(
@@ -163,11 +165,9 @@ export class Console {
 	setCharBackground(x: number, y: number, bg: string, mode: BlendMode) {
 		const tile = this.tiles[x][y];
 
-		if (tile.bg != bg || tile.blend != mode) {
-			tile.bg = bg;
-			tile.blend = mode;
-			tile.dirty = true;
-		}
+		tile.bg = bg;
+		tile.blend = mode;
+		tile.dirty = true;
 	}
 
 	setDefaultForeground(col: string) {
@@ -175,7 +175,10 @@ export class Console {
 	}
 
 	render() {
-		this.tilesFlat.filter(t => t.dirty).forEach(this.drawTile, this);
+		this.tilesFlat.forEach(t => {
+			if (t.dirty) this.drawTile(t);
+		});
+
 		return this.element;
 	}
 
@@ -188,10 +191,10 @@ export class Console {
 		this.context.fillStyle = tile.bg;
 		this.context.fillRect(tile.screenX, tile.screenY, tileWidth, tileHeight);
 
-		this.context.globalCompositeOperation = BlendMode.Set;
-		const img = this.tileset.getChar(tile.char, tile.fg);
+		const img = this.tileset.getChar(tile.ch, tile.fg);
 		if (!img) return;
 
+		this.context.globalCompositeOperation = BlendMode.Set;
 		this.context.drawImage(img, tile.screenX, tile.screenY);
 	}
 }

@@ -168,7 +168,7 @@ async function main() {
 
 		if (action.changeFont) {
 			tileset = tileset == arial ? groovy : arial;
-			con.tileset = tileset;
+			con.setTileset(tileset);
 			fovRecompute = true;
 		}
 
