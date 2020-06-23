@@ -1,4 +1,6 @@
-import arial10x10 from '../res/arial10x10.png';
+import './main.css';
+import arialSrc from '../res/arial10x10.png';
+import groovySrc from '../res/groovy10x10.png';
 import {
 	Charmap,
 	Colours,
@@ -19,11 +21,11 @@ async function main() {
 	const rng = new RNG();
 	(window as any).rng = rng;
 
-	const width = 80;
-	const height = 50;
+	const width = 60;
+	const height = 40;
 
-	const mapWidth = 80;
-	const mapHeight = 45;
+	const mapWidth = width;
+	const mapHeight = height - 5;
 
 	const roomMaxSize = 10;
 	const roomMinSize = 6;
@@ -50,7 +52,9 @@ async function main() {
 		player
 	);
 
-	const tileset = await Tileset.createFromUrl(arial10x10, 32, 8, Charmap.TCOD);
+	const arial = await Tileset.createFromUrl(arialSrc, 32, 8, Charmap.TCOD);
+	const groovy = await Tileset.createFromUrl(groovySrc, 32, 8, Charmap.TCOD);
+	var tileset = groovy;
 
 	var lastReportTime = new Date().getTime();
 	var ticks = 0;
@@ -58,6 +62,7 @@ async function main() {
 
 	const context = new Terminal(width, height, tileset);
 	(window as any).term = context;
+	context.element.style.height = `${context.element.height * 2}px`;
 
 	const rootConsole = new Console(width, height);
 	(window as any).con = rootConsole;
@@ -78,6 +83,22 @@ async function main() {
 
 		rootConsole.setDefaultForeground(Colours.white);
 		rootConsole.printRect(0, 0, 10, 1, fpsString);
+
+		rootConsole.printRect(
+			0,
+			1,
+			100,
+			1,
+			'THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG?'
+		);
+		rootConsole.setDefaultForeground(Colours.yellow);
+		rootConsole.printRect(
+			0,
+			2,
+			100,
+			1,
+			'the quick brown fox jumps over the lazy dog!'
+		);
 		context.present(rootConsole);
 
 		clearAll(rootConsole, entities);
@@ -106,6 +127,11 @@ async function main() {
 				mapHeight,
 				player
 			);
+		}
+
+		if (action.changeFont) {
+			tileset = tileset == arial ? groovy : arial;
+			context.tileset = tileset;
 		}
 	});
 }

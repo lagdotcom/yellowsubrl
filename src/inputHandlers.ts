@@ -8,10 +8,11 @@ export function handleKeys(key?: SysKeyEvent) {
 	else if (key.key == 'ArrowLeft') return { move: [-1, 0] };
 	else if (key.key == 'ArrowRight') return { move: [1, 0] };
 
-	if (key.key == 'Enter' && key.lalt) return { fullscreen: true };
+	if (key.key == 'Enter' && key.alt) return { fullscreen: true };
 	else if (key.key == 'Escape') return { exit: true };
 
-	if (key.type === 'KeyRelease' && key.key == 'r') return { remake: true };
+	if (key.type == 'KeyRelease' && key.key == 'R') return { remake: true };
+	if (key.type == 'KeyRelease' && key.key == 'F') return { changeFont: true };
 
 	return {};
 }

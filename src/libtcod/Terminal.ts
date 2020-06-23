@@ -27,7 +27,6 @@ export class Terminal {
 		const context = canvas.getContext('2d');
 		if (!context) throw 'Could not get 2D context';
 		this.context = context;
-		context.imageSmoothingEnabled = false;
 		context.fillStyle = Colours.black;
 		context.fillRect(0, 0, canvas.width, canvas.height);
 

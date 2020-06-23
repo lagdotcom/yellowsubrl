@@ -31,7 +31,9 @@ export interface SysKeyEvent {
 	type: 'KeyPress' | 'KeyRelease';
 	key: string;
 	keyCode: number;
-	lalt: boolean;
+	alt: boolean;
+	shift: boolean;
+	ctrl: boolean;
 }
 
 export interface SysMouseEvent {
@@ -85,7 +87,9 @@ export class Sys {
 				type: KeyPress,
 				key: e.key,
 				keyCode: e.keyCode,
-				lalt: e.altKey,
+				alt: e.altKey,
+				shift: e.shiftKey,
+				ctrl: e.ctrlKey,
 			});
 		});
 
@@ -94,7 +98,9 @@ export class Sys {
 				type: KeyRelease,
 				key: e.key,
 				keyCode: e.keyCode,
-				lalt: e.altKey,
+				alt: e.altKey,
+				shift: e.shiftKey,
+				ctrl: e.ctrlKey,
 			});
 		});
 	}
