@@ -37,10 +37,10 @@ export function clearAll(con: Console, entities: Entity[]) {
 export function drawEntity(con: Console, e: Entity, fovMap: Map) {
 	if (fovMap.isInFov(e.x, e.y)) {
 		con.setDefaultForeground(e.colour);
-		con.putChar(e.x, e.y, e.char, BlendMode.None);
+		con.putChar(e.x, e.y, e.char);
 	}
 }
 
 export function clearEntity(con: Console, e: Entity) {
-	con.putChar(e.x, e.y, ' ', BlendMode.None);
+	con.putChar(e.x, e.y, ' ');
 }

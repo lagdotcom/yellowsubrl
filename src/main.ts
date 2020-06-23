@@ -163,6 +163,7 @@ async function main() {
 
 			fovMap = initializeFov(gameMap);
 			fovRecompute = true;
+			con.clear();
 		}
 
 		if (action.changeFont) {

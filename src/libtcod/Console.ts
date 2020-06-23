@@ -25,39 +25,57 @@ export enum PrintAlign {
 	Right,
 }
 
-export interface BackgroundUpdate {
+interface ConsoleTile {
 	x: number;
 	y: number;
-	colour: string;
-	mode: BlendMode;
-}
-
-export interface ForegroundUpdate {
-	x: number;
-	y: number;
-	ch: string;
-	colour: string;
-	mode: BlendMode;
+	screenX: number;
+	screenY: number;
+	dirty: boolean;
+	char: string;
+	fg: string;
+	bg: string;
+	blend: BlendMode;
 }
 
 export class Console {
 	context: CanvasRenderingContext2D;
 	element: HTMLCanvasElement;
-	bgUpdates: BackgroundUpdate[];
+	defaultBg: string;
+	defaultBgBlend: BlendMode;
 	defaultFg: string;
-	fgUpdates: ForegroundUpdate[];
 	height: number;
 	width: number;
 	tileset: Tileset;
+	tiles: ConsoleTile[][];
+	tilesFlat: ConsoleTile[];
 
 	constructor(w: number, h: number, tileset: Tileset) {
 		this.width = w;
 		this.height = h;
 		this.tileset = tileset;
-
+		this.defaultBg = Colours.black;
+		this.defaultBgBlend = BlendMode.Set;
 		this.defaultFg = Colours.white;
-		this.bgUpdates = [];
-		this.fgUpdates = [];
+
+		this.tiles = [];
+		for (var x = 0; x < w; x++) {
+			const col: ConsoleTile[] = [];
+			for (var y = 0; y < h; y++)
+				col.push({
+					x,
+					y,
+					screenX: x * tileset.tileWidth,
+					screenY: y * tileset.tileHeight,
+					dirty: false,
+					char: ' ',
+					fg: this.defaultFg,
+					bg: this.defaultBg,
+					blend: this.defaultBgBlend,
+				});
+			this.tiles.push(col);
+		}
+		this.tilesFlat = this.tiles.flat();
+		this.drawTile = this.drawTile.bind(this);
 
 		const canvas = document.createElement('canvas');
 		this.element = canvas;
@@ -71,24 +89,41 @@ export class Console {
 		context.fillRect(0, 0, canvas.width, canvas.height);
 	}
 
+	clear(
+		ch: string = ' ',
+		fg: string = Colours.white,
+		bg: string = Colours.black
+	) {
+		if (bg) {
+			this.context.fillStyle = bg;
+			this.context.fillRect(0, 0, this.element.width, this.element.height);
+		}
+
+		if (fg) {
+			this.setDefaultForeground(fg);
+
+			for (var x = 0; x < this.width; x++) {
+				for (var y = 0; y < this.height; y++) {
+					this.putChar(x, y, ch);
+				}
+			}
+		}
+	}
+
 	checkForKeypress() {
 		return sys.checkForEvents(KeyPress).key;
 	}
 
-	putChar(
-		x: number,
-		y: number,
-		c: number | string,
-		mode: BlendMode = BlendMode.Default
-	) {
+	putChar(x: number, y: number, c: number | string) {
 		const ch = typeof c === 'number' ? String.fromCharCode(c) : c;
-		this.fgUpdates.push({
-			x,
-			y,
-			ch,
-			mode,
-			colour: this.defaultFg,
-		});
+		const fg = this.defaultFg;
+		const tile = this.tiles[x][y];
+
+		if (tile.char != ch || tile.fg != fg) {
+			tile.char = ch;
+			tile.fg = fg;
+			tile.dirty = true;
+		}
 	}
 
 	printBox(
@@ -126,8 +161,14 @@ export class Console {
 		return y - sy + 1;
 	}
 
-	setCharBackground(x: number, y: number, colour: string, mode: BlendMode) {
-		this.bgUpdates.push({ x, y, colour, mode });
+	setCharBackground(x: number, y: number, bg: string, mode: BlendMode) {
+		const tile = this.tiles[x][y];
+
+		if (tile.bg != bg || tile.blend != mode) {
+			tile.bg = bg;
+			tile.blend = mode;
+			tile.dirty = true;
+		}
 	}
 
 	setDefaultForeground(col: string) {
@@ -135,29 +176,23 @@ export class Console {
 	}
 
 	render() {
+		this.tilesFlat.filter(t => t.dirty).forEach(this.drawTile);
+		return this.element;
+	}
+
+	private drawTile(tile: ConsoleTile) {
 		const { tileWidth, tileHeight } = this.tileset;
 
-		this.bgUpdates.forEach(u => {
-			this.context.globalCompositeOperation = u.mode;
-			this.context.fillStyle = u.colour;
-			this.context.fillRect(
-				u.x * tileWidth,
-				u.y * tileHeight,
-				tileWidth,
-				tileHeight
-			);
-		});
-		this.bgUpdates = [];
+		tile.dirty = false;
 
-		this.fgUpdates.forEach(u => {
-			const img = this.tileset.getChar(u.ch, u.colour);
-			if (!img) return;
+		this.context.globalCompositeOperation = tile.blend;
+		this.context.fillStyle = tile.bg;
+		this.context.fillRect(tile.screenX, tile.screenY, tileWidth, tileHeight);
 
-			this.context.globalCompositeOperation = u.mode;
-			this.context.drawImage(img, u.x * tileWidth, u.y * tileHeight);
-		});
-		this.fgUpdates = [];
+		this.context.globalCompositeOperation = BlendMode.Set;
+		const img = this.tileset.getChar(tile.char, tile.fg);
+		if (!img) return;
 
-		return this.element;
+		this.context.drawImage(img, tile.screenX, tile.screenY);
 	}
 }
