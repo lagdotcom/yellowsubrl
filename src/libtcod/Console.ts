@@ -18,6 +18,12 @@ export enum BlendMode {
 	Default = Set,
 }
 
+export enum PrintAlign {
+	Left,
+	Center,
+	Right,
+}
+
 export interface BackgroundUpdate {
 	x: number;
 	y: number;
@@ -69,12 +75,27 @@ export class Console {
 		});
 	}
 
-	printRect(x: number, y: number, w: number, h: number, s: string) {
+	printBox(
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		str: string,
+		fg: string = '',
+		bg: string = '',
+		bgBlend: BlendMode = BlendMode.Set,
+		alignment: PrintAlign = PrintAlign.Left
+	) {
+		// TODO: alignment
+
 		const sx = x;
-		const ex = x + w;
-		for (var i = 0; i < s.length; i++) {
-			const ch = s[i];
-			this.putChar(x, y, ch);
+		const sy = y;
+		const ex = x + width;
+		for (var i = 0; i < str.length; i++) {
+			const ch = str[i];
+
+			if (bg) this.setCharBackground(x, y, bg, bgBlend);
+			if (fg) this.putChar(x, y, ch);
 
 			x++;
 			if (x > ex) {
@@ -84,6 +105,8 @@ export class Console {
 				// TODO: wrapping stuff
 			}
 		}
+
+		return y - sy + 1;
 	}
 
 	setCharBackground(x: number, y: number, colour: string, mode: BlendMode) {

@@ -105,7 +105,7 @@ async function main() {
 		}
 
 		rootConsole.setDefaultForeground(Colours.white);
-		rootConsole.printRect(0, 0, 10, 1, fpsString);
+		rootConsole.printBox(0, 0, 10, 1, fpsString, Colours.white, Colours.black);
 		context.present(rootConsole);
 
 		clearAll(rootConsole, entities);
