@@ -10,12 +10,14 @@ import {
 	Terminal,
 	toRGB,
 	Tileset,
+	FovAlgorithm,
 } from './tcod';
 import { handleKeys } from './inputHandlers';
 import Entity from './Entity';
 import { renderAll, clearAll } from './renderFunctions';
 import GameMap from './GameMap';
 import RNG from './RNG';
+import { initializeFov, recomputeFov } from './fovFunctions';
 
 async function main() {
 	const rng = new RNG();
@@ -31,9 +33,15 @@ async function main() {
 	const roomMinSize = 6;
 	const maxRooms = 30;
 
+	const fovAlgorithm = FovAlgorithm.Raycasting;
+	const fovLightWalls = true;
+	const fovRadius = 10;
+
 	const colours = {
 		darkWall: toRGB(0, 0, 100),
 		darkGround: toRGB(50, 50, 150),
+		lightWall: toRGB(130, 110, 50),
+		lightGround: toRGB(200, 180, 50),
 	};
 
 	const player = new Entity(width / 2, height / 2, '@', Colours.white);
@@ -52,6 +60,9 @@ async function main() {
 		player
 	);
 
+	var fovRecompute = true;
+	var fovMap = initializeFov(gameMap);
+
 	const arial = await Tileset.createFromUrl(arialSrc, 32, 8, Charmap.TCOD);
 	const groovy = await Tileset.createFromUrl(groovySrc, 32, 8, Charmap.TCOD);
 	var tileset = groovy;
@@ -69,7 +80,19 @@ async function main() {
 
 	context.main(function loop() {
 		const { key } = sys.checkForEvents(KeyPress);
-		renderAll(rootConsole, entities, gameMap, colours);
+
+		if (fovRecompute)
+			recomputeFov(
+				fovMap,
+				player.x,
+				player.y,
+				fovRadius,
+				fovLightWalls,
+				fovAlgorithm
+			);
+
+		renderAll(rootConsole, entities, gameMap, fovMap, fovRecompute, colours);
+		fovRecompute = false;
 
 		const time = new Date().getTime();
 		ticks++;
@@ -83,22 +106,6 @@ async function main() {
 
 		rootConsole.setDefaultForeground(Colours.white);
 		rootConsole.printRect(0, 0, 10, 1, fpsString);
-
-		rootConsole.printRect(
-			0,
-			1,
-			100,
-			1,
-			'THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG?'
-		);
-		rootConsole.setDefaultForeground(Colours.yellow);
-		rootConsole.printRect(
-			0,
-			2,
-			100,
-			1,
-			'the quick brown fox jumps over the lazy dog!'
-		);
 		context.present(rootConsole);
 
 		clearAll(rootConsole, entities);
@@ -107,7 +114,10 @@ async function main() {
 		if (action.move) {
 			const [dx, dy] = action.move;
 
-			if (!gameMap.isBlocked(player.x + dx, player.y + dy)) player.move(dx, dy);
+			if (!gameMap.isBlocked(player.x + dx, player.y + dy)) {
+				player.move(dx, dy);
+				fovRecompute = true;
+			}
 		}
 
 		if (action.exit) return context.stop();
@@ -127,6 +137,9 @@ async function main() {
 				mapHeight,
 				player
 			);
+
+			fovMap = initializeFov(gameMap);
+			fovRecompute = true;
 		}
 
 		if (action.changeFont) {

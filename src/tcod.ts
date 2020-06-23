@@ -1,5 +1,6 @@
 import { Sys } from './libtcod/Sys';
 export * from './libtcod/Console';
+export * from './libtcod/Map';
 export * from './libtcod/Terminal';
 export * from './libtcod/Tileset';
 export * from './libtcod/Sys';
