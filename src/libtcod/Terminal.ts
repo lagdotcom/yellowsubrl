@@ -10,17 +10,15 @@ export class Terminal {
 	handle: number;
 	height: number;
 	running: boolean;
-	tileset: Tileset;
 
-	constructor(w: number, h: number, tileset: Tileset) {
+	constructor(w: number, h: number) {
 		this.width = w;
 		this.height = h;
-		this.tileset = tileset;
 
 		const canvas = document.createElement('canvas');
 		this.element = canvas;
-		canvas.width = w * tileset.tileWidth;
-		canvas.height = h * tileset.tileHeight;
+		canvas.width = w;
+		canvas.height = h;
 		document.body.appendChild(canvas);
 		sys.addEventSource(canvas);
 
@@ -36,29 +34,26 @@ export class Terminal {
 		this.schedule();
 	}
 
-	present(con: Console) {
-		const { tileWidth, tileHeight } = this.tileset;
+	present(
+		con: Console,
+		options: {
+			keepAspect: boolean;
+			integerScaling: boolean;
+			clearColour: string;
+			align: [number, number];
+		} = {
+			keepAspect: false,
+			integerScaling: false,
+			clearColour: '#000000',
+			align: [0.5, 0.5],
+		}
+	) {
+		// TODO: keepAspect, integerScaling, align
 
-		con.bgUpdates.forEach(u => {
-			this.context.globalCompositeOperation = u.mode;
-			this.context.fillStyle = u.colour;
-			this.context.fillRect(
-				u.x * tileWidth,
-				u.y * tileHeight,
-				tileWidth,
-				tileHeight
-			);
-		});
-		con.bgUpdates = [];
+		this.context.fillStyle = options.clearColour;
+		this.context.fillRect(0, 0, this.width, this.height);
 
-		con.fgUpdates.forEach(u => {
-			const img = this.tileset.getChar(u.ch, u.colour);
-			if (!img) return;
-
-			this.context.globalCompositeOperation = u.mode;
-			this.context.drawImage(img, u.x * tileWidth, u.y * tileHeight);
-		});
-		con.fgUpdates = [];
+		this.context.drawImage(con.render(), 0, 0);
 	}
 
 	main(f: FrameRequestCallback) {

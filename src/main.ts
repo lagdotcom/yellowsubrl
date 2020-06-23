@@ -13,11 +13,12 @@ import {
 	FovAlgorithm,
 } from './tcod';
 import { handleKeys } from './inputHandlers';
-import Entity from './Entity';
+import Entity, { getBlockingEntitiesAtLocation } from './Entity';
 import { renderAll, clearAll } from './renderFunctions';
 import GameMap from './GameMap';
 import RNG from './RNG';
 import { initializeFov, recomputeFov } from './fovFunctions';
+import GameState from './GameState';
 
 async function main() {
 	const rng = new RNG();
@@ -37,6 +38,8 @@ async function main() {
 	const fovLightWalls = true;
 	const fovRadius = 10;
 
+	const maxMonstersPerRoom = 3;
+
 	const colours = {
 		darkWall: toRGB(0, 0, 100),
 		darkGround: toRGB(50, 50, 150),
@@ -44,9 +47,8 @@ async function main() {
 		lightGround: toRGB(200, 180, 50),
 	};
 
-	const player = new Entity(width / 2, height / 2, '@', Colours.white);
-	const npc = new Entity(width / 2 - 5, height / 2, '@', Colours.yellow);
-	const entities = [player, npc];
+	const player = new Entity(0, 0, '@', Colours.white, 'Player', true);
+	const entities = [player];
 
 	const gameMap = new GameMap(rng.seed, mapWidth, mapHeight);
 	(window as any).map = gameMap;
@@ -57,7 +59,9 @@ async function main() {
 		roomMaxSize,
 		mapWidth,
 		mapHeight,
-		player
+		player,
+		entities,
+		maxMonstersPerRoom
 	);
 
 	var fovRecompute = true;
@@ -71,12 +75,17 @@ async function main() {
 	var ticks = 0;
 	var fpsString = '';
 
-	const context = new Terminal(width, height, tileset);
-	(window as any).term = context;
+	const context = new Terminal(
+		width * arial.tileWidth,
+		height * arial.tileHeight
+	);
+	(window as any).context = context;
 	context.element.style.height = `${context.element.height * 2}px`;
 
-	const rootConsole = new Console(width, height);
-	(window as any).con = rootConsole;
+	const con = new Console(width, height, tileset);
+	(window as any).con = con;
+
+	var gameState = GameState.PlayerTurn;
 
 	context.main(function loop() {
 		const { key } = sys.checkForEvents(KeyPress);
@@ -91,7 +100,7 @@ async function main() {
 				fovAlgorithm
 			);
 
-		renderAll(rootConsole, entities, gameMap, fovMap, fovRecompute, colours);
+		renderAll(con, entities, gameMap, fovMap, fovRecompute, colours);
 		fovRecompute = false;
 
 		const time = new Date().getTime();
@@ -104,19 +113,29 @@ async function main() {
 			ticks = 0;
 		}
 
-		rootConsole.setDefaultForeground(Colours.white);
-		rootConsole.printBox(0, 0, 10, 1, fpsString, Colours.white, Colours.black);
-		context.present(rootConsole);
+		con.printBox(0, 0, 10, 1, fpsString, Colours.white, Colours.black);
+		context.present(con);
 
-		clearAll(rootConsole, entities);
+		clearAll(con, entities);
 		const action = handleKeys(key);
 
-		if (action.move) {
-			const [dx, dy] = action.move;
+		if (action.move && gameState == GameState.PlayerTurn) {
+			const [mx, my] = action.move;
+			const dx = player.x + mx,
+				dy = player.y + my;
 
-			if (!gameMap.isBlocked(player.x + dx, player.y + dy)) {
-				player.move(dx, dy);
-				fovRecompute = true;
+			if (!gameMap.isBlocked(dx, dy)) {
+				const target = getBlockingEntitiesAtLocation(entities, dx, dy);
+				if (target) {
+					console.log(
+						`You kick the ${target.name} in the shins, much to its annoyance!`
+					);
+				} else {
+					player.move(mx, my);
+					fovRecompute = true;
+				}
+
+				gameState = GameState.EnemyTurn;
 			}
 		}
 
@@ -127,6 +146,8 @@ async function main() {
 		}
 
 		if (action.remake) {
+			entities.splice(0, entities.length, player);
+
 			gameMap.reset(rng.seed, mapWidth, mapHeight);
 			gameMap.makeMap(
 				rng,
@@ -135,7 +156,9 @@ async function main() {
 				roomMaxSize,
 				mapWidth,
 				mapHeight,
-				player
+				player,
+				entities,
+				maxMonstersPerRoom
 			);
 
 			fovMap = initializeFov(gameMap);
@@ -144,7 +167,17 @@ async function main() {
 
 		if (action.changeFont) {
 			tileset = tileset == arial ? groovy : arial;
-			context.tileset = tileset;
+			con.tileset = tileset;
+			fovRecompute = true;
+		}
+
+		if (gameState == GameState.EnemyTurn) {
+			entities.forEach(e => {
+				if (e != player)
+					console.log(`The ${e.name} ponders the meaning of its existence.`);
+			});
+
+			gameState = GameState.PlayerTurn;
 		}
 	});
 }

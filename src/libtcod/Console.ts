@@ -1,5 +1,6 @@
 import { KeyPress } from './Sys';
 import { Colours, sys } from '../tcod';
+import { Tileset } from './Tileset';
 
 export enum BlendMode {
 	None = 'source-over', // TODO?
@@ -40,19 +41,34 @@ export interface ForegroundUpdate {
 }
 
 export class Console {
+	context: CanvasRenderingContext2D;
+	element: HTMLCanvasElement;
 	bgUpdates: BackgroundUpdate[];
 	defaultFg: string;
 	fgUpdates: ForegroundUpdate[];
 	height: number;
 	width: number;
+	tileset: Tileset;
 
-	constructor(w: number, h: number) {
+	constructor(w: number, h: number, tileset: Tileset) {
 		this.width = w;
 		this.height = h;
+		this.tileset = tileset;
 
 		this.defaultFg = Colours.white;
 		this.bgUpdates = [];
 		this.fgUpdates = [];
+
+		const canvas = document.createElement('canvas');
+		this.element = canvas;
+		canvas.width = w * tileset.tileWidth;
+		canvas.height = h * tileset.tileHeight;
+
+		const context = canvas.getContext('2d');
+		if (!context) throw 'Could not get 2D context';
+		this.context = context;
+		context.fillStyle = Colours.black;
+		context.fillRect(0, 0, canvas.width, canvas.height);
 	}
 
 	checkForKeypress() {
@@ -87,6 +103,7 @@ export class Console {
 		alignment: PrintAlign = PrintAlign.Left
 	) {
 		// TODO: alignment
+		if (fg) this.setDefaultForeground(fg);
 
 		const sx = x;
 		const sy = y;
@@ -115,5 +132,32 @@ export class Console {
 
 	setDefaultForeground(col: string) {
 		this.defaultFg = col;
+	}
+
+	render() {
+		const { tileWidth, tileHeight } = this.tileset;
+
+		this.bgUpdates.forEach(u => {
+			this.context.globalCompositeOperation = u.mode;
+			this.context.fillStyle = u.colour;
+			this.context.fillRect(
+				u.x * tileWidth,
+				u.y * tileHeight,
+				tileWidth,
+				tileHeight
+			);
+		});
+		this.bgUpdates = [];
+
+		this.fgUpdates.forEach(u => {
+			const img = this.tileset.getChar(u.ch, u.colour);
+			if (!img) return;
+
+			this.context.globalCompositeOperation = u.mode;
+			this.context.drawImage(img, u.x * tileWidth, u.y * tileHeight);
+		});
+		this.fgUpdates = [];
+
+		return this.element;
 	}
 }

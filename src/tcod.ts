@@ -14,6 +14,8 @@ export const Colours = {
 	white: toRGB(255, 255, 255),
 	red: toRGB(255, 0, 0),
 	yellow: toRGB(255, 255, 0),
+	green: toRGB(0, 255, 0),
+	darkGreen: toRGB(0, 128, 0),
 };
 
 export const sys = new Sys();

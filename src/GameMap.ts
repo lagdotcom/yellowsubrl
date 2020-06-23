@@ -2,6 +2,7 @@ import Tile from './Tile';
 import { Rect } from './mapObjects';
 import Entity from './Entity';
 import RNG, { RNGSeed } from './RNG';
+import { Colours } from './tcod';
 
 export default class GameMap {
 	width!: number;
@@ -34,7 +35,9 @@ export default class GameMap {
 		roomMaxSize: number,
 		mapWidth: number,
 		mapHeight: number,
-		player: Entity
+		player: Entity,
+		entities: Entity[],
+		maxMonstersPerRoom: number
 	) {
 		rng.seed = this.seed;
 		const rooms: Rect[] = [];
@@ -73,6 +76,7 @@ export default class GameMap {
 					}
 				}
 
+				this.placeEntities(rng, newRoom, entities, maxMonstersPerRoom);
 				rooms.push(newRoom);
 			}
 		}
@@ -98,6 +102,29 @@ export default class GameMap {
 		for (var y = Math.min(y1, y2); y < Math.max(y1, y2) + 1; y++) {
 			this.tiles[x][y].blocked = false;
 			this.tiles[x][y].blockSight = false;
+		}
+	}
+
+	placeEntities(
+		rng: RNG,
+		room: Rect,
+		entities: Entity[],
+		maxMonstersPerRoom: number
+	) {
+		const numberOfMonsters = rng.randint(0, maxMonstersPerRoom);
+
+		for (var i = 0; i < numberOfMonsters; i++) {
+			const x = rng.randint(room.x1 + 1, room.x2 - 1);
+			const y = rng.randint(room.y1 + 1, room.y2 - 1);
+
+			if (!entities.find(e => e.x == x && e.y == y)) {
+				var monster: Entity;
+				if (rng.randint(0, 100) < 80)
+					monster = new Entity(x, y, 'o', Colours.green, 'Orc', true);
+				else monster = new Entity(x, y, 'T', Colours.darkGreen, 'Troll', true);
+
+				entities.push(monster);
+			}
 		}
 	}
 
