@@ -28,12 +28,12 @@ export enum PrintAlign {
 interface ConsoleTile {
 	x: number;
 	y: number;
-	screenX: number;
-	screenY: number;
-	dirty: boolean;
 	ch: string;
 	fg: string;
 	bg: string;
+	sx: number;
+	sy: number;
+	dirty: boolean;
 	blend: BlendMode;
 }
 
@@ -64,8 +64,8 @@ export class Console {
 				col.push({
 					x,
 					y,
-					screenX: x * tileset.tileWidth,
-					screenY: y * tileset.tileHeight,
+					sx: x * tileset.tileWidth,
+					sy: y * tileset.tileHeight,
 					dirty: false,
 					ch: ' ',
 					fg: this.defaultFg,
@@ -122,9 +122,11 @@ export class Console {
 		const fg = this.defaultFg;
 		const tile = this.tiles[x][y];
 
-		tile.ch = ch;
-		tile.fg = fg;
-		tile.dirty = true;
+		if (tile.ch != ch || tile.fg != fg) {
+			tile.ch = ch;
+			tile.fg = fg;
+			tile.dirty = true;
+		}
 	}
 
 	printBox(
@@ -165,9 +167,11 @@ export class Console {
 	setCharBackground(x: number, y: number, bg: string, mode: BlendMode) {
 		const tile = this.tiles[x][y];
 
-		tile.bg = bg;
-		tile.blend = mode;
-		tile.dirty = true;
+		if (tile.bg != bg || tile.blend != mode) {
+			tile.bg = bg;
+			tile.blend = mode;
+			tile.dirty = true;
+		}
 	}
 
 	setDefaultForeground(col: string) {
@@ -189,12 +193,12 @@ export class Console {
 
 		this.context.globalCompositeOperation = tile.blend;
 		this.context.fillStyle = tile.bg;
-		this.context.fillRect(tile.screenX, tile.screenY, tileWidth, tileHeight);
+		this.context.fillRect(tile.sx, tile.sy, tileWidth, tileHeight);
 
 		const img = this.tileset.getChar(tile.ch, tile.fg);
 		if (!img) return;
 
 		this.context.globalCompositeOperation = BlendMode.Set;
-		this.context.drawImage(img, tile.screenX, tile.screenY);
+		this.context.drawImage(img, tile.sx, tile.sy);
 	}
 }
