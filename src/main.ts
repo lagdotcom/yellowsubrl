@@ -14,6 +14,7 @@ import { handleKeys } from './inputHandlers';
 import RNG from './RNG';
 import BoxesAndCorridors from './generator/BoxesAndCorridors';
 import Engine from './Engine';
+import BSPTree from './generator/BSPTree';
 
 async function main() {
 	const rng = new RNG();
@@ -41,14 +42,15 @@ async function main() {
 		lightGround: toRGB(200, 180, 50),
 	};
 
-	const mapGenerator = new BoxesAndCorridors({
-		maxRooms,
-		roomMinSize,
-		roomMaxSize,
-		mapWidth,
-		mapHeight,
-		maxMonstersPerRoom,
-	});
+	// const mapGenerator = new BoxesAndCorridors({
+	// 	maxRooms,
+	// 	roomMinSize,
+	// 	roomMaxSize,
+	// 	mapWidth,
+	// 	mapHeight,
+	// 	maxMonstersPerRoom,
+	// });
+	const mapGenerator = new BSPTree(5, 10, 20, 75, maxMonstersPerRoom);
 
 	const arial = await Tileset.createFromUrl(arialSrc, 32, 8, Charmap.TCOD);
 	const groovy = await Tileset.createFromUrl(groovySrc, 32, 8, Charmap.TCOD);

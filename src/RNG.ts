@@ -109,11 +109,22 @@ export default class RNG {
 	}
 
 	flip() {
-		return this.random() % 2;
+		return this.random() % 2 == 0;
 	}
 
 	randint(min: number, max: number) {
 		return min + (this.random() % (max - min + 1));
+	}
+
+	randintBias(
+		min: number,
+		max: number,
+		count: number,
+		fn: (...choices: number[]) => number = Math.max
+	) {
+		const choices: number[] = [];
+		for (var i = 0; i < count; i++) choices.push(this.randint(min, max));
+		return fn(...choices);
 	}
 
 	choose<T>(options: T[]) {
