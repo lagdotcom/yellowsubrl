@@ -3,8 +3,6 @@ import arialSrc from '../res/arial10x10.png';
 import groovySrc from '../res/groovy10x10.png';
 import {
 	Charmap,
-	Colours,
-	Console,
 	FovAlgorithm,
 	KeyDown,
 	sys,
@@ -13,12 +11,7 @@ import {
 	toRGB,
 } from './tcod';
 import { handleKeys } from './inputHandlers';
-import Entity, { getBlockingEntitiesAtLocation } from './Entity';
-import { renderAll, clearAll } from './renderFunctions';
-import GameMap from './GameMap';
 import RNG from './RNG';
-import { initializeFov, recomputeFov } from './fovFunctions';
-import GameState from './GameState';
 import BoxesAndCorridors from './generator/BoxesAndCorridors';
 import Engine from './Engine';
 
