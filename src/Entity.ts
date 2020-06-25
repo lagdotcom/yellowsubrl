@@ -1,37 +1,28 @@
+import Appearance from './components/Appearance';
+import Location from './components/Location';
+import Weapon from './components/Weapon';
+
 export default class Entity {
-	x: number;
-	y: number;
-	char: string;
-	colour: string;
 	name: string;
-	blocks: boolean;
+	appearance?: Appearance;
+	location?: Location;
+	weapon?: Weapon;
 
 	constructor({
-		x,
-		y,
-		char,
-		colour,
 		name,
-		blocks = false,
+		appearance,
+		location,
+		weapon,
 	}: {
-		x: number;
-		y: number;
-		char: string;
-		colour: string;
 		name: string;
-		blocks?: boolean;
+		appearance?: Appearance;
+		location?: Location;
+		weapon?: Weapon;
 	}) {
-		this.x = x;
-		this.y = y;
-		this.char = char;
-		this.colour = colour;
 		this.name = name;
-		this.blocks = blocks;
-	}
-
-	move(dx: number, dy: number) {
-		this.x += dx;
-		this.y += dy;
+		this.appearance = appearance;
+		this.location = location;
+		this.weapon = weapon;
 	}
 }
 
@@ -40,5 +31,8 @@ export function getBlockingEntitiesAtLocation(
 	x: number,
 	y: number
 ) {
-	return entities.find(e => e.blocks && e.x == x && e.y == y);
+	return entities.find(
+		e =>
+			e.location && e.location.blocks && e.location.x == x && e.location.y == y
+	);
 }

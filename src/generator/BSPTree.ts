@@ -1,8 +1,10 @@
 import RNG from '../RNG';
 import GameMap from '../GameMap';
-import Entity from '../Entity';
+import Entity, { getBlockingEntitiesAtLocation } from '../Entity';
 import { Rect } from '../mapObjects';
 import { Colours } from '../tcod';
+import Appearance from '../components/Appearance';
+import Location from '../components/Location';
 
 class Leaf {
 	left?: Leaf;
@@ -143,8 +145,8 @@ export default class BSPTree {
 			if (l.room) {
 				if (first) {
 					first = false;
-					player.x = rng.randint(l.room.x1 + 1, l.room.x2 - 1);
-					player.y = rng.randint(l.room.y1 + 1, l.room.y2 - 1);
+					player.location!.x = rng.randint(l.room.x1 + 1, l.room.x2 - 1);
+					player.location!.y = rng.randint(l.room.y1 + 1, l.room.y2 - 1);
 				} else this.placeEntities(rng, l.room, entities);
 			}
 		});
@@ -157,19 +159,16 @@ export default class BSPTree {
 			const x = rng.randint(room.x1 + 1, room.x2 - 1);
 			const y = rng.randint(room.y1 + 1, room.y2 - 1);
 
-			if (!entities.find(e => e.x == x && e.y == y)) {
+			if (!getBlockingEntitiesAtLocation(entities, x, y)) {
 				const type = rng.weighted([
 					[8, { name: 'Orc', colour: Colours.green, char: 'o' }],
 					[2, { name: 'Troll', colour: Colours.darkGreen, char: 'T' }],
 				]);
 
 				const monster = new Entity({
-					x,
-					y,
-					char: type.char,
-					colour: type.colour,
 					name: type.name,
-					blocks: true,
+					appearance: new Appearance(type.char, type.colour),
+					location: new Location(x, y, true),
 				});
 				entities.push(monster);
 			}

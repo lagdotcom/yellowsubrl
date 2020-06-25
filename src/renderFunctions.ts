@@ -1,6 +1,8 @@
 import Entity from './Entity';
 import { Console, BlendMode, Map } from './tcod';
 import GameMap from './GameMap';
+import Location from './components/Location';
+import Appearance from './components/Appearance';
 
 export type ColourMap = { [name: string]: string };
 
@@ -36,20 +38,30 @@ export function renderAll({
 			}
 		}
 
-	entities.forEach(e => drawEntity(console, e, fovMap));
+	entities.forEach(
+		e =>
+			e.appearance &&
+			e.location &&
+			drawEntity(console, e.appearance, e.location, fovMap)
+	);
 }
 
 export function clearAll(con: Console, entities: Entity[]) {
-	entities.forEach(e => clearEntity(con, e));
+	entities.forEach(e => e.location && clearEntity(con, e.location));
 }
 
-export function drawEntity(console: Console, e: Entity, fovMap: Map) {
-	if (fovMap.isInFov(e.x, e.y)) {
-		console.setDefaultForeground(e.colour);
-		console.putChar(e.x, e.y, e.char);
+export function drawEntity(
+	console: Console,
+	app: Appearance,
+	loc: Location,
+	fovMap: Map
+) {
+	if (fovMap.isInFov(loc.x, loc.y)) {
+		console.setDefaultForeground(app.colour);
+		console.putChar(loc.x, loc.y, app.ch);
 	}
 }
 
-export function clearEntity(console: Console, e: Entity) {
-	console.putChar(e.x, e.y, ' ');
+export function clearEntity(console: Console, loc: Location) {
+	console.putChar(loc.x, loc.y, ' ');
 }

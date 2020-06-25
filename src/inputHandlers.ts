@@ -1,13 +1,16 @@
 import { SysKeyEvent } from './tcod';
 import Engine from './Engine';
 import Entity, { getBlockingEntitiesAtLocation } from './Entity';
+import GameState from './GameState';
 
 class MovementAction {
 	constructor(private dx: number, private dy: number) {}
 
 	perform(engine: Engine, en: Entity) {
-		const destX = en.x + this.dx,
-			destY = en.y + this.dy;
+		if (!en.location) return;
+
+		const destX = en.location.x + this.dx,
+			destY = en.location.y + this.dy;
 
 		if (!engine.gameMap.inBounds(destX, destY)) return;
 		if (engine.gameMap.isBlocked(destX, destY)) return;
@@ -18,9 +21,11 @@ class MovementAction {
 			// 	`You kick the ${target.name} in the shins, much to its annoyance!`
 			// );
 		} else {
-			en.move(this.dx, this.dy);
+			en.location.move(this.dx, this.dy);
 			engine.fovRecompute = en == engine.player;
 		}
+
+		engine.gameState = GameState.EnemyTurn;
 	}
 }
 

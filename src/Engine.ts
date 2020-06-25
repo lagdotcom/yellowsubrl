@@ -5,6 +5,8 @@ import GameState from './GameState';
 import { initializeFov, recomputeFov } from './fovFunctions';
 import RNG from './RNG';
 import { renderAll, clearAll, ColourMap } from './renderFunctions';
+import Appearance from './components/Appearance';
+import Location from './components/Location';
 
 export default class Engine {
 	public console: Console;
@@ -35,12 +37,9 @@ export default class Engine {
 		(window as any).G = this;
 
 		this.player = new Entity({
-			x: 0,
-			y: 0,
-			char: '@',
-			colour: Colours.white,
 			name: 'Player',
-			blocks: true,
+			appearance: new Appearance('@', Colours.white),
+			location: new Location(0, 0, true),
 		});
 		this.entities = [this.player];
 
@@ -96,8 +95,8 @@ export default class Engine {
 		if (fovRecompute)
 			recomputeFov(
 				fovMap,
-				player.x,
-				player.y,
+				player.location!.x,
+				player.location!.y,
 				fovRadius,
 				fovLightWalls,
 				fovAlgorithm
