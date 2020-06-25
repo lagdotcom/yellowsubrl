@@ -19,11 +19,9 @@ class Slope {
 	}
 }
 
-export default class RedBlobVis {
-	blocksLightCb: (x: number, y: number) => boolean;
-	setVisibleCb: (x: number, y: number) => void;
-	getDistance: (x: number, y: number) => number;
+const int = Math.floor;
 
+export default class RedBlobVis {
 	/// <param name="blocksLight">A function that accepts the X and Y coordinates of a tile and determines whether the
 	/// given tile blocks the passage of light. The function must be able to accept coordinates that are out of bounds.
 	/// </param>
@@ -34,14 +32,10 @@ export default class RedBlobVis {
 	/// Y >= 0, and X >= Y, and returns the distance from the point to the origin (0,0).
 	/// </param>
 	constructor(
-		blocksLight: (x: number, y: number) => boolean,
-		setVisible: (x: number, y: number) => void,
-		getDistance: (x: number, y: number) => number
-	) {
-		this.blocksLightCb = blocksLight;
-		this.getDistance = getDistance;
-		this.setVisibleCb = setVisible;
-	}
+		public blocksLightCb: (x: number, y: number) => boolean,
+		public setVisibleCb: (x: number, y: number) => void,
+		public getDistance: (x: number, y: number) => number
+	) {}
 
 	compute(origin: LevelPoint, rangeLimit: number) {
 		this.setVisibleCb(origin.x, origin.y);
@@ -169,13 +163,10 @@ export default class RedBlobVis {
 			var wasOpaque = -1; // 0:false, 1:true, -1:not applicable
 			for (
 				var y = topY;
-				y >= bottomY;
+				int(y) >= int(bottomY);
 				y-- // use a signed comparison because y can wrap around when decremented
 			) {
-				if (
-					rangeLimit < 0 ||
-					this.getDistance(Math.floor(x), Math.floor(y)) <= rangeLimit
-				) {
+				if (rangeLimit < 0 || this.getDistance(int(x), int(y)) <= rangeLimit) {
 					// skip the tile if it's out of visual range
 					var isOpaque = this.blocksLight(x, y, octant, origin);
 					// every tile where topY > y > bottomY is guaranteed to be visible. also, the code that initializes topY and
@@ -307,7 +298,7 @@ export default class RedBlobVis {
 				ny += y;
 				break;
 		}
-		return this.blocksLightCb(Math.floor(nx), Math.floor(ny));
+		return this.blocksLightCb(int(nx), int(ny));
 	}
 
 	private setVisible(x: number, y: number, octant: number, origin: LevelPoint) {
@@ -347,6 +338,6 @@ export default class RedBlobVis {
 				ny += y;
 				break;
 		}
-		return this.setVisibleCb(Math.floor(nx), Math.floor(ny));
+		return this.setVisibleCb(int(nx), int(ny));
 	}
 }
