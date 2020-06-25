@@ -29,7 +29,7 @@ async function main() {
 	const roomMinSize = 6;
 	const maxRooms = 30;
 
-	const fovAlgorithm = FovAlgorithm.Raycasting;
+	const fovAlgorithm = FovAlgorithm.RedBlob;
 	const fovLightWalls = true;
 	const fovRadius = 10;
 

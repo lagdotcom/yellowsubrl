@@ -1,6 +1,10 @@
+import RedBlobVis from './RedBlobVis';
+
 export enum FovAlgorithm {
 	Raycasting,
+	Raycasting2,
 	Sunburst,
+	RedBlob,
 }
 
 function raycasting(
@@ -59,6 +63,56 @@ function raycasting(
 }
 
 const sunRays = 90;
+function raycasting2(
+	map: Map,
+	cx: number,
+	cy: number,
+	radius: number,
+	lightWalls: boolean
+) {
+	function ray(x1: number, y1: number) {
+		var x0 = cx,
+			y0 = cy;
+		const dx = Math.abs(x1 - x0);
+		const sx = x0 < x1 ? 1 : -1;
+		const dy = -Math.abs(y1 - y0);
+		const sy = y0 < y1 ? 1 : -1;
+		var err = dx + dy;
+		while (true) {
+			if (!map.contains(x0, y0)) return;
+			const t = map.tiles[x0][y0];
+			t.inFov = lightWalls || t.allowSight;
+			if (!t.allowSight) return;
+
+			if (x0 == x1 && y0 == y1) return;
+
+			const e2 = 2 * err;
+			if (e2 >= dy) {
+				err += dy;
+				x0 += sx;
+			}
+			if (e2 <= dx) {
+				err += dx;
+				y0 += sy;
+			}
+		}
+	}
+
+	const targets = new Set<string>();
+	var a = 0;
+	const aadd = (Math.PI * 2) / sunRays;
+	for (var a = 0; a < Math.PI * 2; a += aadd) {
+		const x = Math.round(cx + Math.cos(a) * radius);
+		const y = Math.round(cy + Math.sin(a) * radius);
+		const key = `${x},${y}`;
+
+		if (!targets.has(key)) {
+			targets.add(key);
+			ray(x, y);
+		}
+	}
+}
+
 function sunburst(
 	map: Map,
 	cx: number,
@@ -92,7 +146,26 @@ function sunburst(
 
 const algorithms = {
 	[FovAlgorithm.Raycasting]: raycasting,
+	[FovAlgorithm.Raycasting2]: raycasting2,
 	[FovAlgorithm.Sunburst]: sunburst,
+	[FovAlgorithm.RedBlob]: (
+		map: Map,
+		x: number,
+		y: number,
+		radius: number,
+		lightWalls: boolean
+	) => {
+		const vis = new RedBlobVis(
+			(x, y) => (map.contains(x, y) ? !map.tiles[x][y].allowSight : true),
+			(x, y) => {
+				const t = map.tiles[x][y];
+				t.inFov = lightWalls || t.allowSight;
+			},
+			(x, y) => x * x + y * y
+		);
+
+		vis.compute({ x, y }, radius * radius);
+	},
 };
 
 class MapTile {
