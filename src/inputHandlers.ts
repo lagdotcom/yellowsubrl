@@ -1,68 +1,25 @@
 import { SysKeyEvent } from './tcod';
-import Engine from './Engine';
-import Entity, { getBlockingEntitiesAtLocation } from './Entity';
-import GameState from './GameState';
-
-class MovementAction {
-	constructor(private dx: number, private dy: number) {}
-
-	perform(engine: Engine, en: Entity) {
-		if (!en.location) return;
-
-		const destX = en.location.x + this.dx,
-			destY = en.location.y + this.dy;
-
-		if (!engine.gameMap.inBounds(destX, destY)) return;
-		if (engine.gameMap.isBlocked(destX, destY)) return;
-
-		const target = getBlockingEntitiesAtLocation(engine.entities, destX, destY);
-		if (target) {
-			// console.log(
-			// 	`You kick the ${target.name} in the shins, much to its annoyance!`
-			// );
-		} else {
-			en.location.move(this.dx, this.dy);
-			engine.fovRecompute = en == engine.player;
-		}
-
-		engine.gameState = GameState.EnemyTurn;
-	}
-}
-
-class RemakeAction {
-	perform(engine: Engine) {
-		engine.newMap();
-	}
-}
-
-class ChangeFontAction {
-	perform(engine: Engine) {
-		engine.changeFont();
-	}
-}
-
-class ExploreMapAction {
-	perform(engine: Engine) {
-		const { gameMap } = engine;
-		for (var x = 0; x < gameMap.width; x++)
-			for (var y = 0; y < gameMap.height; y++)
-				gameMap.tiles[x][y].explored = true;
-
-		engine.fovRecompute = true;
-	}
-}
+import MovementAction from './actions/MovementAction';
+import RemakeAction from './actions/RemakeAction';
+import ChangeFontAction from './actions/ChangeFontAction';
+import ExploreMapAction from './actions/ExploreMapAction';
 
 export function handleKeys(e?: SysKeyEvent) {
 	if (!e) return;
+	const { key } = e;
 
-	if (e.key == 'ArrowUp') return new MovementAction(0, -1);
-	else if (e.key == 'ArrowDown') return new MovementAction(0, 1);
-	else if (e.key == 'ArrowLeft') return new MovementAction(-1, 0);
-	else if (e.key == 'ArrowRight') return new MovementAction(1, 0);
+	if (key == 'ArrowUp' || key == '8') return new MovementAction(0, -1);
+	else if (key == 'ArrowDown' || key == '2') return new MovementAction(0, 1);
+	else if (key == 'ArrowLeft' || key == '4') return new MovementAction(-1, 0);
+	else if (key == 'ArrowRight' || key == '6') return new MovementAction(1, 0);
+	else if (key == '7' || key == 'Home') return new MovementAction(-1, -1);
+	else if (key == '9' || key == 'PageUp') return new MovementAction(1, -1);
+	else if (key == '1' || key == 'End') return new MovementAction(-1, 1);
+	else if (key == '3' || key == 'PageDown') return new MovementAction(1, 1);
 
-	if (e.key == 'R') return new RemakeAction();
-	else if (e.key == 'F') return new ChangeFontAction();
-	else if (e.key == 'X') return new ExploreMapAction();
+	if (key == 'R') return new RemakeAction();
+	else if (key == 'F') return new ChangeFontAction();
+	else if (key == 'X') return new ExploreMapAction();
 
 	return;
 }

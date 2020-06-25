@@ -4,9 +4,12 @@ import { Console, Colours, Terminal, Map, Tileset, FovAlgorithm } from './tcod';
 import GameState from './GameState';
 import { initializeFov, recomputeFov } from './fovFunctions';
 import RNG from './RNG';
-import { renderAll, clearAll, ColourMap } from './renderFunctions';
+import { renderAll, clearAll, ColourMap, RenderOrder } from './renderFunctions';
 import Appearance from './components/Appearance';
 import Location from './components/Location';
+import Fighter from './components/Fighter';
+import { Action } from './Action';
+import Result from './results/Result';
 
 export default class Engine {
 	public console: Console;
@@ -38,7 +41,8 @@ export default class Engine {
 
 		this.player = new Entity({
 			name: 'Player',
-			appearance: new Appearance('@', Colours.white),
+			appearance: new Appearance('@', Colours.white, RenderOrder.Actor),
+			fighter: new Fighter(30, 2, 5),
 			location: new Location(0, 0, true),
 		});
 		this.entities = [this.player];
@@ -55,6 +59,8 @@ export default class Engine {
 
 		this.fovMap = initializeFov(this.gameMap);
 		this.fovRecompute = true;
+
+		this.resolve = this.resolve.bind(this);
 	}
 
 	changeFont() {
@@ -89,7 +95,9 @@ export default class Engine {
 			fovRadius,
 			fovRecompute,
 			gameMap,
+			height,
 			player,
+			width,
 		} = this;
 
 		if (fovRecompute)
@@ -107,6 +115,9 @@ export default class Engine {
 			entities,
 			gameMap,
 			fovMap,
+			player,
+			screenHeight: height,
+			screenWidth: width,
 			fovRecompute,
 			colours,
 		});
@@ -118,12 +129,22 @@ export default class Engine {
 		clearAll(console, entities);
 	}
 
+	act(action: Action) {
+		const results = action.perform(this, this.player);
+		results.forEach(this.resolve);
+	}
+
+	resolve(result: Result) {
+		result.perform(this).forEach(this.resolve);
+	}
+
 	enemyActions() {
 		if (this.gameState == GameState.EnemyTurn) {
 			this.entities.forEach(en => {
-				if (en != this.player) {
-					//console.log(`The ${e.name} ponders the meaning of its existence.`);
-				}
+				if (en.ai)
+					en.ai
+						.takeTurn(en, this.player, this.fovMap, this.gameMap, this.entities)
+						.map(this.resolve);
 			});
 
 			this.gameState = GameState.PlayerTurn;

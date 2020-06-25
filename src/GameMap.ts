@@ -1,8 +1,13 @@
 import Tile from './Tile';
 import { Rect } from './mapObjects';
-import Entity from './Entity';
+import Entity, { getBlockingEntitiesAtLocation } from './Entity';
 import RNG, { RNGSeed } from './RNG';
 import { Colours } from './tcod';
+import Appearance from './components/Appearance';
+import Location from './components/Location';
+import BasicAI from './components/BasicAI';
+import Fighter from './components/Fighter';
+import { RenderOrder } from './renderFunctions';
 
 export interface MapGenerator {
 	generate(
@@ -61,6 +66,56 @@ export default class GameMap {
 		for (var y = Math.min(y1, y2); y < Math.max(y1, y2) + 1; y++) {
 			this.tiles[x][y].blocked = false;
 			this.tiles[x][y].blockSight = false;
+		}
+	}
+
+	placeEntities(
+		rng: RNG,
+		room: Rect,
+		entities: Entity[],
+		maxMonstersPerRoom: number
+	) {
+		const numberOfMonsters = rng.randint(0, maxMonstersPerRoom);
+
+		for (var i = 0; i < numberOfMonsters; i++) {
+			const x = rng.randint(room.x1 + 1, room.x2 - 1);
+			const y = rng.randint(room.y1 + 1, room.y2 - 1);
+
+			if (!getBlockingEntitiesAtLocation(entities, x, y)) {
+				const type = rng.weighted([
+					[
+						8,
+						{
+							name: 'Orc',
+							colour: Colours.green,
+							char: 'o',
+							hp: 10,
+							defense: 0,
+							power: 3,
+						},
+					],
+					[
+						2,
+						{
+							name: 'Troll',
+							colour: Colours.darkGreen,
+							char: 'T',
+							hp: 16,
+							defense: 1,
+							power: 4,
+						},
+					],
+				]);
+
+				const monster = new Entity({
+					name: type.name,
+					ai: new BasicAI(),
+					appearance: new Appearance(type.char, type.colour, RenderOrder.Actor),
+					fighter: new Fighter(type.hp, type.defense, type.power),
+					location: new Location(x, y, true),
+				});
+				entities.push(monster);
+			}
 		}
 	}
 

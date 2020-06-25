@@ -81,7 +81,7 @@ async function main() {
 
 		const { key } = sys.checkForEvents(KeyDown);
 		const action = handleKeys(key);
-		if (action) action.perform(engine, engine.player);
+		if (action) engine.act(action);
 
 		engine.enemyActions();
 	});
