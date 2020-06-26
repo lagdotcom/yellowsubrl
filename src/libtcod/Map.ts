@@ -1,10 +1,12 @@
-import RedBlobVis from './RedBlobVis';
+import RedBlobVis from './fov/RedBlobVis';
+import { refreshVisibility as nystrom } from './fov/NystromShadows';
 
 export enum FovAlgorithm {
 	Raycasting,
 	Raycasting2,
 	Sunburst,
 	RedBlob,
+	NystromShadows,
 }
 
 function raycasting(
@@ -166,6 +168,7 @@ const algorithms = {
 
 		vis.compute({ x, y }, radius * radius);
 	},
+	[FovAlgorithm.NystromShadows]: nystrom,
 };
 
 class MapTile {
