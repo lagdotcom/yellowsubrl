@@ -1,6 +1,15 @@
 import Entity from './Entity';
 import GameMap, { MapGenerator } from './GameMap';
-import { Console, Colours, Terminal, Map, Tileset, FovAlgorithm } from './tcod';
+import {
+	Colours,
+	Console,
+	FovAlgorithm,
+	Map,
+	Terminal,
+	Tileset,
+	TerminalKey,
+	TerminalMouse,
+} from './tcod';
 import GameState from './GameState';
 import { initializeFov, recomputeFov } from './fovFunctions';
 import RNG from './RNG';
@@ -10,34 +19,81 @@ import Location from './components/Location';
 import Fighter from './components/Fighter';
 import { Action } from './Action';
 import Result from './results/Result';
+import MessageLog from './MessageLog';
+import { handleKeys } from './inputHandlers';
 
 export default class Engine {
+	public barWidth: number;
+	public colours: ColourMap;
 	public console: Console;
+	public context: Terminal;
 	public entities: Entity[];
+	public fovAlgorithm: FovAlgorithm;
+	public fovLightWalls: boolean;
 	public fovMap: Map;
+	public fovRadius: number;
 	public fovRecompute: boolean;
 	public gameMap: GameMap;
 	public gameState: GameState;
+	public height: number;
+	public mapGenerator: MapGenerator;
+	public mapHeight: number;
+	public mapWidth: number;
+	public messageLog: MessageLog;
+	public mouseX: number;
+	public mouseY: number;
+	public panel: Console;
+	public panelHeight: number;
+	public panelY: number;
 	public player: Entity;
+	public rng: RNG;
+	public tilesets: Tileset[];
+	public width: number;
 
 	private fpsString: string;
 	private frames: number;
 	private lastReportTime: number;
 
-	constructor(
-		public colours: ColourMap,
-		public fovAlgorithm: FovAlgorithm,
-		public fovLightWalls: boolean,
-		public fovRadius: number,
-		public mapGenerator: MapGenerator,
-		public mapWidth: number,
-		public mapHeight: number,
-		public rng: RNG,
-		public tilesets: Tileset[],
-		public width: number,
-		public height: number
-	) {
+	constructor({
+		barWidth,
+		colours,
+		fovAlgorithm,
+		fovLightWalls,
+		fovRadius,
+		mapGenerator,
+		mapHeight,
+		mapWidth,
+		messageX,
+		messageHeight,
+		messageWidth,
+		panelHeight,
+		rng,
+		tilesets,
+		width,
+		height,
+	}: {
+		barWidth: number;
+		colours: ColourMap;
+		fovAlgorithm: FovAlgorithm;
+		fovLightWalls: boolean;
+		fovRadius: number;
+		height: number;
+		mapGenerator: MapGenerator;
+		mapHeight: number;
+		mapWidth: number;
+		messageX: number;
+		messageHeight: number;
+		messageWidth: number;
+		panelHeight: number;
+		rng: RNG;
+		tilesets: Tileset[];
+		width: number;
+	}) {
 		(window as any).G = this;
+
+		this.colours = colours;
+		this.rng = rng;
+		this.tilesets = tilesets;
 
 		this.player = new Entity({
 			name: 'Player',
@@ -47,16 +103,41 @@ export default class Engine {
 		});
 		this.entities = [this.player];
 
+		this.mapGenerator = mapGenerator;
+		this.mapHeight = mapHeight;
+		this.mapWidth = mapWidth;
 		this.gameMap = new GameMap(rng.seed, mapWidth, mapHeight);
 		mapGenerator.generate(rng, this.gameMap, this.player, this.entities);
 
-		this.console = new Console(width, height, tilesets[0]);
+		const tileset = tilesets[0];
+		this.context = new Terminal(
+			width * tileset.tileWidth,
+			height * tileset.tileHeight,
+			tileset
+		);
+		this.context.listen('keydown', 'mousemove');
+		this.mouseX = 0;
+		this.mouseY = 0;
+
+		this.height = height;
+		this.width = width;
+		this.console = new Console(width, height, tileset);
+
+		this.barWidth = barWidth;
+		this.panelHeight = panelHeight;
+		this.panelY = height - panelHeight;
+		this.panel = new Console(width, panelHeight, tileset);
+
+		this.messageLog = new MessageLog(messageX, messageWidth, messageHeight);
 
 		this.fpsString = '';
 		this.frames = 0;
 		this.gameState = GameState.PlayerTurn;
 		this.lastReportTime = new Date().getTime();
 
+		this.fovAlgorithm = fovAlgorithm;
+		this.fovLightWalls = fovLightWalls;
+		this.fovRadius = fovRadius;
 		this.fovMap = initializeFov(this.gameMap);
 		this.fovRecompute = true;
 
@@ -64,10 +145,13 @@ export default class Engine {
 	}
 
 	changeFont() {
-		const i = this.tilesets.indexOf(this.console.tileset);
+		const i = this.tilesets.indexOf(this.context.tileset);
 		const j = (i + 1) % this.tilesets.length;
+		const tileset = this.tilesets[j];
 
-		this.console.setTileset(this.tilesets[j]);
+		this.context.setTileset(tileset);
+		this.console.setTileset(tileset);
+		this.panel.setTileset(tileset);
 		this.fovRecompute = true;
 	}
 
@@ -84,8 +168,24 @@ export default class Engine {
 		console.clear();
 	}
 
+	start() {
+		this.context.main(() => {
+			const { key, mouse } = this.context.checkForEvents();
+			this.update(key, mouse);
+			this.render(this.context);
+			this.enemyActions();
+		});
+	}
+
+	update(key?: TerminalKey, mouse?: TerminalMouse) {
+		const action = handleKeys(key);
+		if (action) action.perform(this, this.player).forEach(this.resolve);
+		if (mouse) [this.mouseX, this.mouseY] = [mouse.x, mouse.y];
+	}
+
 	render(context: Terminal) {
 		const {
+			barWidth,
 			colours,
 			console,
 			entities,
@@ -96,6 +196,12 @@ export default class Engine {
 			fovRecompute,
 			gameMap,
 			height,
+			messageLog,
+			mouseX,
+			mouseY,
+			panel,
+			panelHeight,
+			panelY,
 			player,
 			width,
 		} = this;
@@ -111,15 +217,22 @@ export default class Engine {
 			);
 
 		renderAll({
+			barWidth,
+			colours,
 			console,
 			entities,
-			gameMap,
 			fovMap,
+			fovRecompute,
+			gameMap,
+			messageLog,
+			mouseX,
+			mouseY,
+			panel,
+			panelHeight,
+			panelY,
 			player,
 			screenHeight: height,
 			screenWidth: width,
-			fovRecompute,
-			colours,
 		});
 		this.fovRecompute = false;
 
@@ -164,7 +277,7 @@ export default class Engine {
 
 		this.console.printBox(
 			0,
-			0,
+			this.height - 1,
 			10,
 			1,
 			this.fpsString,

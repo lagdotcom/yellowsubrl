@@ -1,16 +1,7 @@
 import './main.css';
 import arialSrc from '../res/arial10x10.png';
 import groovySrc from '../res/groovy10x10.png';
-import {
-	Charmap,
-	FovAlgorithm,
-	KeyDown,
-	sys,
-	Terminal,
-	Tileset,
-	toRGB,
-} from './tcod';
-import { handleKeys } from './inputHandlers';
+import { Charmap, FovAlgorithm, Tileset, toRGB } from './tcod';
 import RNG from './RNG';
 import BoxesAndCorridors from './generator/BoxesAndCorridors';
 import Engine from './Engine';
@@ -22,8 +13,15 @@ async function main() {
 	const width = 60;
 	const height = 40;
 
+	const barWidth = 20;
+	const panelHeight = 7;
+
+	const messageX = barWidth + 2;
+	const messageWidth = width - barWidth - 2;
+	const messageHeight = panelHeight - 1;
+
 	const mapWidth = width;
-	const mapHeight = height - 5;
+	const mapHeight = height - panelHeight;
 
 	const roomMaxSize = 10;
 	const roomMinSize = 6;
@@ -55,36 +53,26 @@ async function main() {
 	const arial = await Tileset.createFromUrl(arialSrc, 32, 8, Charmap.TCOD);
 	const groovy = await Tileset.createFromUrl(groovySrc, 32, 8, Charmap.TCOD);
 
-	const engine = new Engine(
+	const engine = new Engine({
+		barWidth,
 		colours,
 		fovAlgorithm,
 		fovLightWalls,
 		fovRadius,
+		height,
 		mapGenerator,
-		mapWidth,
 		mapHeight,
+		mapWidth,
+		messageX,
+		messageHeight,
+		messageWidth,
+		panelHeight,
 		rng,
-		[groovy, arial],
+		tilesets: [groovy, arial],
 		width,
-		height
-	);
-
-	const tileset = engine.tilesets[0];
-	const context = new Terminal(
-		width * tileset.tileWidth,
-		height * tileset.tileHeight
-	);
-	context.element.style.height = `${context.element.height * 2}px`;
-
-	context.main(function loop() {
-		engine.render(context);
-
-		const { key } = sys.checkForEvents(KeyDown);
-		const action = handleKeys(key);
-		if (action) engine.act(action);
-
-		engine.enemyActions();
 	});
+
+	engine.start();
 }
 
 window.addEventListener('load', main);

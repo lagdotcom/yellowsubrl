@@ -1,5 +1,4 @@
-import { KeyPress } from './Sys';
-import { Colours, sys } from '../tcod';
+import { Colours } from '../tcod';
 import { Tileset } from './Tileset';
 
 export enum BlendMode {
@@ -107,14 +106,12 @@ export class Console {
 
 	setTileset(tileset: Tileset) {
 		this.tileset = tileset;
+		this.element.width = this.width * tileset.tileWidth;
+		this.element.height = this.height * tileset.tileHeight;
 
 		this.tilesFlat.forEach(t => {
-			if (t.ch != ' ') this.drawTile(t);
+			this.drawTile(t);
 		});
-	}
-
-	checkForKeypress() {
-		return sys.checkForEvents(KeyPress).key;
 	}
 
 	putChar(x: number, y: number, c: number | string) {
@@ -127,6 +124,19 @@ export class Console {
 			tile.fg = fg;
 			tile.dirty = true;
 		}
+	}
+
+	print(x: number, y: number, str: string) {
+		return this.printBox(
+			x,
+			y,
+			str.length,
+			1,
+			str,
+			this.defaultFg,
+			this.defaultBg,
+			this.defaultBgBlend
+		);
 	}
 
 	printBox(
@@ -164,6 +174,36 @@ export class Console {
 		return y - sy + 1;
 	}
 
+	drawRect(
+		sx: number,
+		sy: number,
+		width: number,
+		height: number,
+		c?: string | number,
+		fg?: string,
+		bg?: string,
+		blend: BlendMode = BlendMode.Set
+	) {
+		const ch = typeof c === 'number' ? String.fromCharCode(c) : c;
+
+		for (var x = 0; x < width; x++) {
+			for (var y = 0; y < height; y++) {
+				if (fg && ch) this.setCharForeground(sx + x, sy + y, fg, ch);
+				if (bg) this.setCharBackground(sx + x, sy + y, bg, blend);
+			}
+		}
+	}
+
+	setCharForeground(x: number, y: number, fg: string, ch: string) {
+		const tile = this.tiles[x][y];
+
+		if (tile.fg != fg || tile.ch != ch) {
+			tile.fg = fg;
+			tile.ch = ch;
+			tile.dirty = true;
+		}
+	}
+
 	setCharBackground(x: number, y: number, bg: string, mode: BlendMode) {
 		const tile = this.tiles[x][y];
 
@@ -176,6 +216,28 @@ export class Console {
 
 	setDefaultForeground(col: string) {
 		this.defaultFg = col;
+	}
+
+	blit(
+		dest: Console,
+		dx: number,
+		dy: number,
+		sx: number = 0,
+		sy: number = 0,
+		width: number = 0,
+		height: number = 0
+	) {
+		width = width || this.width;
+		height = height || this.height;
+
+		for (var x = 0; x < width; x++) {
+			for (var y = 0; y < height; y++) {
+				const st = this.tiles[sx + x][sy + y];
+
+				dest.setCharBackground(dx + x, dy + y, st.bg, st.blend);
+				dest.setCharForeground(dx + x, dy + y, st.fg, st.ch);
+			}
+		}
 	}
 
 	render() {

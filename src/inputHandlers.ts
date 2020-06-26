@@ -1,10 +1,10 @@
-import { SysKeyEvent } from './tcod';
+import { TerminalKey } from './tcod';
 import MovementAction from './actions/MovementAction';
 import RemakeAction from './actions/RemakeAction';
 import ChangeFontAction from './actions/ChangeFontAction';
 import ExploreMapAction from './actions/ExploreMapAction';
 
-export function handleKeys(e?: SysKeyEvent) {
+export function handleKeys(e?: TerminalKey) {
 	if (!e) return;
 	const { key } = e;
 

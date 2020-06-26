@@ -4,6 +4,7 @@ import GameMap from './GameMap';
 import Location from './components/Location';
 import Appearance from './components/Appearance';
 import { leftpad } from './pad';
+import MessageLog from './MessageLog';
 
 export type ColourMap = { [name: string]: string };
 
@@ -14,25 +15,39 @@ export enum RenderOrder {
 }
 
 export function renderAll({
+	barWidth,
+	colours,
 	console,
 	entities,
-	player,
-	gameMap,
 	fovMap,
-	screenWidth,
-	screenHeight,
 	fovRecompute,
-	colours,
+	gameMap,
+	messageLog,
+	mouseX,
+	mouseY,
+	panel,
+	panelHeight,
+	panelY,
+	player,
+	screenHeight,
+	screenWidth,
 }: {
+	barWidth: number;
+	colours: ColourMap;
 	console: Console;
 	entities: Entity[];
-	player: Entity;
-	gameMap: GameMap;
 	fovMap: Map;
-	screenWidth: number;
-	screenHeight: number;
 	fovRecompute: boolean;
-	colours: ColourMap;
+	gameMap: GameMap;
+	messageLog: MessageLog;
+	mouseX: number;
+	mouseY: number;
+	panel: Console;
+	panelHeight: number;
+	panelY: number;
+	player: Entity;
+	screenHeight: number;
+	screenWidth: number;
 }) {
 	if (fovRecompute)
 		for (var y = 0; y < gameMap.height; y++) {
@@ -59,19 +74,31 @@ export function renderAll({
 		drawEntity(console, e.appearance!, e.location!, fovMap)
 	);
 
-	console.printBox(
+	panel.clear(' ', undefined, Colours.black);
+
+	var y = 1;
+	messageLog.messages.forEach(msg => {
+		panel.setDefaultForeground(msg.colour);
+		panel.print(messageLog.x, y, msg.text);
+		y++;
+	});
+
+	renderBar(
+		panel,
 		1,
-		screenHeight - 2,
-		10,
 		1,
-		`HP: ${leftpad(player.fighter!.hp, 2, '0')}/${leftpad(
-			player.fighter!.maxHp,
-			2,
-			'0'
-		)}`,
-		Colours.white,
-		Colours.black
+		barWidth,
+		'HP',
+		player.fighter!.hp,
+		player.fighter!.maxHp,
+		Colours.lightRed,
+		Colours.darkRed
 	);
+
+	panel.setDefaultForeground(Colours.lightGrey);
+	panel.print(1, 0, getNamesUnderMouse(mouseX, mouseY, entities, fovMap));
+
+	panel.blit(console, 0, panelY);
 }
 
 export function clearAll(con: Console, entities: Entity[]) {
@@ -92,4 +119,51 @@ export function drawEntity(
 
 export function clearEntity(console: Console, loc: Location) {
 	console.putChar(loc.x, loc.y, ' ');
+}
+
+export function renderBar(
+	panel: Console,
+	x: number,
+	y: number,
+	totalWidth: number,
+	name: string,
+	value: number,
+	maximum: number,
+	barColour: string,
+	backColor: string
+) {
+	const width = Math.floor((value / maximum) * totalWidth);
+
+	panel.drawRect(x, y, totalWidth, 1, 0, undefined, backColor);
+
+	if (width > 0) panel.drawRect(x, y, width, 1, 0, undefined, barColour);
+
+	panel.printBox(
+		Math.floor(x + totalWidth / 2),
+		y,
+		totalWidth,
+		1,
+		`${name}: ${value}/${maximum}`,
+		Colours.white
+	);
+}
+
+export function getNamesUnderMouse(
+	x: number,
+	y: number,
+	entities: Entity[],
+	fovMap: Map
+) {
+	const names = entities
+		.filter(
+			en =>
+				en.location &&
+				x == en.location.x &&
+				y == en.location.y &&
+				fovMap.isInFov(en.location.x, en.location.y)
+		)
+		.map(en => en.name);
+
+	// TODO: title case
+	return names.join(', ');
 }

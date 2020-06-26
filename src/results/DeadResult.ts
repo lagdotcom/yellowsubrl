@@ -19,9 +19,11 @@ export default class DeadResult implements Result {
 		// TODO
 		if (entity.name === 'Player') {
 			engine.gameState = GameState.PlayerDead;
-			results.push(new MessageResult('You died!'));
+			results.push(new MessageResult('You died!', Colours.red));
 		} else {
-			results.push(new MessageResult(`${entity.name} is dead!`));
+			results.push(
+				new MessageResult(`${entity.name} is dead!`, Colours.orange)
+			);
 			entity.appearance!.order = RenderOrder.Corpse;
 			entity.location!.blocks = false;
 			entity.fighter = undefined;

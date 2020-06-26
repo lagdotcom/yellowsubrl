@@ -1,25 +1,62 @@
 import { Console } from './Console';
-import { sys, Colours } from '../tcod';
+import { Colours } from '../tcod';
+import { Tileset } from './Tileset';
+
+export const KeyDown = 'keydown',
+	KeyPress = 'keypress',
+	KeyUp = 'keyup',
+	MouseDown = 'mousedown',
+	MouseMove = 'mousemove';
+
+export interface TerminalKey {
+	type: string;
+	key: string;
+	keyCode: number;
+	alt: boolean;
+	ctrl: boolean;
+	shift: boolean;
+}
+
+export interface TerminalMouse {
+	type: string;
+	button: number;
+	x: number;
+	y: number;
+}
 
 export class Terminal {
 	callback?: FrameRequestCallback;
 	context: CanvasRenderingContext2D;
 	element: HTMLCanvasElement;
-	width: number;
 	handle: number;
 	height: number;
+	keyEvents: TerminalKey[];
+	mouseEvent?: TerminalMouse;
+	offsetX: number;
+	offsetY: number;
+	redraw: boolean;
 	running: boolean;
+	scaleX: number;
+	scaleY: number;
+	tileset: Tileset;
+	width: number;
 
-	constructor(w: number, h: number) {
+	constructor(w: number, h: number, tileset: Tileset) {
 		this.width = w;
 		this.height = h;
+		this.tileset = tileset;
+		this.keyEvents = [];
 
 		const canvas = document.createElement('canvas');
 		this.element = canvas;
-		canvas.width = w;
-		canvas.height = h;
+		this.redraw = false;
+		canvas.tabIndex = 1;
+		window.addEventListener('resize', () => this.resize());
+		requestAnimationFrame(() => {
+			canvas.focus();
+			this.resize();
+		});
 		document.body.appendChild(canvas);
-		sys.addEventSource(canvas);
 
 		const context = canvas.getContext('2d');
 		if (!context) throw 'Could not get 2D context';
@@ -27,10 +64,49 @@ export class Terminal {
 		context.fillStyle = Colours.black;
 		context.fillRect(0, 0, canvas.width, canvas.height);
 
+		this.offsetX = 0;
+		this.offsetY = 0;
+		this.scaleX = 1;
+		this.scaleY = 1;
+
+		this.onKeyDown = this.onKeyDown.bind(this);
+		this.onKeyPress = this.onKeyPress.bind(this);
+		this.onKeyUp = this.onKeyUp.bind(this);
+		this.onMouseDown = this.onMouseDown.bind(this);
+		this.onMouseMove = this.onMouseMove.bind(this);
+
 		this.tick = this.tick.bind(this);
 		this.running = true;
 		this.handle = 0;
 		this.schedule();
+	}
+
+	private resize() {
+		this.redraw = true;
+		this.width = this.element.width = this.element.clientWidth;
+		this.height = this.element.height = this.element.clientHeight;
+	}
+
+	listen(...events: string[]) {
+		if (events.includes(KeyDown))
+			this.element.addEventListener('keydown', this.onKeyDown);
+		else this.element.removeEventListener('keydown', this.onKeyDown);
+
+		if (events.includes(KeyPress))
+			this.element.addEventListener('keypress', this.onKeyPress);
+		else this.element.removeEventListener('keypress', this.onKeyPress);
+
+		if (events.includes(KeyUp))
+			this.element.addEventListener('keyup', this.onKeyUp);
+		else this.element.removeEventListener('keyup', this.onKeyUp);
+
+		if (events.includes(MouseMove))
+			this.element.addEventListener('mousemove', this.onMouseMove);
+		else this.element.removeEventListener('mousemove', this.onMouseMove);
+
+		if (events.includes(MouseMove))
+			this.element.addEventListener('mousedown', this.onMouseDown);
+		else this.element.removeEventListener('mousemove', this.onMouseDown);
 	}
 
 	present(
@@ -41,18 +117,62 @@ export class Terminal {
 			clearColour: string;
 			align: [number, number];
 		} = {
-			keepAspect: false,
-			integerScaling: false,
+			keepAspect: true,
+			integerScaling: true,
 			clearColour: '#000000',
 			align: [0.5, 0.5],
 		}
 	) {
-		// TODO: keepAspect, integerScaling, align
+		const { tileWidth, tileHeight } = this.tileset;
+		var consoleW, consoleH;
 
-		this.context.fillStyle = options.clearColour;
-		this.context.fillRect(0, 0, this.width, this.height);
+		if (this.redraw) {
+			const { width, height } = this;
 
-		this.context.drawImage(console.render(), 0, 0);
+			var scaleX = width / console.width / tileWidth;
+			var scaleY = height / console.height / tileHeight;
+
+			if (options.integerScaling) {
+				scaleX = Math.max(1, Math.floor(scaleX));
+				scaleY = Math.max(1, Math.floor(scaleY));
+			}
+
+			if (options.keepAspect) {
+				scaleX = Math.min(scaleX, scaleY);
+				scaleY = scaleX;
+			}
+
+			const consoleWidth = scaleX * console.width * tileWidth;
+			const consoleHeight = scaleY * console.height * tileHeight;
+
+			this.offsetX = Math.floor((width - consoleWidth) * options.align[0]);
+			this.offsetY = Math.floor((height - consoleHeight) * options.align[1]);
+			this.scaleX = scaleX;
+			this.scaleY = scaleY;
+
+			this.context.fillStyle = options.clearColour;
+			this.context.fillRect(0, 0, width, height);
+			this.redraw = false;
+
+			consoleW = consoleWidth;
+			consoleH = consoleHeight;
+		} else {
+			consoleW = this.scaleX * console.width * tileWidth;
+			consoleH = this.scaleY * console.height * tileHeight;
+		}
+
+		const src = console.render();
+		this.context.drawImage(
+			src,
+			0,
+			0,
+			src.width,
+			src.height,
+			this.offsetX,
+			this.offsetY,
+			consoleW,
+			consoleH
+		);
 	}
 
 	main(f: FrameRequestCallback) {
@@ -64,6 +184,29 @@ export class Terminal {
 		cancelAnimationFrame(this.handle);
 	}
 
+	setTileset(tileset: Tileset) {
+		this.tileset = tileset;
+		this.redraw = true;
+	}
+
+	pixelToTile(wx: number, wy: number): [number, number] {
+		const ox = wx - this.element.offsetLeft - this.offsetX;
+		const oy = wy - this.element.offsetTop - this.offsetY;
+
+		const tw = this.tileset.tileWidth * this.scaleX;
+		const th = this.tileset.tileHeight * this.scaleY;
+
+		return [Math.floor(ox / tw), Math.floor(oy / th)];
+	}
+
+	checkForEvents() {
+		const key = this.keyEvents.shift();
+		const mouse = this.mouseEvent;
+		this.mouseEvent = undefined;
+
+		return { key, mouse };
+	}
+
 	private schedule() {
 		if (this.running) this.handle = requestAnimationFrame(this.tick);
 	}
@@ -71,5 +214,65 @@ export class Terminal {
 	private tick(time: number) {
 		this.callback && this.callback(time);
 		this.schedule();
+	}
+
+	private onKeyDown(e: KeyboardEvent) {
+		this.keyEvents.push({
+			type: KeyDown,
+			key: e.key,
+			keyCode: e.keyCode,
+			alt: e.altKey,
+			ctrl: e.ctrlKey,
+			shift: e.shiftKey,
+		});
+	}
+
+	private onKeyUp(e: KeyboardEvent) {
+		this.keyEvents.push({
+			type: KeyUp,
+			key: e.key,
+			keyCode: e.keyCode,
+			alt: e.altKey,
+			ctrl: e.ctrlKey,
+			shift: e.shiftKey,
+		});
+	}
+
+	private onKeyPress(e: KeyboardEvent) {
+		this.keyEvents.push({
+			type: KeyPress,
+			key: e.key,
+			keyCode: e.keyCode,
+			alt: e.altKey,
+			ctrl: e.ctrlKey,
+			shift: e.shiftKey,
+		});
+	}
+
+	private onMouseDown(e: MouseEvent) {
+		const [x, y] = this.pixelToTile(e.x, e.y);
+
+		this.mouseEvent = {
+			type: MouseDown,
+			button: e.button,
+			x,
+			y,
+		};
+	}
+
+	private onMouseMove(e: MouseEvent) {
+		const [x, y] = this.pixelToTile(e.x, e.y);
+
+		if (this.mouseEvent) {
+			this.mouseEvent.x = x;
+			this.mouseEvent.y = y;
+		} else {
+			this.mouseEvent = {
+				type: MouseMove,
+				button: 0,
+				x,
+				y,
+			};
+		}
 	}
 }
