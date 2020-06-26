@@ -163,6 +163,10 @@ export default class Engine {
 		gameMap.reset(rng.seed, gameMap.width, gameMap.height);
 		mapGenerator.generate(rng, gameMap, player, entities);
 
+		this.player.fighter!.hp = this.player.fighter!.maxHp;
+		this.player.appearance!.ch = '@';
+		this.player.appearance!.colour = Colours.white;
+
 		this.fovMap = initializeFov(gameMap);
 		this.fovRecompute = true;
 		console.clear();
