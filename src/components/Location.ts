@@ -37,8 +37,10 @@ export default class Location {
 		me: HasLocation,
 		target: HasLocation,
 		gameMap: GameMap,
-		entities: Entity[]
+		entities: Entity[],
+		goal?: Location
 	) {
+		goal = goal || target.location;
 		const fov = new Map(gameMap.width, gameMap.height);
 
 		for (var x = 0; x < gameMap.width; x++)
@@ -56,18 +58,13 @@ export default class Location {
 		});
 
 		const finder = new AStar(fov, 1);
-		const path = finder.getPath(
-			this.x,
-			this.y,
-			target.location.x,
-			target.location.y
-		);
+		const path = finder.getPath(this.x, this.y, goal.x, goal.y);
 
 		if (path && path.length < 25) {
 			const next = path[0];
 			[this.x, this.y] = next;
 		} else {
-			this.moveTowards(target.location.x, target.location.y, gameMap, entities);
+			this.moveTowards(goal.x, goal.y, gameMap, entities);
 		}
 	}
 }
