@@ -20,6 +20,10 @@ export default class Fighter {
 		return results;
 	}
 
+	heal(me: HasFighter, amount: number) {
+		this.hp = Math.min(this.maxHp, this.hp + amount);
+	}
+
 	attack(me: HasFighter, target: HasFighter) {
 		const results = [];
 		const damage = this.power - target.fighter.defense;

@@ -159,11 +159,13 @@ export class Console {
 		for (var i = 0; i < str.length; i++) {
 			const ch = str[i];
 
-			if (bg) this.setCharBackground(x, y, bg, bgBlend);
-			if (fg) this.putChar(x, y, ch);
+			if (ch != '\n') {
+				if (bg) this.setCharBackground(x, y, bg, bgBlend);
+				if (fg) this.putChar(x, y, ch);
+				x++;
+			}
 
-			x++;
-			if (x > ex) {
+			if (x >= ex || ch == '\n') {
 				x = sx;
 				y++;
 
@@ -246,6 +248,22 @@ export class Console {
 		});
 
 		return this.element;
+	}
+
+	getHeightRect(
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		str: string
+	) {
+		const lines = str.split('\n');
+		var height = 0;
+		lines.forEach(line => {
+			height += Math.ceil(line.length / width);
+		});
+
+		return height + lines.length - 1;
 	}
 
 	private drawTile(tile: ConsoleTile) {

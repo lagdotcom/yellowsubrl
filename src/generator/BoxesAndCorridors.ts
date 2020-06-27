@@ -10,6 +10,7 @@ export default class BoxesAndCorridors {
 	mapWidth: number;
 	mapHeight: number;
 	maxMonstersPerRoom: number;
+	maxItemsPerRoom: number;
 
 	constructor({
 		maxRooms,
@@ -18,6 +19,7 @@ export default class BoxesAndCorridors {
 		mapWidth,
 		mapHeight,
 		maxMonstersPerRoom,
+		maxItemsPerRoom,
 	}: {
 		maxRooms: number;
 		roomMinSize: number;
@@ -25,6 +27,7 @@ export default class BoxesAndCorridors {
 		mapWidth: number;
 		mapHeight: number;
 		maxMonstersPerRoom: number;
+		maxItemsPerRoom: number;
 	}) {
 		this.maxRooms = maxRooms;
 		this.roomMaxSize = roomMaxSize;
@@ -32,6 +35,7 @@ export default class BoxesAndCorridors {
 		this.mapWidth = mapWidth;
 		this.mapHeight = mapHeight;
 		this.maxMonstersPerRoom = maxMonstersPerRoom;
+		this.maxItemsPerRoom = maxItemsPerRoom;
 	}
 
 	generate(rng: RNG, gameMap: GameMap, player: Entity, entities: Entity[]) {
@@ -71,7 +75,13 @@ export default class BoxesAndCorridors {
 					}
 				}
 
-				gameMap.placeEntities(rng, newRoom, entities, this.maxMonstersPerRoom);
+				gameMap.placeEntities(
+					rng,
+					newRoom,
+					entities,
+					this.maxMonstersPerRoom,
+					this.maxItemsPerRoom
+				);
 				rooms.push(newRoom);
 			}
 		}

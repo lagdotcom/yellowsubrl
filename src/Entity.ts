@@ -5,6 +5,8 @@ import Fighter from './components/Fighter';
 import { Map } from './tcod';
 import GameMap from './GameMap';
 import Result from './results/Result';
+import Inventory from './components/Inventory';
+import Item from './components/Item';
 
 export type HasAI = Entity & { ai: AI };
 interface AI {
@@ -22,6 +24,8 @@ export default class Entity {
 	ai?: AI;
 	appearance?: Appearance;
 	fighter?: Fighter;
+	inventory?: Inventory;
+	item?: Item;
 	location?: Location;
 	weapon?: Weapon;
 
@@ -30,6 +34,8 @@ export default class Entity {
 		ai,
 		appearance,
 		fighter,
+		inventory,
+		item,
 		location,
 		weapon,
 	}: {
@@ -37,6 +43,8 @@ export default class Entity {
 		ai?: AI;
 		appearance?: Appearance;
 		fighter?: Fighter;
+		inventory?: Inventory;
+		item?: Item;
 		location?: Location;
 		weapon?: Weapon;
 	}) {
@@ -44,6 +52,8 @@ export default class Entity {
 		this.ai = ai;
 		this.appearance = appearance;
 		this.fighter = fighter;
+		this.inventory = inventory;
+		this.item = item;
 		this.location = location;
 		this.weapon = weapon;
 	}

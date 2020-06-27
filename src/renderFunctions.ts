@@ -5,6 +5,9 @@ import Location from './components/Location';
 import Appearance from './components/Appearance';
 import { leftpad } from './pad';
 import MessageLog from './MessageLog';
+import GameState from './GameState';
+import { inventoryMenu } from './menus';
+import Inventory from './components/Inventory';
 
 export type ColourMap = { [name: string]: string };
 
@@ -31,6 +34,7 @@ export function renderAll({
 	player,
 	screenHeight,
 	screenWidth,
+	gameState,
 }: {
 	barWidth: number;
 	colours: ColourMap;
@@ -48,6 +52,7 @@ export function renderAll({
 	player: Entity;
 	screenHeight: number;
 	screenWidth: number;
+	gameState: GameState;
 }) {
 	if (fovRecompute)
 		for (var y = 0; y < gameMap.height; y++) {
@@ -99,6 +104,24 @@ export function renderAll({
 	panel.print(1, 0, getNamesUnderMouse(mouseX, mouseY, entities, fovMap));
 
 	panel.blit(console, 0, panelY);
+
+	var inventoryTitle = '';
+	if (gameState == GameState.ShowInventory)
+		inventoryTitle =
+			'Press the key next to an item to use it, or Esc to cancel.\n';
+	else if (gameState == GameState.DropInventory)
+		inventoryTitle =
+			'Press the key next to an item to drop it, or Esc to cancel.\n';
+
+	if (inventoryTitle)
+		inventoryMenu(
+			console,
+			inventoryTitle,
+			player.inventory as Inventory,
+			50,
+			screenWidth,
+			screenHeight
+		);
 }
 
 export function clearAll(con: Console, entities: Entity[]) {

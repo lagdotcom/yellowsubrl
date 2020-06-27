@@ -32,6 +32,7 @@ async function main() {
 	const fovRadius = 10;
 
 	const maxMonstersPerRoom = 3;
+	const maxItemsPerRoom = 2;
 
 	const colours = {
 		darkWall: toRGB(0, 0, 100),
@@ -48,7 +49,14 @@ async function main() {
 	// 	mapHeight,
 	// 	maxMonstersPerRoom,
 	// });
-	const mapGenerator = new BSPTree(5, 10, 20, 75, maxMonstersPerRoom);
+	const mapGenerator = new BSPTree(
+		5,
+		10,
+		20,
+		75,
+		maxMonstersPerRoom,
+		maxItemsPerRoom
+	);
 
 	const arial = await Tileset.createFromUrl(arialSrc, 32, 8, Charmap.TCOD);
 	const groovy = await Tileset.createFromUrl(groovySrc, 32, 8, Charmap.TCOD);

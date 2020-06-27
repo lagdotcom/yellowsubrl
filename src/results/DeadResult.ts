@@ -7,7 +7,10 @@ import GameState from '../GameState';
 import { RenderOrder } from '../renderFunctions';
 
 export default class DeadResult implements Result {
-	constructor(public entity: Entity) {}
+	name: 'dead';
+	constructor(public entity: Entity) {
+		this.name = 'dead';
+	}
 
 	perform(engine: Engine): Result[] {
 		const { entity } = this;
@@ -18,7 +21,7 @@ export default class DeadResult implements Result {
 
 		// TODO
 		if (entity.name === 'Player') {
-			engine.gameState = GameState.PlayerDead;
+			engine.gameStateStack.swap(GameState.PlayerDead);
 			results.push(new MessageResult('You died!', Colours.red));
 		} else {
 			results.push(

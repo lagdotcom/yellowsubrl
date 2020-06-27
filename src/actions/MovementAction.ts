@@ -7,7 +7,10 @@ import Result from '../results/Result';
 import MessageResult from '../results/MessageResult';
 
 export default class MovementAction implements Action {
-	constructor(private dx: number, private dy: number) {}
+	name: 'movement';
+	constructor(private dx: number, private dy: number) {
+		this.name = 'movement';
+	}
 
 	perform(engine: Engine, en: Entity) {
 		const results: Result[] = [];
@@ -35,7 +38,7 @@ export default class MovementAction implements Action {
 			engine.fovRecompute = en == engine.player;
 		}
 
-		engine.gameState = GameState.EnemyTurn;
+		engine.gameStateStack.swap(GameState.EnemyTurn);
 		return results;
 	}
 }

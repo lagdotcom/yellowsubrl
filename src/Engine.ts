@@ -21,6 +21,8 @@ import { Action } from './Action';
 import Result from './results/Result';
 import MessageLog from './MessageLog';
 import { handleKeys } from './inputHandlers';
+import Inventory from './components/Inventory';
+import Stack from './Stack';
 
 export default class Engine {
 	public barWidth: number;
@@ -34,7 +36,7 @@ export default class Engine {
 	public fovRadius: number;
 	public fovRecompute: boolean;
 	public gameMap: GameMap;
-	public gameState: GameState;
+	public gameStateStack: Stack<GameState>;
 	public height: number;
 	public mapGenerator: MapGenerator;
 	public mapHeight: number;
@@ -99,6 +101,7 @@ export default class Engine {
 			name: 'Player',
 			appearance: new Appearance('@', Colours.white, RenderOrder.Actor),
 			fighter: new Fighter(30, 2, 5),
+			inventory: new Inventory(26),
 			location: new Location(0, 0, true),
 		});
 		this.entities = [this.player];
@@ -132,7 +135,7 @@ export default class Engine {
 
 		this.fpsString = '';
 		this.frames = 0;
-		this.gameState = GameState.PlayerTurn;
+		this.gameStateStack = new Stack(GameState.PlayerTurn);
 		this.lastReportTime = new Date().getTime();
 
 		this.fovAlgorithm = fovAlgorithm;
@@ -142,6 +145,15 @@ export default class Engine {
 		this.fovRecompute = true;
 
 		this.resolve = this.resolve.bind(this);
+	}
+
+	get gameState() {
+		return this.gameStateStack.top;
+	}
+
+	refresh() {
+		this.fovRecompute = true;
+		this.console.clear();
 	}
 
 	changeFont() {
@@ -182,7 +194,7 @@ export default class Engine {
 	}
 
 	update(key?: TerminalKey, mouse?: TerminalMouse) {
-		const action = handleKeys(key);
+		const action = handleKeys(this.gameState, key);
 		if (action) action.perform(this, this.player).forEach(this.resolve);
 		if (mouse) [this.mouseX, this.mouseY] = [mouse.x, mouse.y];
 	}
@@ -199,6 +211,7 @@ export default class Engine {
 			fovRadius,
 			fovRecompute,
 			gameMap,
+			gameState,
 			height,
 			messageLog,
 			mouseX,
@@ -228,6 +241,7 @@ export default class Engine {
 			fovMap,
 			fovRecompute,
 			gameMap,
+			gameState,
 			messageLog,
 			mouseX,
 			mouseY,
@@ -264,7 +278,7 @@ export default class Engine {
 						.map(this.resolve);
 			});
 
-			this.gameState = GameState.PlayerTurn;
+			this.gameStateStack.swap(GameState.PlayerTurn);
 		}
 	}
 

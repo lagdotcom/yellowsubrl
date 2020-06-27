@@ -8,6 +8,8 @@ import Location from './components/Location';
 import BasicAI from './components/BasicAI';
 import Fighter from './components/Fighter';
 import { RenderOrder } from './renderFunctions';
+import Item from './components/Item';
+import { heal } from './itemFunctions';
 
 export interface MapGenerator {
 	generate(
@@ -73,9 +75,11 @@ export default class GameMap {
 		rng: RNG,
 		room: Rect,
 		entities: Entity[],
-		maxMonstersPerRoom: number
+		maxMonstersPerRoom: number,
+		maxItemsPerRoom: number
 	) {
 		const numberOfMonsters = rng.randint(0, maxMonstersPerRoom);
+		const numberOfItems = rng.randint(0, maxItemsPerRoom);
 
 		for (var i = 0; i < numberOfMonsters; i++) {
 			const x = rng.randint(room.x1 + 1, room.x2 - 1);
@@ -115,6 +119,23 @@ export default class GameMap {
 					location: new Location(x, y, true),
 				});
 				entities.push(monster);
+			}
+		}
+
+		for (var i = 0; i < numberOfItems; i++) {
+			const x = rng.randint(room.x1 + 1, room.x2 - 1);
+			const y = rng.randint(room.y1 + 1, room.y2 - 1);
+
+			if (
+				!entities.find(e => e.location && e.location.x == x && e.location.y)
+			) {
+				const item = new Entity({
+					name: 'healing potion',
+					appearance: new Appearance('!', Colours.violet, RenderOrder.Item),
+					item: new Item((item, en) => heal(item, en, 4)),
+					location: new Location(x, y, false),
+				});
+				entities.push(item);
 			}
 		}
 	}

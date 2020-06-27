@@ -108,7 +108,8 @@ export default class BSPTree {
 		public minLeaf: number,
 		public maxLeaf: number,
 		public splitChance: number,
-		public maxMonstersPerRoom: number
+		public maxMonstersPerRoom: number,
+		public maxItemsPerRoom: number
 	) {}
 
 	generate(rng: RNG, gameMap: GameMap, player: Entity, entities: Entity[]) {
@@ -145,7 +146,13 @@ export default class BSPTree {
 					player.location!.x = rng.randint(l.room.x1 + 1, l.room.x2 - 1);
 					player.location!.y = rng.randint(l.room.y1 + 1, l.room.y2 - 1);
 				} else
-					gameMap.placeEntities(rng, l.room, entities, this.maxMonstersPerRoom);
+					gameMap.placeEntities(
+						rng,
+						l.room,
+						entities,
+						this.maxMonstersPerRoom,
+						this.maxItemsPerRoom
+					);
 			}
 		});
 	}

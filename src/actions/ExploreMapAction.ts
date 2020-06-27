@@ -2,6 +2,11 @@ import Engine from '../Engine';
 import Action from './Action';
 
 export default class ExploreMapAction implements Action {
+	name = 'exploremap';
+	constructor() {
+		this.name = 'exploremap';
+	}
+
 	perform(engine: Engine) {
 		const { gameMap } = engine;
 		for (var x = 0; x < gameMap.width; x++)
