@@ -68,7 +68,7 @@ export const itemSpawnData: [number, ItemSpawn][] = [
 		},
 	],
 	[
-		100000,
+		10,
 		{
 			name: 'confusion scroll',
 			colour: Colours.lightPink,
