@@ -11,6 +11,7 @@ import { RenderOrder } from './renderFunctions';
 import Item from './components/Item';
 import { heal, castLightning } from './itemFunctions';
 import { itemSpawnData, enemySpawnData } from './spawnData';
+import Weapon from './components/Weapon';
 
 export interface MapGenerator {
 	generate(
@@ -114,6 +115,7 @@ export default class GameMap {
 					appearance: new Appearance(type.char, type.colour, RenderOrder.Item),
 					item: new Item(type.use, type.targeting, type.targetingMessage),
 					location: new Location(x, y, false),
+					weapon: type.weapon ? new Weapon(type.weapon) : undefined,
 				});
 				entities.push(item);
 			}

@@ -14,7 +14,7 @@ export type ItemUseFn = (
 
 export default class Item {
 	constructor(
-		public use: ItemUseFn,
+		public use?: ItemUseFn,
 		public targeting: boolean = false,
 		public targetingMessage?: MessageResult
 	) {}

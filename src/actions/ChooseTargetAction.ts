@@ -13,7 +13,7 @@ export default class ChooseTargetAction implements Action {
 		if (engine.gameState != GameState.Targeting || !engine.targetingItem)
 			return [];
 
-		const results = engine.targetingItem.item.use(
+		const results = engine.targetingItem.item.use!(
 			engine.targetingItem,
 			entity,
 			engine,
