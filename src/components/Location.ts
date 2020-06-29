@@ -13,10 +13,14 @@ export default class Location {
 		this.y += dy;
 	}
 
-	distanceTo(other: Location) {
-		const dx = other.x - this.x;
-		const dy = other.y - this.y;
+	distance(x: number, y: number) {
+		const dx = x - this.x;
+		const dy = y - this.y;
 		return Math.sqrt(dx * dx + dy * dy);
+	}
+
+	distanceTo(other: Location) {
+		return this.distance(other.x, other.y);
 	}
 
 	moveTowards(tx: number, ty: number, gameMap: GameMap, entities: Entity[]) {

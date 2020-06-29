@@ -9,6 +9,9 @@ import ExitAction from './actions/ExitAction';
 import GameState from './GameState';
 import UseInventoryAction from './actions/UseInventoryAction';
 import DropInventoryAction from './actions/DropInventoryAction';
+import { TerminalMouse } from './libtcod/Terminal';
+import ChooseTargetAction from './actions/ChooseTargetAction';
+import CancelTargetingAction from './actions/CancelTargetingAction';
 
 export function handleKeys(gameState: GameState, e?: TerminalKey) {
 	if (!e) return;
@@ -25,6 +28,18 @@ export function handleKeys(gameState: GameState, e?: TerminalKey) {
 
 		case GameState.DropInventory:
 			return handleDropInventoryKeys(e);
+
+		case GameState.Targeting:
+			return handleTargetingKeys(e);
+	}
+}
+
+export function handleMouse(gameState: GameState, m?: TerminalMouse) {
+	if (!m || m.type != 'mousedown') return;
+
+	switch (gameState) {
+		case GameState.Targeting:
+			return handleTargetingMouse(m);
 	}
 }
 
@@ -77,4 +92,13 @@ export function handleDropInventoryKeys(e: TerminalKey) {
 
 	const index = key.charCodeAt(0) - asciiForA;
 	if (index >= 0) return new DropInventoryAction(index);
+}
+
+export function handleTargetingKeys(e: TerminalKey) {
+	if (e.key == 'Escape') return new CancelTargetingAction();
+}
+
+export function handleTargetingMouse(m: TerminalMouse) {
+	if (m.button == 0) return new ChooseTargetAction(m.x, m.y);
+	if (m.button == 2) return new CancelTargetingAction();
 }

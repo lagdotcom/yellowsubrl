@@ -1,23 +1,10 @@
+import AI from './components/AI';
 import Appearance from './components/Appearance';
 import Location from './components/Location';
 import Weapon from './components/Weapon';
 import Fighter from './components/Fighter';
-import { Map } from './tcod';
-import GameMap from './GameMap';
-import Result from './results/Result';
 import Inventory from './components/Inventory';
 import Item from './components/Item';
-
-export type HasAI = Entity & { ai: AI };
-interface AI {
-	takeTurn(
-		me: Entity,
-		target: Entity,
-		fovMap: Map,
-		gameMap: GameMap,
-		entities: Entity[]
-	): Result[];
-}
 
 export default class Entity {
 	name: string;

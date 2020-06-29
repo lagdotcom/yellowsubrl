@@ -20,9 +20,10 @@ import Fighter from './components/Fighter';
 import { Action } from './Action';
 import Result from './results/Result';
 import MessageLog from './MessageLog';
-import { handleKeys } from './inputHandlers';
+import { handleKeys, handleMouse } from './inputHandlers';
 import Inventory from './components/Inventory';
 import Stack from './Stack';
+import Item, { HasItem } from './components/Item';
 
 export default class Engine {
 	public barWidth: number;
@@ -49,6 +50,7 @@ export default class Engine {
 	public panelY: number;
 	public player: Entity;
 	public rng: RNG;
+	public targetingItem?: HasItem;
 	public tilesets: Tileset[];
 	public width: number;
 
@@ -118,7 +120,7 @@ export default class Engine {
 			height * tileset.tileHeight,
 			tileset
 		);
-		this.context.listen('keydown', 'mousemove');
+		this.context.listen('keydown', 'mousemove', 'mousedown');
 		this.mouseX = 0;
 		this.mouseY = 0;
 
@@ -194,9 +196,13 @@ export default class Engine {
 	}
 
 	update(key?: TerminalKey, mouse?: TerminalMouse) {
-		const action = handleKeys(this.gameState, key);
-		if (action) action.perform(this, this.player).forEach(this.resolve);
 		if (mouse) [this.mouseX, this.mouseY] = [mouse.x, mouse.y];
+
+		const kaction = handleKeys(this.gameState, key);
+		if (kaction) kaction.perform(this, this.player).forEach(this.resolve);
+
+		const maction = handleMouse(this.gameState, mouse);
+		if (maction) maction.perform(this, this.player).forEach(this.resolve);
 	}
 
 	render(context: Terminal) {
@@ -272,10 +278,7 @@ export default class Engine {
 	enemyActions() {
 		if (this.gameState == GameState.EnemyTurn) {
 			this.entities.forEach(en => {
-				if (en.ai)
-					en.ai
-						.takeTurn(en, this.player, this.fovMap, this.gameMap, this.entities)
-						.map(this.resolve);
+				if (en.ai) en.ai.takeTurn(en, this.player, this).map(this.resolve);
 			});
 
 			this.gameStateStack.swap(GameState.PlayerTurn);

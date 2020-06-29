@@ -23,8 +23,14 @@ export default class UseInventoryAction implements Action {
 			results.push(
 				new MessageResult(`The ${item.name} cannot be used.`, Colours.yellow)
 			);
-		else {
-			results.push(...item.item.use(item, entity));
+		else if (item.item.targeting) {
+			engine.refresh();
+			engine.gameStateStack.swap(GameState.Targeting);
+			engine.targetingItem = item;
+
+			results.push(item.item.targetingMessage!);
+		} else {
+			results.push(...item.item.use(item, entity, engine));
 		}
 
 		// TODO: this is such a bad hack, should be fixed when I get energy system

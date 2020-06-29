@@ -4,6 +4,7 @@ enum GameState {
 	PlayerDead,
 	ShowInventory,
 	DropInventory,
+	Targeting,
 }
 
 export default GameState;

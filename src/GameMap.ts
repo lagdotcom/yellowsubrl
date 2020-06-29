@@ -9,7 +9,8 @@ import BasicAI from './components/BasicAI';
 import Fighter from './components/Fighter';
 import { RenderOrder } from './renderFunctions';
 import Item from './components/Item';
-import { heal } from './itemFunctions';
+import { heal, castLightning } from './itemFunctions';
+import { itemSpawnData, enemySpawnData } from './spawnData';
 
 export interface MapGenerator {
 	generate(
@@ -86,30 +87,7 @@ export default class GameMap {
 			const y = rng.randint(room.y1 + 1, room.y2 - 1);
 
 			if (!getBlockingEntitiesAtLocation(entities, x, y)) {
-				const type = rng.weighted([
-					[
-						8,
-						{
-							name: 'Orc',
-							colour: Colours.green,
-							char: 'o',
-							hp: 10,
-							defense: 0,
-							power: 3,
-						},
-					],
-					[
-						2,
-						{
-							name: 'Troll',
-							colour: Colours.darkGreen,
-							char: 'T',
-							hp: 16,
-							defense: 1,
-							power: 4,
-						},
-					],
-				]);
+				const type = rng.weighted(enemySpawnData);
 
 				const monster = new Entity({
 					name: type.name,
@@ -129,10 +107,12 @@ export default class GameMap {
 			if (
 				!entities.find(e => e.location && e.location.x == x && e.location.y)
 			) {
+				const type = rng.weighted(itemSpawnData);
+
 				const item = new Entity({
-					name: 'healing potion',
-					appearance: new Appearance('!', Colours.violet, RenderOrder.Item),
-					item: new Item((item, en) => heal(item, en, 4)),
+					name: type.name,
+					appearance: new Appearance(type.char, type.colour, RenderOrder.Item),
+					item: new Item(type.use, type.targeting, type.targetingMessage),
 					location: new Location(x, y, false),
 				});
 				entities.push(item);
