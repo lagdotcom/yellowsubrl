@@ -1,25 +1,23 @@
 import Tile from './Tile';
 import { Rect } from './mapObjects';
-import Entity, { getBlockingEntitiesAtLocation } from './Entity';
 import RNG, { RNGSeed } from './RNG';
-import { Colours } from './tcod';
-import Appearance from './components/Appearance';
-import Location from './components/Location';
-import BasicAI from './components/BasicAI';
-import Fighter from './components/Fighter';
 import { RenderOrder } from './renderFunctions';
-import Item from './components/Item';
-import { heal, castLightning } from './itemFunctions';
 import { itemSpawnData, enemySpawnData } from './spawnData';
-import Weapon from './components/Weapon';
+import ecs, {
+	Appearance,
+	Blocks,
+	Entity,
+	Fighter,
+	Item,
+	Position,
+	Weapon,
+	AI,
+} from './ecs';
+import { getBlocker, isAt } from './systems/entities';
+import { BasicAI } from './systems/ai';
 
 export interface MapGenerator {
-	generate(
-		rng: RNG,
-		gameMap: GameMap,
-		player: Entity,
-		entities: Entity[]
-	): void;
+	generate(rng: RNG, gameMap: GameMap, player: Entity): void;
 }
 
 export default class GameMap {
@@ -76,7 +74,6 @@ export default class GameMap {
 	placeEntities(
 		rng: RNG,
 		room: Rect,
-		entities: Entity[],
 		maxMonstersPerRoom: number,
 		maxItemsPerRoom: number
 	) {
@@ -87,17 +84,18 @@ export default class GameMap {
 			const x = rng.randint(room.x1 + 1, room.x2 - 1);
 			const y = rng.randint(room.y1 + 1, room.y2 - 1);
 
-			if (!getBlockingEntitiesAtLocation(entities, x, y)) {
-				const type = rng.weighted(enemySpawnData);
+			if (!getBlocker(x, y)) {
+				const { name, ch, colour, hp, defense, power } = rng.weighted(
+					enemySpawnData
+				);
 
-				const monster = new Entity({
-					name: type.name,
-					ai: new BasicAI(),
-					appearance: new Appearance(type.char, type.colour, RenderOrder.Actor),
-					fighter: new Fighter(type.hp, type.defense, type.power),
-					location: new Location(x, y, true),
-				});
-				entities.push(monster);
+				const enemy = ecs
+					.entity()
+					.add(Appearance, { name, ch, colour, order: RenderOrder.Actor })
+					.add(AI, { routine: new BasicAI() })
+					.add(Fighter, { hp, maxHp: hp, defense, power })
+					.add(Position, { x, y })
+					.add(Blocks, {});
 			}
 		}
 
@@ -106,18 +104,25 @@ export default class GameMap {
 			const y = rng.randint(room.y1 + 1, room.y2 - 1);
 
 			if (
-				!entities.find(e => e.location && e.location.x == x && e.location.y)
+				ecs.find({ all: [Position] }).filter(en => isAt(en, x, y)).length == 0
 			) {
-				const type = rng.weighted(itemSpawnData);
+				const {
+					name,
+					ch,
+					colour,
+					use,
+					targeting,
+					targetingMessage,
+					weapon,
+				} = rng.weighted(itemSpawnData);
 
-				const item = new Entity({
-					name: type.name,
-					appearance: new Appearance(type.char, type.colour, RenderOrder.Item),
-					item: new Item(type.use, type.targeting, type.targetingMessage),
-					location: new Location(x, y, false),
-					weapon: type.weapon ? new Weapon(type.weapon) : undefined,
-				});
-				entities.push(item);
+				const item = ecs
+					.entity()
+					.add(Appearance, { name, ch, colour, order: RenderOrder.Item })
+					.add(Item, { use, targeting, targetingMessage })
+					.add(Position, { x, y });
+
+				if (weapon) item.add(Weapon, { category: weapon });
 			}
 		}
 	}

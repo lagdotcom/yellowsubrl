@@ -1,5 +1,5 @@
+import { Entity } from './ecs';
 import Engine from './Engine';
-import Entity from './Entity';
 import Result from './results/Result';
 
 export interface Action {

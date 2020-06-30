@@ -1,10 +1,11 @@
-import Entity from '../Entity';
 import Result from './Result';
 import Engine from '../Engine';
 import { Colours } from '../tcod';
 import MessageResult from './MessageResult';
 import GameState from '../GameState';
 import { RenderOrder } from '../renderFunctions';
+import { Entity, Appearance, Player, Blocks, Fighter, AI } from '../ecs';
+import { nameOf } from '../systems/entities';
 
 export default class DeadResult implements Result {
 	name: 'dead';
@@ -16,22 +17,24 @@ export default class DeadResult implements Result {
 		const { entity } = this;
 		const results = [];
 
-		entity.appearance!.ch = '%';
-		entity.appearance!.colour = Colours.darkRed;
+		const name = nameOf(entity);
 
-		// TODO
-		if (entity.name === 'Player') {
+		entity.add(Appearance, {
+			name: `remains of ${name}`,
+			ch: '%',
+			colour: Colours.darkRed,
+			order: RenderOrder.Corpse,
+		});
+
+		if (entity.has(Player)) {
 			engine.gameStateStack.swap(GameState.PlayerDead);
 			results.push(new MessageResult('You died!', Colours.red));
 		} else {
-			results.push(
-				new MessageResult(`${entity.name} is dead!`, Colours.orange)
-			);
-			entity.appearance!.order = RenderOrder.Corpse;
-			entity.location!.blocks = false;
-			entity.fighter = undefined;
-			entity.ai = undefined;
-			entity.name = `remains of ${entity.name}`;
+			results.push(new MessageResult(`${name} is dead!`, Colours.orange));
+
+			entity.remove(AI);
+			entity.remove(Blocks);
+			entity.remove(Fighter);
 		}
 
 		return results;

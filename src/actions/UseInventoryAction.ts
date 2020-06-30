@@ -1,10 +1,11 @@
 import Action from './Action';
 import Engine from '../Engine';
-import Entity from '../Entity';
 import MessageResult from '../results/MessageResult';
 import { Colours } from '../tcod';
 import Result from '../results/Result';
 import GameState from '../GameState';
+import { Entity, Inventory, Item } from '../ecs';
+import { nameOf } from '../systems/entities';
 
 export default class UseInventoryAction implements Action {
 	name: 'useinventory';
@@ -14,23 +15,31 @@ export default class UseInventoryAction implements Action {
 
 	perform(engine: Engine, entity: Entity) {
 		const results: Result[] = [];
-		if (!entity.inventory) return results;
 
-		const item = entity.inventory.items[this.index];
+		const inventory = entity.get(Inventory);
+		if (!inventory) return results;
+
+		const itemEntity = inventory.items[this.index];
+		if (!itemEntity) return results;
+
+		const item = itemEntity.get(Item);
 		if (!item) return results;
 
-		if (!item.item.use)
+		if (!item.use)
 			results.push(
-				new MessageResult(`The ${item.name} cannot be used.`, Colours.yellow)
+				new MessageResult(
+					`The ${nameOf(itemEntity)} cannot be used.`,
+					Colours.yellow
+				)
 			);
-		else if (item.item.targeting) {
+		else if (item.targeting) {
 			engine.refresh();
 			engine.gameStateStack.swap(GameState.Targeting);
-			engine.targetingItem = item;
+			engine.targetingItem = itemEntity;
 
-			results.push(item.item.targetingMessage!);
+			results.push(item.targetingMessage!);
 		} else {
-			results.push(...item.item.use(item, entity, engine));
+			results.push(...item.use(itemEntity, entity, engine));
 		}
 
 		// TODO: this is such a bad hack, should be fixed when I get energy system

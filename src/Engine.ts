@@ -1,4 +1,3 @@
-import Entity from './Entity';
 import GameMap, { MapGenerator } from './GameMap';
 import {
 	Colours,
@@ -14,28 +13,34 @@ import GameState from './GameState';
 import { initializeFov, recomputeFov } from './fovFunctions';
 import RNG from './RNG';
 import { renderAll, clearAll, ColourMap, RenderOrder } from './renderFunctions';
-import Appearance from './components/Appearance';
-import Location from './components/Location';
-import Fighter from './components/Fighter';
 import { Action } from './Action';
 import Result from './results/Result';
 import MessageLog from './MessageLog';
 import { handleKeys, handleMouse } from './inputHandlers';
-import Inventory from './components/Inventory';
 import Stack from './Stack';
-import Item, { HasItem } from './components/Item';
+import ecs, {
+	Query,
+	Entity,
+	Player,
+	Appearance,
+	Fighter,
+	Inventory,
+	Position,
+	Blocks,
+	hasAI,
+	AI,
+} from './ecs';
 
 export default class Engine {
 	public barWidth: number;
 	public colours: ColourMap;
 	public console: Console;
 	public context: Terminal;
-	public entities: Entity[];
 	public fovAlgorithm: FovAlgorithm;
 	public fovLightWalls: boolean;
 	public fovMap: Map;
 	public fovRadius: number;
-	public fovRecompute: boolean;
+	public fovRecompute!: boolean;
 	public gameMap: GameMap;
 	public gameStateStack: Stack<GameState>;
 	public height: number;
@@ -48,9 +53,9 @@ export default class Engine {
 	public panel: Console;
 	public panelHeight: number;
 	public panelY: number;
-	public player: Entity;
+	public player!: Entity;
 	public rng: RNG;
-	public targetingItem?: HasItem;
+	public targetingItem?: Entity;
 	public tilesets: Tileset[];
 	public width: number;
 
@@ -99,20 +104,10 @@ export default class Engine {
 		this.rng = rng;
 		this.tilesets = tilesets;
 
-		this.player = new Entity({
-			name: 'Player',
-			appearance: new Appearance('@', Colours.white, RenderOrder.Actor),
-			fighter: new Fighter(30, 2, 5),
-			inventory: new Inventory(26),
-			location: new Location(0, 0, true),
-		});
-		this.entities = [this.player];
-
 		this.mapGenerator = mapGenerator;
 		this.mapHeight = mapHeight;
 		this.mapWidth = mapWidth;
 		this.gameMap = new GameMap(rng.seed, mapWidth, mapHeight);
-		mapGenerator.generate(rng, this.gameMap, this.player, this.entities);
 
 		const tileset = tilesets[0];
 		this.context = new Terminal(
@@ -144,9 +139,10 @@ export default class Engine {
 		this.fovLightWalls = fovLightWalls;
 		this.fovRadius = fovRadius;
 		this.fovMap = initializeFov(this.gameMap);
-		this.fovRecompute = true;
 
 		this.resolve = this.resolve.bind(this);
+
+		this.newMap();
 	}
 
 	get gameState() {
@@ -170,16 +166,25 @@ export default class Engine {
 	}
 
 	newMap() {
-		const { entities, gameMap, mapGenerator, console, rng, player } = this;
+		const { gameMap, mapGenerator, console, rng } = this;
 
-		entities.splice(0, entities.length, player);
+		ecs.clear();
+		this.player = ecs
+			.entity()
+			.add(Player, {})
+			.add(Appearance, {
+				name: 'you',
+				ch: '@',
+				colour: Colours.white,
+				order: RenderOrder.Actor,
+			})
+			.add(Fighter, { hp: 30, maxHp: 30, defense: 2, power: 5 })
+			.add(Inventory, { capacity: 26, items: [] })
+			.add(Position, { x: 0, y: 0 })
+			.add(Blocks, {});
 
 		gameMap.reset(rng.seed, gameMap.width, gameMap.height);
-		mapGenerator.generate(rng, gameMap, player, entities);
-
-		this.player.fighter!.hp = this.player.fighter!.maxHp;
-		this.player.appearance!.ch = '@';
-		this.player.appearance!.colour = Colours.white;
+		mapGenerator.generate(rng, gameMap, this.player);
 
 		this.fovMap = initializeFov(gameMap);
 		this.fovRecompute = true;
@@ -210,7 +215,6 @@ export default class Engine {
 			barWidth,
 			colours,
 			console,
-			entities,
 			fovAlgorithm,
 			fovLightWalls,
 			fovMap,
@@ -229,21 +233,24 @@ export default class Engine {
 			width,
 		} = this;
 
-		if (fovRecompute)
-			recomputeFov(
-				fovMap,
-				player.location!.x,
-				player.location!.y,
-				fovRadius,
-				fovLightWalls,
-				fovAlgorithm
-			);
+		if (fovRecompute) {
+			const position = player.get(Position);
+
+			if (position)
+				recomputeFov(
+					fovMap,
+					position.x,
+					position.y,
+					fovRadius,
+					fovLightWalls,
+					fovAlgorithm
+				);
+		}
 
 		renderAll({
 			barWidth,
 			colours,
 			console,
-			entities,
 			fovMap,
 			fovRecompute,
 			gameMap,
@@ -263,7 +270,7 @@ export default class Engine {
 		this.showFps();
 		context.present(console);
 
-		clearAll(console, entities);
+		clearAll(console);
 	}
 
 	act(action: Action) {
@@ -277,8 +284,8 @@ export default class Engine {
 
 	enemyActions() {
 		if (this.gameState == GameState.EnemyTurn) {
-			this.entities.forEach(en => {
-				if (en.ai) en.ai.takeTurn(en, this.player, this).map(this.resolve);
+			hasAI.get().forEach(en => {
+				en.get(AI).routine.perform(en, this.player, this).map(this.resolve);
 			});
 
 			this.gameStateStack.swap(GameState.PlayerTurn);

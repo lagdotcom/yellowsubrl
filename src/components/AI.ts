@@ -1,8 +1,11 @@
-import Result from '../results/Result';
-import Entity from '../Entity';
+import { Entity } from '../ecs';
 import Engine from '../Engine';
+import Result from '../results/Result';
 
-export type HasAI = Entity & { ai: AI };
-export default interface AI {
-	takeTurn(me: Entity, target: Entity, engine: Engine): Result[];
+export interface AIRoutine {
+	perform(me: Entity, target: Entity, engine: Engine): Result[];
+}
+
+export default interface IAI {
+	routine: AIRoutine;
 }

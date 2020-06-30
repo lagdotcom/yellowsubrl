@@ -1,7 +1,7 @@
 import Action from './Action';
 import Engine from '../Engine';
-import Entity from '../Entity';
 import GameState from '../GameState';
+import { Entity, Item } from '../ecs';
 
 export default class ChooseTargetAction implements Action {
 	name: 'choosetarget';
@@ -13,7 +13,7 @@ export default class ChooseTargetAction implements Action {
 		if (engine.gameState != GameState.Targeting || !engine.targetingItem)
 			return [];
 
-		const results = engine.targetingItem.item.use!(
+		const results = engine.targetingItem.get(Item).use!(
 			engine.targetingItem,
 			entity,
 			engine,

@@ -1,6 +1,6 @@
 import Result from '../results/Result';
 import Engine from '../Engine';
-import Entity from '../Entity';
+import { Entity } from '../ecs';
 
 export default interface Action {
 	name: string;

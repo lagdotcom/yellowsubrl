@@ -1,12 +1,11 @@
 import Action from './Action';
 import Engine from '../Engine';
-import Entity from '../Entity';
 import MessageResult from '../results/MessageResult';
 import { Colours } from '../tcod';
 import Result from '../results/Result';
-import { HasInventory } from '../components/Inventory';
-import { HasItem } from '../components/Item';
 import GameState from '../GameState';
+import ecs, { Inventory, Position, Entity, Item } from '../ecs';
+import { addItemToInventory } from '../systems/items';
 
 export default class GetAction implements Action {
 	name: 'get';
@@ -16,15 +15,16 @@ export default class GetAction implements Action {
 
 	perform(engine: Engine, entity: Entity) {
 		const results: Result[] = [];
-		if (!entity.inventory || !entity.location) return results;
 
-		const items = engine.entities.filter(
-			en =>
-				en.location &&
-				en.item &&
-				en.location.x == entity.location!.x &&
-				en.location.y == entity.location!.y
-		);
+		const inventory = entity.get(Inventory),
+			position = entity.get(Position);
+
+		if (!inventory || !position) return results;
+
+		const items = ecs.find({ all: [Item, Position] }).filter(en => {
+			const pos = en.get(Position);
+			return pos.x == position.x && pos.y == position.y;
+		});
 
 		if (items.length == 0) {
 			results.push(
@@ -32,9 +32,7 @@ export default class GetAction implements Action {
 			);
 		} else {
 			items.forEach(it => {
-				results.push(
-					...entity.inventory!.addItem(entity as HasInventory, it as HasItem)
-				);
+				results.push(...addItemToInventory(it, entity));
 			});
 
 			engine.gameStateStack.swap(GameState.EnemyTurn);

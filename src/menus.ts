@@ -1,5 +1,6 @@
 import { Console, Colours } from './tcod';
 import Inventory from './components/Inventory';
+import { nameOf } from './systems/entities';
 
 export function menu(
 	con: Console,
@@ -42,7 +43,7 @@ export function inventoryMenu(
 	const options =
 		inventory.items.length == 0
 			? ['Inventory is empty.']
-			: inventory.items.map(it => it.name);
+			: inventory.items.map(nameOf);
 
 	menu(con, header, options, inventoryWidth, screenWidth, screenHeight);
 }

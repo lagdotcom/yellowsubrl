@@ -1,13 +1,18 @@
-import Entity from './Entity';
 import { Console, BlendMode, Map, Colours } from './tcod';
 import GameMap from './GameMap';
-import Location from './components/Location';
-import Appearance from './components/Appearance';
-import { leftpad } from './pad';
 import MessageLog from './MessageLog';
 import GameState from './GameState';
 import { inventoryMenu } from './menus';
-import Inventory from './components/Inventory';
+import ecs, {
+	renderable,
+	Position,
+	Entity,
+	Appearance,
+	Fighter,
+	Inventory,
+} from './ecs';
+import { XY } from './systems/movement';
+import { isAt, nameOf } from './systems/entities';
 
 export type ColourMap = { [name: string]: string };
 
@@ -21,7 +26,6 @@ export function renderAll({
 	barWidth,
 	colours,
 	console,
-	entities,
 	fovMap,
 	fovRecompute,
 	gameMap,
@@ -39,7 +43,6 @@ export function renderAll({
 	barWidth: number;
 	colours: ColourMap;
 	console: Console;
-	entities: Entity[];
 	fovMap: Map;
 	fovRecompute: boolean;
 	gameMap: GameMap;
@@ -71,13 +74,10 @@ export function renderAll({
 			}
 		}
 
-	const drawable = entities
-		.filter(e => e.appearance && e.location)
-		.sort((a, b) => a.appearance!.order - b.appearance!.order);
-
-	drawable.forEach(e =>
-		drawEntity(console, e.appearance!, e.location!, fovMap)
-	);
+	renderable
+		.get()
+		.sort((a, b) => a.get(Appearance).order - b.get(Appearance).order)
+		.forEach(e => drawEntity(console, e, fovMap));
 
 	panel.clear(' ', undefined, Colours.black);
 
@@ -88,20 +88,21 @@ export function renderAll({
 		y++;
 	});
 
+	const fighter = player.get(Fighter);
 	renderBar(
 		panel,
 		1,
 		1,
 		barWidth,
 		'HP',
-		player.fighter!.hp,
-		player.fighter!.maxHp,
+		fighter.hp,
+		fighter.maxHp,
 		Colours.lightRed,
 		Colours.darkRed
 	);
 
 	panel.setDefaultForeground(Colours.lightGrey);
-	panel.print(1, 0, getNamesUnderMouse(mouseX, mouseY, entities, fovMap));
+	panel.print(1, 0, getNamesUnderMouse(mouseX, mouseY, fovMap));
 
 	panel.blit(console, 0, panelY);
 
@@ -117,31 +118,29 @@ export function renderAll({
 		inventoryMenu(
 			console,
 			inventoryTitle,
-			player.inventory as Inventory,
+			player.get(Inventory),
 			50,
 			screenWidth,
 			screenHeight
 		);
 }
 
-export function clearAll(con: Console, entities: Entity[]) {
-	entities.forEach(e => e.location && clearEntity(con, e.location));
+export function clearAll(con: Console) {
+	renderable.get().forEach(en => clearEntity(con, en.get(Position)));
 }
 
-export function drawEntity(
-	console: Console,
-	app: Appearance,
-	loc: Location,
-	fovMap: Map
-) {
-	if (fovMap.isInFov(loc.x, loc.y)) {
-		console.setDefaultForeground(app.colour);
-		console.putChar(loc.x, loc.y, app.ch);
+export function drawEntity(console: Console, en: Entity, fovMap: Map) {
+	const appearance = en.get(Appearance);
+	const position = en.get(Position);
+
+	if (fovMap.isInFov(position.x, position.y)) {
+		console.setDefaultForeground(appearance.colour);
+		console.putChar(position.x, position.y, appearance.ch);
 	}
 }
 
-export function clearEntity(console: Console, loc: Location) {
-	console.putChar(loc.x, loc.y, ' ');
+export function clearEntity(console: Console, pos: XY) {
+	console.putChar(pos.x, pos.y, ' ');
 }
 
 export function renderBar(
@@ -171,21 +170,11 @@ export function renderBar(
 	);
 }
 
-export function getNamesUnderMouse(
-	x: number,
-	y: number,
-	entities: Entity[],
-	fovMap: Map
-) {
-	const names = entities
-		.filter(
-			en =>
-				en.location &&
-				x == en.location.x &&
-				y == en.location.y &&
-				fovMap.isInFov(en.location.x, en.location.y)
-		)
-		.map(en => en.name);
+export function getNamesUnderMouse(x: number, y: number, fovMap: Map) {
+	const names = ecs
+		.find({ all: [Position] })
+		.filter(en => isAt(en, x, y) && fovMap.isInFov(x, y))
+		.map(nameOf);
 
 	// TODO: title case
 	return names.join(', ');

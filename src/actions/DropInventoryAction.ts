@@ -1,9 +1,10 @@
+import { Inventory, Entity } from '../ecs';
+import { dropItemFromInventory } from '../systems/items';
 import Action from './Action';
 import Engine from '../Engine';
-import Entity from '../Entity';
 import Result from '../results/Result';
 import GameState from '../GameState';
-import { HasInventory } from '../components/Inventory';
+import PlaceItemResult from '../results/PlaceItemResult';
 
 export default class DropInventoryAction implements Action {
 	name: 'dropinventory';
@@ -13,10 +14,16 @@ export default class DropInventoryAction implements Action {
 
 	perform(engine: Engine, entity: Entity) {
 		const results: Result[] = [];
-		if (!entity.inventory || !entity.location) return results;
 
-		const item = entity.inventory.items[this.index];
-		results.push(...entity.inventory.dropItem(entity as HasInventory, item));
+		const inventory = entity.get(Inventory);
+		if (!inventory) return results;
+
+		const item = inventory.items[this.index];
+
+		results.push(
+			...dropItemFromInventory(item, entity),
+			new PlaceItemResult(entity, item)
+		);
 
 		if (engine.gameState == GameState.DropInventory) {
 			engine.refresh();

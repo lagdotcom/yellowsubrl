@@ -1,17 +1,18 @@
+import { Entity, Inventory, Position } from '../ecs';
 import Result from './Result';
-import Engine from '../Engine';
-import { HasInventory } from '../components/Inventory';
-import { HasItem } from '../components/Item';
 
 export default class ItemAddedResult implements Result {
 	name: 'itemadded';
-	constructor(public owner: HasInventory, public item: HasItem) {
+	constructor(public owner: Entity, public item: Entity) {
 		this.name = 'itemadded';
 	}
 
-	perform(engine: Engine): Result[] {
-		this.owner.inventory.items.push(this.item);
-		engine.entities.splice(engine.entities.indexOf(this.item), 1);
+	perform(): Result[] {
+		const inventory = this.owner.get(Inventory);
+		if (!inventory) return [];
+
+		this.item.remove(Position);
+		inventory.items.push(this.item);
 		return [];
 	}
 }

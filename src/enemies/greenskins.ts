@@ -2,18 +2,18 @@ import { Colours } from '../tcod';
 import EnemySpawn from './EnemySpawn';
 
 export const orc: EnemySpawn = {
-	name: 'Orc',
+	name: 'orc',
 	colour: Colours.green,
-	char: 'o',
+	ch: 'o',
 	hp: 10,
 	defense: 0,
 	power: 3,
 };
 
 export const troll: EnemySpawn = {
-	name: 'Troll',
+	name: 'troll',
 	colour: Colours.darkGreen,
-	char: 'T',
+	ch: 'T',
 	hp: 16,
 	defense: 1,
 	power: 4,

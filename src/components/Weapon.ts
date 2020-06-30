@@ -1,5 +1,3 @@
-import Entity from '../Entity';
-
 export enum WeaponCategory {
 	String,
 	Brass,
@@ -7,8 +5,6 @@ export enum WeaponCategory {
 	Percussion,
 }
 
-export type HasWeapon = Entity & { weapon: Weapon };
-
-export default class Weapon {
-	constructor(public category: WeaponCategory) {}
+export default interface IWeapon {
+	category: WeaponCategory;
 }

@@ -1,10 +1,11 @@
-import Engine from '../Engine';
-import Entity, { getBlockingEntitiesAtLocation } from '../Entity';
-import GameState from '../GameState';
-import { HasFighter } from '../components/Fighter';
+import { Entity, Position, Fighter } from '../ecs';
+import { getBlocker, nameOf } from '../systems/entities';
+import { attack } from '../systems/combat';
 import Action from './Action';
-import Result from '../results/Result';
+import Engine from '../Engine';
+import GameState from '../GameState';
 import MessageResult from '../results/MessageResult';
+import Result from '../results/Result';
 
 export default class MovementAction implements Action {
 	name: 'movement';
@@ -15,26 +16,31 @@ export default class MovementAction implements Action {
 	perform(engine: Engine, en: Entity) {
 		const results: Result[] = [];
 
-		if (!en.location || !en.fighter) return results;
-		if (en.fighter.hp <= 0) return results;
+		const fighter = en.get(Fighter);
+		const position = en.get(Position);
 
-		const destX = en.location.x + this.dx,
-			destY = en.location.y + this.dy;
+		if (!fighter || !position || fighter.hp <= 0) return results;
+
+		const destX = position.x + this.dx,
+			destY = position.y + this.dy;
 
 		if (!engine.gameMap.inBounds(destX, destY)) return results;
 		if (engine.gameMap.isBlocked(destX, destY)) return results;
 
-		const target = getBlockingEntitiesAtLocation(engine.entities, destX, destY);
+		const target = getBlocker(destX, destY);
 		if (target) {
-			if (target.fighter) {
-				results.push(
-					...en.fighter.attack(en as HasFighter, target as HasFighter)
-				);
+			const enemy = target.get(Fighter);
+
+			if (enemy) {
+				results.push(...attack(en, target));
 			} else {
-				results.push(new MessageResult(`You bump into ${target.name}.`));
+				results.push(
+					new MessageResult(`${nameOf(en)} bumps into ${nameOf(target)}`)
+				);
 			}
 		} else {
-			en.location.move(this.dx, this.dy);
+			position.x = destX;
+			position.y = destY;
 			engine.fovRecompute = en == engine.player;
 		}
 

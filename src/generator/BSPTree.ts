@@ -1,7 +1,7 @@
 import RNG from '../RNG';
 import GameMap from '../GameMap';
-import Entity from '../Entity';
 import { Rect } from '../mapObjects';
+import { Entity, Position } from '../ecs';
 
 class Leaf {
 	left?: Leaf;
@@ -112,11 +112,12 @@ export default class BSPTree {
 		public maxItemsPerRoom: number
 	) {}
 
-	generate(rng: RNG, gameMap: GameMap, player: Entity, entities: Entity[]) {
+	generate(rng: RNG, gameMap: GameMap, player: Entity) {
 		const { minRoom, minLeaf, maxLeaf, splitChance } = this;
 
 		const root = new Leaf(0, 0, gameMap.width, gameMap.height);
 		const leaves = [root];
+		const position = player.get(Position);
 
 		var go = true;
 		while (go) {
@@ -143,13 +144,12 @@ export default class BSPTree {
 			if (l.room) {
 				if (first) {
 					first = false;
-					player.location!.x = rng.randint(l.room.x1 + 1, l.room.x2 - 1);
-					player.location!.y = rng.randint(l.room.y1 + 1, l.room.y2 - 1);
+					position.x = rng.randint(l.room.x1 + 1, l.room.x2 - 1);
+					position.y = rng.randint(l.room.y1 + 1, l.room.y2 - 1);
 				} else
 					gameMap.placeEntities(
 						rng,
 						l.room,
-						entities,
 						this.maxMonstersPerRoom,
 						this.maxItemsPerRoom
 					);
