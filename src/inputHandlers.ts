@@ -54,6 +54,8 @@ export function handleMainMenuKeys(e: TerminalKey) {
 
 	if (key == 'a') return new NewGameAction();
 	else if (key == 'b') return new LoadGameAction();
+
+	if (key == 'F') return new ChangeFontAction();
 }
 
 export function handlePlayerTurnKeys(e: TerminalKey) {
