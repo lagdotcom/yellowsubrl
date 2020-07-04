@@ -1,71 +1,69 @@
 import { Entity, Position, Fighter, AI } from '../ecs';
-import IAI, { AIRoutine } from '../components/AI';
 import Engine from '../Engine';
 import Result from '../results/Result';
-import { XY, distance, moveAstar, moveTowards } from './movement';
+import { distance, moveAstar, moveTowards, XY } from './movement';
 import { attack } from './combat';
 import MessageResult from '../results/MessageResult';
 import { nameOf } from './entities';
 import { Colours } from '../tcod';
+import IAI from '../components/AI';
 
-export class BasicAI implements AIRoutine {
+interface BasicAIVars {
 	goal?: XY;
+}
+export function basicAI(me: Entity, target: Entity, engine: Engine) {
+	const results: Result[] = [];
+	const vars = me.get(AI).vars as BasicAIVars;
 
-	perform(me: Entity, target: Entity, engine: Engine) {
-		const results: Result[] = [];
+	const position = me.get(Position);
+	const targetpos = target.get(Position);
+	if (!position || !targetpos) return results;
 
-		const position = me.get(Position);
-		const targetpos = target.get(Position);
-		if (!position || !targetpos) return results;
+	if (vars.goal && vars.goal.x == position.x && vars.goal.y == position.y)
+		vars.goal = undefined;
 
-		if (this.goal && this.goal.x == position.x && this.goal.y == position.y)
-			this.goal = undefined;
+	const playerAt = target.get(Position);
+	if (engine.fovMap.isInFov(position.x, position.y))
+		vars.goal = { x: playerAt.x, y: playerAt.y };
 
-		const playerAt = target.get(Position);
-		if (engine.fovMap.isInFov(position.x, position.y))
-			this.goal = { x: playerAt.x, y: playerAt.y };
-
-		if (this.goal) {
-			if (distance(position, this.goal) >= 2)
-				moveAstar(me, target, engine.gameMap, this.goal);
-			else if (distance(position, playerAt) < 2) {
-				const angry = me.get(Fighter);
-				const enemy = target.get(Fighter);
-				if (angry && enemy && enemy.hp > 0) results.push(...attack(me, target));
-			}
+	if (vars.goal) {
+		if (distance(position, vars.goal) >= 2)
+			moveAstar(me, target, engine.gameMap, vars.goal);
+		else if (distance(position, playerAt) < 2) {
+			const angry = me.get(Fighter);
+			const enemy = target.get(Fighter);
+			if (angry && enemy && enemy.hp > 0) results.push(...attack(me, target));
 		}
-
-		return results;
 	}
+
+	return results;
 }
 
-export default class ConfusedAI implements AIRoutine {
-	constructor(private previous: IAI, private duration: number) {}
+interface ConfusedAIVars {
+	duration: number;
+	previous: IAI;
+}
+export function confusedAI(me: Entity, target: Entity, engine: Engine) {
+	const results: Result[] = [];
+	const vars = me.get(AI).vars as ConfusedAIVars;
 
-	perform(me: Entity, target: Entity, engine: Engine) {
-		const results: Result[] = [];
+	const position = me.get(Position);
+	if (!position) return results;
 
-		const position = me.get(Position);
-		if (!position) return results;
+	if (vars.duration) {
+		const x = engine.rng.randint(0, 2) - 1 + position.x;
+		const y = engine.rng.randint(0, 2) - 1 + position.y;
 
-		if (this.duration) {
-			const x = engine.rng.randint(0, 2) - 1 + position.x;
-			const y = engine.rng.randint(0, 2) - 1 + position.y;
+		if (x != position.x || y != position.y)
+			moveTowards(me, { x, y }, engine.gameMap);
 
-			if (x != position.x || y != position.y)
-				moveTowards(me, { x, y }, engine.gameMap);
-
-			this.duration--;
-		} else {
-			me.add(AI, this.previous);
-			results.push(
-				new MessageResult(
-					`The ${nameOf(me)} is no longer confused!`,
-					Colours.red
-				)
-			);
-		}
-
-		return results;
+		vars.duration--;
+	} else {
+		me.add(AI, vars.previous);
+		results.push(
+			new MessageResult(`The ${nameOf(me)} is no longer confused!`, Colours.red)
+		);
 	}
+
+	return results;
 }

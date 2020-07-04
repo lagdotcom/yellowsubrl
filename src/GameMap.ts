@@ -14,10 +14,10 @@ import ecs, {
 	AI,
 } from './ecs';
 import { getBlocker, isAt } from './systems/entities';
-import { BasicAI } from './systems/ai';
+import { XY } from './systems/movement';
 
 export interface MapGenerator {
-	generate(rng: RNG, gameMap: GameMap, player: Entity): void;
+	generate(rng: RNG, gameMap: GameMap): XY;
 }
 
 export default class GameMap {
@@ -92,7 +92,7 @@ export default class GameMap {
 				const enemy = ecs
 					.entity()
 					.add(Appearance, { name, ch, colour, order: RenderOrder.Actor })
-					.add(AI, { routine: new BasicAI() })
+					.add(AI, { routine: 'basic', vars: {} })
 					.add(Fighter, { hp, maxHp: hp, defense, power })
 					.add(Position, { x, y })
 					.add(Blocks, {});

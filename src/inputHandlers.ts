@@ -1,22 +1,28 @@
 import { TerminalKey } from './tcod';
-import ChangeFontAction from './actions/ChangeFontAction';
-import ExploreMapAction from './actions/ExploreMapAction';
-import GetAction from './actions/GetAction';
-import MovementAction from './actions/MovementAction';
-import RemakeAction from './actions/RemakeAction';
-import ShowInventoryAction from './actions/ShowInventoryAction';
-import ExitAction from './actions/ExitAction';
-import GameState from './GameState';
-import UseInventoryAction from './actions/UseInventoryAction';
-import DropInventoryAction from './actions/DropInventoryAction';
 import { TerminalMouse } from './libtcod/Terminal';
-import ChooseTargetAction from './actions/ChooseTargetAction';
 import CancelTargetingAction from './actions/CancelTargetingAction';
+import ChangeFontAction from './actions/ChangeFontAction';
+import ChooseTargetAction from './actions/ChooseTargetAction';
+import DropInventoryAction from './actions/DropInventoryAction';
+import ExitAction from './actions/ExitAction';
+import ExploreMapAction from './actions/ExploreMapAction';
+import GameState from './GameState';
+import GetAction from './actions/GetAction';
+import LoadGameAction from './actions/LoadGameAction';
+import MovementAction from './actions/MovementAction';
+import NewGameAction from './actions/NewGameAction';
+import RemakeAction from './actions/RemakeAction';
+import SaveGameAction from './actions/SaveGameAction';
+import ShowInventoryAction from './actions/ShowInventoryAction';
+import UseInventoryAction from './actions/UseInventoryAction';
 
 export function handleKeys(gameState: GameState, e?: TerminalKey) {
 	if (!e) return;
 
 	switch (gameState) {
+		case GameState.MainMenu:
+			return handleMainMenuKeys(e);
+
 		case GameState.PlayerTurn:
 			return handlePlayerTurnKeys(e);
 
@@ -43,6 +49,13 @@ export function handleMouse(gameState: GameState, m?: TerminalMouse) {
 	}
 }
 
+export function handleMainMenuKeys(e: TerminalKey) {
+	const { key } = e;
+
+	if (key == 'a') return new NewGameAction();
+	else if (key == 'b') return new LoadGameAction();
+}
+
 export function handlePlayerTurnKeys(e: TerminalKey) {
 	const { key } = e;
 
@@ -59,7 +72,8 @@ export function handlePlayerTurnKeys(e: TerminalKey) {
 	else if (key == 'i') return new ShowInventoryAction(GameState.ShowInventory);
 	else if (key == 'd') return new ShowInventoryAction(GameState.DropInventory);
 
-	if (key == 'R') return new RemakeAction();
+	if (key == 'S') return new SaveGameAction();
+	else if (key == 'R') return new RemakeAction();
 	else if (key == 'F') return new ChangeFontAction();
 	else if (key == 'X') return new ExploreMapAction();
 }

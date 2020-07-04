@@ -6,7 +6,6 @@ import { Colours, Map } from './tcod';
 import ConsumeItemResult from './results/ConsumeItemResult';
 import { distance, XY } from './systems/movement';
 import { nameOf, isAt } from './systems/entities';
-import ConfusedAI from './systems/ai';
 
 export function heal({
 	item,
@@ -160,7 +159,10 @@ export function castConfuse(
 		.find({ all: [AI, Position] })
 		.find(en => isAt(en, target.x, target.y));
 	if (victim) {
-		victim.add(AI, { routine: new ConfusedAI(victim.get(AI), duration) });
+		victim.add(AI, {
+			routine: 'confused',
+			vars: { duration, previous: victim.get(AI) },
+		});
 		results.push(
 			new ConsumeItemResult(caster, item),
 			new MessageResult(

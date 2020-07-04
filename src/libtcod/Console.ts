@@ -87,6 +87,10 @@ export class Console {
 		context.fillRect(0, 0, canvas.width, canvas.height);
 	}
 
+	contains(x: number, y: number) {
+		return x >= 0 && x < this.width && y >= 0 && y < this.height;
+	}
+
 	clear(ch: string = ' ', fgc?: string, bgc?: string) {
 		const bg = bgc || this.defaultBg;
 		const fg = fgc || this.defaultFg;
@@ -115,6 +119,8 @@ export class Console {
 	}
 
 	putChar(x: number, y: number, c: number | string) {
+		if (!this.contains(x, y)) return;
+
 		const ch = typeof c === 'number' ? String.fromCharCode(c) : c;
 		const fg = this.defaultFg;
 		const tile = this.tiles[x][y];
@@ -150,30 +156,26 @@ export class Console {
 		bgBlend: BlendMode = BlendMode.Set,
 		alignment: PrintAlign = PrintAlign.Left
 	) {
-		// TODO: alignment
 		if (fg) this.setDefaultForeground(fg);
 
-		const sx = x;
-		const sy = y;
-		const ex = x + width;
-		for (var i = 0; i < str.length; i++) {
-			const ch = str[i];
+		const lines = this.splitLines(width, height, str);
+		lines.forEach((line, ly) => {
+			var lx = 0;
 
-			if (ch != '\n') {
-				if (bg) this.setCharBackground(x, y, bg, bgBlend);
-				if (fg) this.putChar(x, y, ch);
-				x++;
+			if (alignment == PrintAlign.Right) lx = width - line.length;
+			else if (alignment == PrintAlign.Center)
+				lx = Math.floor((width - line.length) / 2);
+
+			for (var i = 0; i < line.length; i++) {
+				const ch = line[i];
+				if (bg) this.setCharBackground(x + lx, y + ly, bg, bgBlend);
+				if (fg) this.putChar(x + lx, y + ly, ch);
+
+				lx++;
 			}
+		});
 
-			if (x >= ex || ch == '\n') {
-				x = sx;
-				y++;
-
-				// TODO: wrapping stuff
-			}
-		}
-
-		return y - sy + 1;
+		return lines.length;
 	}
 
 	drawRect(
@@ -264,6 +266,36 @@ export class Console {
 		});
 
 		return height + lines.length - 1;
+	}
+
+	private splitLines(width: number, height: number, str: string) {
+		const lines = [];
+		var cline = '';
+		var x = 0;
+		var y = 0;
+
+		for (var i = 0; i < str.length; i++) {
+			const ch = str[i];
+
+			if (ch != '\n') {
+				if (ch != ' ' || x) {
+					cline += ch;
+					x++;
+				}
+			}
+
+			if (x >= width || ch == '\n') {
+				lines.push(cline);
+				cline = '';
+				y++;
+
+				if (y >= height) return lines;
+				x = 0;
+			}
+		}
+
+		if (cline) lines.push(cline);
+		return lines;
 	}
 
 	private drawTile(tile: ConsoleTile) {

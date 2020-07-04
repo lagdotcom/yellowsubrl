@@ -1,7 +1,6 @@
 import RNG from '../RNG';
 import { Rect } from '../mapObjects';
 import GameMap from '../GameMap';
-import { Entity, Position } from '../ecs';
 
 export default class BoxesAndCorridors {
 	maxRooms: number;
@@ -38,9 +37,9 @@ export default class BoxesAndCorridors {
 		this.maxItemsPerRoom = maxItemsPerRoom;
 	}
 
-	generate(rng: RNG, gameMap: GameMap, player: Entity) {
+	generate(rng: RNG, gameMap: GameMap) {
 		const rooms: Rect[] = [];
-		const position = player.get(Position);
+		const position = { x: 0, y: 0 };
 
 		for (var r = 0; r < this.maxRooms; r++) {
 			const w = rng.randint(this.roomMinSize, this.roomMaxSize);
@@ -85,5 +84,7 @@ export default class BoxesAndCorridors {
 				rooms.push(newRoom);
 			}
 		}
+
+		return position;
 	}
 }

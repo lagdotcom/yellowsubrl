@@ -11,25 +11,58 @@ import {
 } from './tcod';
 import GameState from './GameState';
 import { initializeFov, recomputeFov } from './fovFunctions';
-import RNG from './RNG';
-import { renderAll, clearAll, ColourMap, RenderOrder } from './renderFunctions';
+import RNG, { toReadable, fromReadable } from './RNG';
+import {
+	renderAll,
+	clearAll,
+	ColourMap,
+	RenderOrder,
+	drawMessageLog,
+} from './renderFunctions';
 import { Action } from './Action';
 import Result from './results/Result';
 import MessageLog from './MessageLog';
 import { handleKeys, handleMouse } from './inputHandlers';
 import Stack from './Stack';
 import ecs, {
-	Query,
-	Entity,
-	Player,
-	Appearance,
-	Fighter,
-	Inventory,
-	Position,
-	Blocks,
-	hasAI,
 	AI,
+	Appearance,
+	Blocks,
+	Entity,
+	Fighter,
+	hasAI,
+	Inventory,
+	Player,
+	Position,
 } from './ecs';
+import BSPTree from './generator/BSPTree';
+import {
+	barWidth,
+	colours,
+	fovAlgorithm,
+	fovLightWalls,
+	fovRadius,
+	height,
+	mapHeight,
+	mapWidth,
+	maxItemsPerRoom,
+	maxMonstersPerRoom,
+	messageHeight,
+	messageWidth,
+	messageX,
+	panelHeight,
+	rng,
+	width,
+} from './constants';
+import { AIRoutines } from './components/AI';
+import MessageResult from './results/MessageResult';
+import { menu, mainMenu } from './menus';
+
+interface SaveData {
+	entities: { [id: string]: any };
+	map: string;
+	seed: string;
+}
 
 export default class Engine {
 	public barWidth: number;
@@ -63,48 +96,30 @@ export default class Engine {
 	private frames: number;
 	private lastReportTime: number;
 
-	constructor({
-		barWidth,
-		colours,
-		fovAlgorithm,
-		fovLightWalls,
-		fovRadius,
-		mapGenerator,
-		mapHeight,
-		mapWidth,
-		messageX,
-		messageHeight,
-		messageWidth,
-		panelHeight,
-		rng,
-		tilesets,
-		width,
-		height,
-	}: {
-		barWidth: number;
-		colours: ColourMap;
-		fovAlgorithm: FovAlgorithm;
-		fovLightWalls: boolean;
-		fovRadius: number;
-		height: number;
-		mapGenerator: MapGenerator;
-		mapHeight: number;
-		mapWidth: number;
-		messageX: number;
-		messageHeight: number;
-		messageWidth: number;
-		panelHeight: number;
-		rng: RNG;
-		tilesets: Tileset[];
-		width: number;
-	}) {
+	constructor(tilesets: Tileset[]) {
 		(window as any).G = this;
 
 		this.colours = colours;
 		this.rng = rng;
 		this.tilesets = tilesets;
 
-		this.mapGenerator = mapGenerator;
+		// this.mapGenerator = new BoxesAndCorridors({
+		// 	maxRooms,
+		// 	roomMinSize,
+		// 	roomMaxSize,
+		// 	mapWidth,
+		// 	mapHeight,
+		// 	maxMonstersPerRoom,
+		// });
+		this.mapGenerator = new BSPTree(
+			5,
+			10,
+			20,
+			75,
+			maxMonstersPerRoom,
+			maxItemsPerRoom
+		);
+
 		this.mapHeight = mapHeight;
 		this.mapWidth = mapWidth;
 		this.gameMap = new GameMap(rng.seed, mapWidth, mapHeight);
@@ -132,7 +147,7 @@ export default class Engine {
 
 		this.fpsString = '';
 		this.frames = 0;
-		this.gameStateStack = new Stack(GameState.PlayerTurn);
+		this.gameStateStack = new Stack(GameState.MainMenu);
 		this.lastReportTime = new Date().getTime();
 
 		this.fovAlgorithm = fovAlgorithm;
@@ -141,12 +156,72 @@ export default class Engine {
 		this.fovMap = initializeFov(this.gameMap);
 
 		this.resolve = this.resolve.bind(this);
-
-		this.newMap();
+		this.main = this.main.bind(this);
 	}
 
 	get gameState() {
 		return this.gameStateStack.top;
+	}
+
+	newGame() {
+		this.gameStateStack.swap(GameState.PlayerTurn);
+		this.newMap();
+	}
+
+	saveGame() {
+		// TODO: map reveal not saved
+
+		const data: SaveData = {
+			entities: {},
+			seed: toReadable(this.rng.seed),
+			map: toReadable(this.gameMap.seed),
+		};
+		ecs.find().forEach(en => {
+			data.entities[en.id] = en.data();
+		});
+
+		localStorage.setItem('ysrl.save', JSON.stringify(data));
+	}
+
+	loadGame() {
+		const raw = localStorage.getItem('ysrl.save');
+		if (!raw) return this.messageLog.add(new MessageResult('No game to load!'));
+		const data = JSON.parse(raw) as SaveData;
+
+		this.gameMap.reset(
+			fromReadable(data.map),
+			this.gameMap.width,
+			this.gameMap.height
+		);
+		this.rng.seed = this.gameMap.seed;
+		this.mapGenerator.generate(this.rng, this.gameMap);
+		ecs.clear();
+
+		for (const id in data.entities) {
+			const en = new Entity(ecs, id);
+			const edata = data.entities[id];
+			ecs.attach(en);
+
+			for (const name in edata) {
+				const co = ecs.lookup(name);
+				const cdata = edata[name];
+				if (!co) {
+					console.log(`Unknown component: ${name}`);
+					continue;
+				}
+
+				en.add(co, cdata);
+			}
+		}
+
+		this.rng.seed = fromReadable(data.seed);
+		this.player = ecs.find({ all: [Player] })[0];
+		if (!this.player) throw 'No player in save game';
+
+		this.refresh();
+		this.fovMap = initializeFov(this.gameMap);
+		this.messageLog.add(new MessageResult('Game loaded!'));
+		this.gameStateStack.swap(GameState.PlayerTurn);
 	}
 
 	refresh() {
@@ -169,6 +244,10 @@ export default class Engine {
 		const { gameMap, mapGenerator, console, rng } = this;
 
 		ecs.clear();
+
+		gameMap.reset(rng.seed, gameMap.width, gameMap.height);
+		const position = mapGenerator.generate(rng, gameMap);
+
 		this.player = ecs
 			.entity()
 			.add(Player, {})
@@ -180,27 +259,39 @@ export default class Engine {
 			})
 			.add(Fighter, { hp: 30, maxHp: 30, defense: 2, power: 5 })
 			.add(Inventory, { capacity: 26, items: [] })
-			.add(Position, { x: 0, y: 0 })
+			.add(Position, position)
 			.add(Blocks, {});
 
-		gameMap.reset(rng.seed, gameMap.width, gameMap.height);
-		mapGenerator.generate(rng, gameMap, this.player);
-
 		this.fovMap = initializeFov(gameMap);
-		this.fovRecompute = true;
-		console.clear();
+		this.refresh();
 	}
 
 	start() {
-		this.context.main(() => {
-			const { key, mouse } = this.context.checkForEvents();
-			this.update(key, mouse);
-			this.render(this.context);
-			this.enemyActions();
-		});
+		this.context.main(this.main);
 	}
 
-	update(key?: TerminalKey, mouse?: TerminalMouse) {
+	private main() {
+		if (this.gameState == GameState.MainMenu) {
+			mainMenu(this.console, width, height);
+			drawMessageLog(this.messageLog, this.console, 30);
+			this.context.present(this.console);
+
+			const { key } = this.context.checkForEvents();
+			this.update(key);
+			return;
+		}
+
+		this.gameMain();
+	}
+
+	private gameMain() {
+		const { key, mouse } = this.context.checkForEvents();
+		this.update(key, mouse);
+		this.render(this.context);
+		this.enemyActions();
+	}
+
+	private update(key?: TerminalKey, mouse?: TerminalMouse) {
 		if (mouse) [this.mouseX, this.mouseY] = [mouse.x, mouse.y];
 
 		const kaction = handleKeys(this.gameState, key);
@@ -210,27 +301,15 @@ export default class Engine {
 		if (maction) maction.perform(this, this.player).forEach(this.resolve);
 	}
 
-	render(context: Terminal) {
+	private render(context: Terminal) {
 		const {
-			barWidth,
-			colours,
 			console,
 			fovAlgorithm,
 			fovLightWalls,
 			fovMap,
 			fovRadius,
 			fovRecompute,
-			gameMap,
-			gameState,
-			height,
-			messageLog,
-			mouseX,
-			mouseY,
-			panel,
-			panelHeight,
-			panelY,
 			player,
-			width,
 		} = this;
 
 		if (fovRecompute) {
@@ -247,24 +326,7 @@ export default class Engine {
 				);
 		}
 
-		renderAll({
-			barWidth,
-			colours,
-			console,
-			fovMap,
-			fovRecompute,
-			gameMap,
-			gameState,
-			messageLog,
-			mouseX,
-			mouseY,
-			panel,
-			panelHeight,
-			panelY,
-			player,
-			screenHeight: height,
-			screenWidth: width,
-		});
+		renderAll(this);
 		this.fovRecompute = false;
 
 		this.showFps();
@@ -273,19 +335,19 @@ export default class Engine {
 		clearAll(console);
 	}
 
-	act(action: Action) {
+	private act(action: Action) {
 		const results = action.perform(this, this.player);
 		results.forEach(this.resolve);
 	}
 
-	resolve(result: Result) {
+	private resolve(result: Result) {
 		result.perform(this).forEach(this.resolve);
 	}
 
-	enemyActions() {
+	private enemyActions() {
 		if (this.gameState == GameState.EnemyTurn) {
 			hasAI.get().forEach(en => {
-				en.get(AI).routine.perform(en, this.player, this).map(this.resolve);
+				AIRoutines[en.get(AI).routine](en, this.player, this).map(this.resolve);
 			});
 
 			this.gameStateStack.swap(GameState.PlayerTurn);

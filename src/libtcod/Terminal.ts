@@ -87,7 +87,9 @@ export class Terminal {
 		this.height = this.element.height = this.element.clientHeight;
 	}
 
-	listen(...events: string[]) {
+	listen(
+		...events: ('keydown' | 'keypress' | 'keyup' | 'mousemove' | 'mousedown')[]
+	) {
 		if (events.includes(KeyDown))
 			this.element.addEventListener('keydown', this.onKeyDown);
 		else this.element.removeEventListener('keydown', this.onKeyDown);
@@ -104,7 +106,7 @@ export class Terminal {
 			this.element.addEventListener('mousemove', this.onMouseMove);
 		else this.element.removeEventListener('mousemove', this.onMouseMove);
 
-		if (events.includes(MouseMove))
+		if (events.includes(MouseDown))
 			this.element.addEventListener('mousedown', this.onMouseDown);
 		else this.element.removeEventListener('mousemove', this.onMouseDown);
 	}

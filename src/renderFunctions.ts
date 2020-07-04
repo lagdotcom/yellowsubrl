@@ -13,6 +13,8 @@ import ecs, {
 } from './ecs';
 import { XY } from './systems/movement';
 import { isAt, nameOf } from './systems/entities';
+import { colours, barWidth, width, height } from './constants';
+import Engine from './Engine';
 
 export type ColourMap = { [name: string]: string };
 
@@ -22,41 +24,21 @@ export enum RenderOrder {
 	Actor,
 }
 
-export function renderAll({
-	barWidth,
-	colours,
-	console,
-	fovMap,
-	fovRecompute,
-	gameMap,
-	messageLog,
-	mouseX,
-	mouseY,
-	panel,
-	panelHeight,
-	panelY,
-	player,
-	screenHeight,
-	screenWidth,
-	gameState,
-}: {
-	barWidth: number;
-	colours: ColourMap;
-	console: Console;
-	fovMap: Map;
-	fovRecompute: boolean;
-	gameMap: GameMap;
-	messageLog: MessageLog;
-	mouseX: number;
-	mouseY: number;
-	panel: Console;
-	panelHeight: number;
-	panelY: number;
-	player: Entity;
-	screenHeight: number;
-	screenWidth: number;
-	gameState: GameState;
-}) {
+export function renderAll(engine: Engine) {
+	const {
+		console,
+		fovMap,
+		fovRecompute,
+		gameMap,
+		gameState,
+		messageLog,
+		mouseX,
+		mouseY,
+		panel,
+		panelY,
+		player,
+	} = engine;
+
 	if (fovRecompute)
 		for (var y = 0; y < gameMap.height; y++) {
 			for (var x = 0; x < gameMap.width; x++) {
@@ -81,12 +63,7 @@ export function renderAll({
 
 	panel.clear(' ', undefined, Colours.black);
 
-	var y = 1;
-	messageLog.messages.forEach(msg => {
-		panel.setDefaultForeground(msg.colour);
-		panel.print(messageLog.x, y, msg.text);
-		y++;
-	});
+	drawMessageLog(messageLog, panel, 1);
 
 	const fighter = player.get(Fighter);
 	renderBar(
@@ -120,9 +97,22 @@ export function renderAll({
 			inventoryTitle,
 			player.get(Inventory),
 			50,
-			screenWidth,
-			screenHeight
+			width,
+			height
 		);
+}
+
+export function drawMessageLog(
+	messageLog: MessageLog,
+	panel: Console,
+	sy: number = 1
+) {
+	var y = sy;
+	messageLog.messages.forEach(msg => {
+		panel.setDefaultForeground(msg.colour);
+		panel.print(messageLog.x, y, msg.text);
+		y++;
+	});
 }
 
 export function clearAll(con: Console) {

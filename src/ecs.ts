@@ -12,7 +12,7 @@ import IAI from './components/AI';
 export class Component<T> {
 	private data: { [id: string]: T };
 
-	constructor() {
+	constructor(public name: string) {
 		this.data = {};
 	}
 
@@ -60,6 +60,15 @@ export class Entity {
 		this.ecs.update(this);
 	}
 
+	data() {
+		const data: { [name: string]: any } = {};
+		this.components.forEach(co => {
+			data[co.name] = co.get(this);
+		});
+
+		return data;
+	}
+
 	destroy() {
 		if (!this.destroyed) {
 			this.components.forEach(comp => comp.remove(this));
@@ -89,11 +98,15 @@ export class Manager {
 		});
 	}
 
-	register<T>(): Component<T> {
-		const comp = new Component<T>();
+	register<T>(name: string): Component<T> {
+		const comp = new Component<T>(name);
 		this.components.add(comp);
 
 		return comp;
+	}
+
+	lookup<T>(name: string): Component<T> | undefined {
+		return Array.from(this.components).find(co => co.name == name);
 	}
 
 	nextId() {
@@ -102,11 +115,13 @@ export class Manager {
 
 	entity(): Entity {
 		const id = this.nextId();
-
 		const en = new Entity(this, id);
+		return this.attach(en);
+	}
+
+	attach(en: Entity): Entity {
 		this.entities.add(en);
 		this.queries.forEach(q => q.add(en));
-
 		return en;
 	}
 
@@ -188,15 +203,15 @@ const ecs = new Manager();
 (window as any).ecs = ecs;
 export default ecs;
 
-export const Appearance = ecs.register<IAppearance>();
-export const AI = ecs.register<IAI>();
-export const Blocks = ecs.register<IBlocks>();
-export const Fighter = ecs.register<IFighter>();
-export const Inventory = ecs.register<IInventory>();
-export const Item = ecs.register<IItem>();
-export const Player = ecs.register<IPlayer>();
-export const Position = ecs.register<IPosition>();
-export const Weapon = ecs.register<IWeapon>();
+export const Appearance = ecs.register<IAppearance>('Appearance');
+export const AI = ecs.register<IAI>('AI');
+export const Blocks = ecs.register<IBlocks>('Blocks');
+export const Fighter = ecs.register<IFighter>('Fighter');
+export const Inventory = ecs.register<IInventory>('Inventory');
+export const Item = ecs.register<IItem>('Item');
+export const Player = ecs.register<IPlayer>('Player');
+export const Position = ecs.register<IPosition>('Position');
+export const Weapon = ecs.register<IWeapon>('Weapon');
 
 export const blockers = ecs.query({ all: [Blocks, Position] });
 export const hasAI = ecs.query({ all: [AI] });

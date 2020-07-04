@@ -1,5 +1,6 @@
 enum GameState {
-	PlayerTurn = 1,
+	MainMenu,
+	PlayerTurn,
 	EnemyTurn,
 	PlayerDead,
 	ShowInventory,

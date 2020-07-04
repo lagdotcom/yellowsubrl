@@ -112,12 +112,12 @@ export default class BSPTree {
 		public maxItemsPerRoom: number
 	) {}
 
-	generate(rng: RNG, gameMap: GameMap, player: Entity) {
+	generate(rng: RNG, gameMap: GameMap) {
 		const { minRoom, minLeaf, maxLeaf, splitChance } = this;
 
 		const root = new Leaf(0, 0, gameMap.width, gameMap.height);
 		const leaves = [root];
-		const position = player.get(Position);
+		const position = { x: 0, y: 0 };
 
 		var go = true;
 		while (go) {
@@ -155,5 +155,7 @@ export default class BSPTree {
 					);
 			}
 		});
+
+		return position;
 	}
 }

@@ -21,6 +21,7 @@ export const Colours = {
 	lightGrey: toRGB(211, 211, 211),
 	lightPink: toRGB(250, 175, 186),
 	lightRed: toRGB(255, 128, 128),
+	lightYellow: toRGB(255, 255, 128),
 	orange: toRGB(255, 165, 0),
 	red: toRGB(255, 0, 0),
 	silver: toRGB(192, 192, 192),

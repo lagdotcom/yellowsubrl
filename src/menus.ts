@@ -1,6 +1,7 @@
 import { Console, Colours } from './tcod';
 import Inventory from './components/Inventory';
 import { nameOf } from './systems/entities';
+import { PrintAlign } from './libtcod/Console';
 
 export function menu(
 	con: Console,
@@ -46,4 +47,44 @@ export function inventoryMenu(
 			: inventory.items.map(nameOf);
 
 	menu(con, header, options, inventoryWidth, screenWidth, screenHeight);
+}
+
+export function mainMenu(
+	con: Console,
+	screenWidth: number,
+	screenHeight: number
+) {
+	const cy = Math.floor(screenHeight / 2);
+
+	con.printBox(
+		0,
+		cy - 8,
+		screenWidth,
+		1,
+		'Yellow Sub RL',
+		Colours.lightYellow,
+		undefined,
+		undefined,
+		PrintAlign.Center
+	);
+	con.printBox(
+		0,
+		cy - 6,
+		screenWidth,
+		1,
+		'by Lag.Com',
+		Colours.lightYellow,
+		undefined,
+		undefined,
+		PrintAlign.Center
+	);
+
+	menu(
+		con,
+		'',
+		['Play a new game', 'Continue last game'],
+		24,
+		screenWidth,
+		screenHeight
+	);
 }
