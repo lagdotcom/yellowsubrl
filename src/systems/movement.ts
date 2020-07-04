@@ -28,8 +28,8 @@ export function moveTowards(entity: Entity, dest: XY, gameMap: GameMap) {
 		!gameMap.isBlocked(position.x + mx, position.y + my) &&
 		!getBlocker(position.x + mx, position.y + my)
 	) {
-		dest.x += mx;
-		dest.y += my;
+		position.x += mx;
+		position.y += my;
 	}
 }
 
