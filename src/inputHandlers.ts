@@ -13,6 +13,7 @@ import MovementAction from './actions/MovementAction';
 import NewGameAction from './actions/NewGameAction';
 import RemakeAction from './actions/RemakeAction';
 import SaveGameAction from './actions/SaveGameAction';
+import ScrollAction from './actions/ScrollAction';
 import ShowInventoryAction from './actions/ShowInventoryAction';
 import UseInventoryAction from './actions/UseInventoryAction';
 
@@ -58,17 +59,21 @@ export function handleMainMenuKeys(e: TerminalKey) {
 	if (key == 'F') return new ChangeFontAction();
 }
 
-export function handlePlayerTurnKeys(e: TerminalKey) {
-	const { key } = e;
+function dirAction(ctrl: boolean, dx: number, dy: number) {
+	return ctrl ? new ScrollAction(dx, dy) : new MovementAction(dx, dy);
+}
 
-	if (key == 'ArrowUp' || key == '8') return new MovementAction(0, -1);
-	else if (key == 'ArrowDown' || key == '2') return new MovementAction(0, 1);
-	else if (key == 'ArrowLeft' || key == '4') return new MovementAction(-1, 0);
-	else if (key == 'ArrowRight' || key == '6') return new MovementAction(1, 0);
-	else if (key == '7' || key == 'Home') return new MovementAction(-1, -1);
-	else if (key == '9' || key == 'PageUp') return new MovementAction(1, -1);
-	else if (key == '1' || key == 'End') return new MovementAction(-1, 1);
-	else if (key == '3' || key == 'PageDown') return new MovementAction(1, 1);
+export function handlePlayerTurnKeys(e: TerminalKey) {
+	const { key, ctrl } = e;
+
+	if (key == 'ArrowUp' || key == '8') return dirAction(ctrl, 0, -1);
+	else if (key == 'ArrowDown' || key == '2') return dirAction(ctrl, 0, 1);
+	else if (key == 'ArrowLeft' || key == '4') return dirAction(ctrl, -1, 0);
+	else if (key == 'ArrowRight' || key == '6') return dirAction(ctrl, 1, 0);
+	else if (key == '7' || key == 'Home') return dirAction(ctrl, -1, -1);
+	else if (key == '9' || key == 'PageUp') return dirAction(ctrl, 1, -1);
+	else if (key == '1' || key == 'End') return dirAction(ctrl, -1, 1);
+	else if (key == '3' || key == 'PageDown') return dirAction(ctrl, 1, 1);
 
 	if (key == 'g') return new GetAction();
 	else if (key == 'i') return new ShowInventoryAction(GameState.ShowInventory);

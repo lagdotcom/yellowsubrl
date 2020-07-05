@@ -6,7 +6,6 @@ import { itemSpawnData, enemySpawnData } from './spawnData';
 import ecs, {
 	Appearance,
 	Blocks,
-	Entity,
 	Fighter,
 	Item,
 	Position,
@@ -38,7 +37,7 @@ export default class GameMap {
 		this.tiles = this.initializeTiles();
 	}
 
-	inBounds(x: number, y: number) {
+	contains(x: number, y: number) {
 		return x >= 0 && x < this.width && y >= 0 && y < this.height;
 	}
 
@@ -85,13 +84,19 @@ export default class GameMap {
 			const y = rng.randint(room.y1 + 1, room.y2 - 1);
 
 			if (!getBlocker(x, y)) {
-				const { name, ch, colour, hp, defense, power } = rng.weighted(
+				const { name, tile, colour, hp, defense, power } = rng.weighted(
 					enemySpawnData
 				);
 
 				const enemy = ecs
 					.entity()
-					.add(Appearance, { name, ch, colour, order: RenderOrder.Actor })
+					.add(Appearance, {
+						name,
+						tile,
+						tile2: tile + '2',
+						colour,
+						order: RenderOrder.Actor,
+					})
 					.add(AI, { routine: 'basic', vars: {} })
 					.add(Fighter, { hp, maxHp: hp, defense, power })
 					.add(Position, { x, y })
@@ -108,7 +113,7 @@ export default class GameMap {
 			) {
 				const {
 					name,
-					ch,
+					tile,
 					colour,
 					use,
 					targeting,
@@ -118,7 +123,7 @@ export default class GameMap {
 
 				const item = ecs
 					.entity()
-					.add(Appearance, { name, ch, colour, order: RenderOrder.Item })
+					.add(Appearance, { name, tile, colour, order: RenderOrder.Item })
 					.add(Item, { use, targeting, targetingMessage })
 					.add(Position, { x, y });
 

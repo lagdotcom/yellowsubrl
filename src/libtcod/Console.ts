@@ -37,29 +37,29 @@ interface ConsoleTile {
 }
 
 export class Console {
+	cols: number;
 	context: CanvasRenderingContext2D;
-	element: HTMLCanvasElement;
 	defaultBg: string;
 	defaultBgBlend: BlendMode;
 	defaultFg: string;
-	height: number;
-	width: number;
-	tileset: Tileset;
+	element: HTMLCanvasElement;
+	rows: number;
 	tiles: ConsoleTile[][];
+	tileset: Tileset;
 	tilesFlat: ConsoleTile[];
 
-	constructor(w: number, h: number, tileset: Tileset) {
-		this.width = w;
-		this.height = h;
+	constructor(cols: number, rows: number, tileset: Tileset) {
+		this.cols = cols;
+		this.rows = rows;
 		this.tileset = tileset;
 		this.defaultBg = Colours.black;
 		this.defaultBgBlend = BlendMode.Set;
 		this.defaultFg = Colours.white;
 
 		this.tiles = [];
-		for (var x = 0; x < w; x++) {
+		for (var x = 0; x < cols; x++) {
 			const col: ConsoleTile[] = [];
-			for (var y = 0; y < h; y++)
+			for (var y = 0; y < rows; y++)
 				col.push({
 					x,
 					y,
@@ -77,8 +77,8 @@ export class Console {
 
 		const canvas = document.createElement('canvas');
 		this.element = canvas;
-		canvas.width = w * tileset.tileWidth;
-		canvas.height = h * tileset.tileHeight;
+		canvas.width = cols * tileset.tileWidth;
+		canvas.height = rows * tileset.tileHeight;
 
 		const context = canvas.getContext('2d');
 		if (!context) throw 'Could not get 2D context';
@@ -88,7 +88,7 @@ export class Console {
 	}
 
 	contains(x: number, y: number) {
-		return x >= 0 && x < this.width && y >= 0 && y < this.height;
+		return x >= 0 && x < this.cols && y >= 0 && y < this.rows;
 	}
 
 	clear(ch: string = ' ', fgc?: string, bgc?: string) {
@@ -110,8 +110,8 @@ export class Console {
 
 	setTileset(tileset: Tileset) {
 		this.tileset = tileset;
-		this.element.width = this.width * tileset.tileWidth;
-		this.element.height = this.height * tileset.tileHeight;
+		this.element.width = this.cols * tileset.tileWidth;
+		this.element.height = this.rows * tileset.tileHeight;
 
 		this.tilesFlat.forEach(t => {
 			this.drawTile(t);
@@ -199,6 +199,7 @@ export class Console {
 	}
 
 	setCharForeground(x: number, y: number, fg: string, ch: string) {
+		if (!this.contains(x, y)) return;
 		const tile = this.tiles[x][y];
 
 		if (tile.fg != fg || tile.ch != ch) {
@@ -209,6 +210,7 @@ export class Console {
 	}
 
 	setCharBackground(x: number, y: number, bg: string, mode: BlendMode) {
+		if (!this.contains(x, y)) return;
 		const tile = this.tiles[x][y];
 
 		if (tile.bg != bg || tile.blend != mode) {
@@ -231,8 +233,8 @@ export class Console {
 		width: number = 0,
 		height: number = 0
 	) {
-		width = width || this.width;
-		height = height || this.height;
+		width = width || this.cols;
+		height = height || this.rows;
 
 		for (var x = 0; x < width; x++) {
 			for (var y = 0; y < height; y++) {

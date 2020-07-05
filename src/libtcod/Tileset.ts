@@ -9,16 +9,40 @@ const tcodLayout = [
 	'',
 ];
 
-export enum Charmap {
-	TCOD,
+export type Charmap = { [ch: string]: [number, number] };
+
+function convertLayout(layout: string[]) {
+	const charmap: Charmap = {};
+
+	// process the lookup table
+	for (var row = 0; row < layout.length; row++) {
+		for (var col = 0; col < layout[row].length; col++) {
+			charmap[layout[row][col]] = [col, row];
+		}
+	}
+
+	return charmap;
 }
+
+function expandCharmap(charmap: Charmap, w: number, h: number) {
+	const expanded: Charmap = {};
+
+	for (const key in charmap) {
+		const [x, y] = charmap[key];
+		expanded[key] = [x * w, y * h];
+	}
+
+	return expanded;
+}
+
+export const Charmaps = {
+	TCOD: convertLayout(tcodLayout),
+};
 
 export class Tileset {
 	canvas: HTMLCanvasElement;
 	charmap: Charmap;
 	context: CanvasRenderingContext2D;
-	layout: string[];
-	lookup: { [ch: string]: [number, number] };
 	src: CanvasImageSource;
 	tileHeight: number;
 	tileWidth: number;
@@ -49,11 +73,6 @@ export class Tileset {
 		rows: number,
 		cols: number
 	) {
-		this.charmap = charmap;
-
-		if (charmap == Charmap.TCOD) this.layout = tcodLayout;
-		else throw 'Unsupported charmap';
-
 		// get the tile size
 		const { width, height } = src;
 		this.tileWidth = width / rows;
@@ -73,16 +92,7 @@ export class Tileset {
 		context.putImageData(data, 0, 0);
 		this.src = mask;
 
-		// process the lookup table
-		this.lookup = {};
-		for (var row = 0; row < this.layout.length; row++) {
-			for (var col = 0; col < this.layout[row].length; col++) {
-				this.lookup[this.layout[row][col]] = [
-					col * this.tileWidth,
-					row * this.tileHeight,
-				];
-			}
-		}
+		this.charmap = expandCharmap(charmap, this.tileWidth, this.tileHeight);
 
 		// reserve a canvas for text drawing
 		this.canvas = document.createElement('canvas');
@@ -95,7 +105,7 @@ export class Tileset {
 	}
 
 	getChar(ch: string, fg: string) {
-		const loc = this.lookup[ch];
+		const loc = this.charmap[ch];
 		if (!loc) return undefined;
 
 		const { canvas, context, src, tileWidth, tileHeight } = this;

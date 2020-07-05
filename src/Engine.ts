@@ -19,7 +19,6 @@ import {
 	RenderOrder,
 	drawMessageLog,
 } from './renderFunctions';
-import { Action } from './Action';
 import Result from './results/Result';
 import MessageLog from './MessageLog';
 import { handleKeys, handleMouse } from './inputHandlers';
@@ -43,6 +42,8 @@ import {
 	fovLightWalls,
 	fovRadius,
 	height,
+	mapDisplayHeight,
+	mapDisplayWidth,
 	mapHeight,
 	mapWidth,
 	maxItemsPerRoom,
@@ -56,7 +57,7 @@ import {
 } from './constants';
 import { AIRoutines } from './components/AI';
 import MessageResult from './results/MessageResult';
-import { menu, mainMenu } from './menus';
+import { mainMenu } from './menus';
 
 interface SaveData {
 	entities: { [id: string]: any };
@@ -88,6 +89,8 @@ export default class Engine {
 	public panelY: number;
 	public player!: Entity;
 	public rng: RNG;
+	public scrollX: number;
+	public scrollY: number;
 	public targetingItem?: Entity;
 	public tilesets: Tileset[];
 	public width: number;
@@ -128,7 +131,8 @@ export default class Engine {
 		this.context = new Terminal(
 			width * tileset.tileWidth,
 			height * tileset.tileHeight,
-			tileset
+			tileset.tileWidth,
+			tileset.tileHeight
 		);
 		this.context.listen('keydown', 'mousemove', 'mousedown');
 		this.mouseX = 0;
@@ -137,6 +141,8 @@ export default class Engine {
 		this.height = height;
 		this.width = width;
 		this.console = new Console(width, height, tileset);
+		this.scrollX = 0;
+		this.scrollY = 0;
 
 		this.barWidth = barWidth;
 		this.panelHeight = panelHeight;
@@ -218,10 +224,11 @@ export default class Engine {
 		this.player = ecs.find({ all: [Player] })[0];
 		if (!this.player) throw 'No player in save game';
 
-		this.refresh();
 		this.fovMap = initializeFov(this.gameMap);
 		this.messageLog.add(new MessageResult('Game loaded!'));
 		this.gameStateStack.swap(GameState.PlayerTurn);
+
+		this.updateScroll();
 	}
 
 	refresh() {
@@ -230,18 +237,17 @@ export default class Engine {
 	}
 
 	changeFont() {
-		const i = this.tilesets.indexOf(this.context.tileset);
+		const i = this.tilesets.indexOf(this.console.tileset);
 		const j = (i + 1) % this.tilesets.length;
 		const tileset = this.tilesets[j];
 
-		this.context.setTileset(tileset);
 		this.console.setTileset(tileset);
 		this.panel.setTileset(tileset);
 		this.fovRecompute = true;
 	}
 
 	newMap() {
-		const { gameMap, mapGenerator, console, rng } = this;
+		const { gameMap, mapGenerator, rng } = this;
 
 		ecs.clear();
 
@@ -253,7 +259,8 @@ export default class Engine {
 			.add(Player, {})
 			.add(Appearance, {
 				name: 'you',
-				ch: '@',
+				tile: 'Player',
+				tile2: 'Player2',
 				colour: Colours.white,
 				order: RenderOrder.Actor,
 			})
@@ -263,7 +270,7 @@ export default class Engine {
 			.add(Blocks, {});
 
 		this.fovMap = initializeFov(gameMap);
-		this.refresh();
+		this.updateScroll();
 	}
 
 	start() {
@@ -292,13 +299,29 @@ export default class Engine {
 	}
 
 	private update(key?: TerminalKey, mouse?: TerminalMouse) {
-		if (mouse) [this.mouseX, this.mouseY] = [mouse.x, mouse.y];
+		if (mouse) {
+			[this.mouseX, this.mouseY] = [mouse.x, mouse.y];
+
+			this.mouseX = this.scrollX + Math.floor(mouse.x / 2);
+			this.mouseY = this.scrollY + mouse.y;
+		}
 
 		const kaction = handleKeys(this.gameState, key);
 		if (kaction) kaction.perform(this, this.player).forEach(this.resolve);
 
 		const maction = handleMouse(this.gameState, mouse);
 		if (maction) maction.perform(this, this.player).forEach(this.resolve);
+	}
+
+	updateScroll() {
+		if (this.player) {
+			const position = this.player.get(Position);
+
+			this.scrollX = Math.floor(position.x - mapDisplayWidth / 2);
+			this.scrollY = Math.floor(position.y - mapDisplayHeight / 2);
+
+			this.refresh();
+		}
 	}
 
 	private render(context: Terminal) {
@@ -310,6 +333,8 @@ export default class Engine {
 			fovRadius,
 			fovRecompute,
 			player,
+			scrollX,
+			scrollY,
 		} = this;
 
 		if (fovRecompute) {
@@ -332,12 +357,7 @@ export default class Engine {
 		this.showFps();
 		context.present(console);
 
-		clearAll(console);
-	}
-
-	private act(action: Action) {
-		const results = action.perform(this, this.player);
-		results.forEach(this.resolve);
+		clearAll(console, scrollX, scrollY);
 	}
 
 	private resolve(result: Result) {

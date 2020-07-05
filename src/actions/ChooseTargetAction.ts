@@ -17,8 +17,8 @@ export default class ChooseTargetAction implements Action {
 			engine.targetingItem,
 			entity,
 			engine,
-			this.x,
-			this.y
+			engine.scrollX + Math.floor(this.x / 2),
+			engine.scrollY + this.y
 		);
 		engine.gameStateStack.pop();
 		return results;

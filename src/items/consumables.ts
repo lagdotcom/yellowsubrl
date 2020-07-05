@@ -11,14 +11,14 @@ import MessageResult from '../results/MessageResult';
 export const healingPotion: ItemSpawn = {
 	name: 'healing potion',
 	colour: Colours.violet,
-	ch: '!',
+	tile: '!',
 	use: (item, en) => heal({ item, en, amount: 4 }),
 };
 
 export const fireballScroll: ItemSpawn = {
 	name: 'fireball scroll',
 	colour: Colours.red,
-	ch: '#',
+	tile: '#',
 	targeting: true,
 	targetingMessage: new MessageResult(
 		'Left-click a target tile for the fireball, or Esc to cancel.',
@@ -38,7 +38,7 @@ export const fireballScroll: ItemSpawn = {
 export const lightningScroll: ItemSpawn = {
 	name: 'lightning scroll',
 	colour: Colours.yellow,
-	ch: '#',
+	tile: '#',
 	use: (item, caster, engine) =>
 		castLightning({
 			item,
@@ -52,7 +52,7 @@ export const lightningScroll: ItemSpawn = {
 export const confusionScroll: ItemSpawn = {
 	name: 'confusion scroll',
 	colour: Colours.lightPink,
-	ch: '#',
+	tile: '#',
 	targeting: true,
 	targetingMessage: new MessageResult(
 		'Left-click an enemy to confuse it, or Esc to cancel.',

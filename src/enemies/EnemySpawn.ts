@@ -1,7 +1,7 @@
 export default interface EnemySpawn {
 	name: string;
 	colour: string;
-	ch: string;
+	tile: string;
 	hp: number;
 	defense: number;
 	power: number;

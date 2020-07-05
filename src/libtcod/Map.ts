@@ -210,7 +210,7 @@ export class Map {
 	}
 
 	isInFov(x: number, y: number) {
-		return this.tiles[x][y].inFov;
+		return this.contains(x, y) && this.tiles[x][y].inFov;
 	}
 
 	computeFov(

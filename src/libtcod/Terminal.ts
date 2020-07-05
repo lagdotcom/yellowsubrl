@@ -1,6 +1,9 @@
 import { Console } from './Console';
 import { Colours } from '../tcod';
-import { Tileset } from './Tileset';
+
+function opt<T>(option: T | undefined, def: T) {
+	return option !== undefined ? option : def;
+}
 
 export const KeyDown = 'keydown',
 	KeyPress = 'keypress',
@@ -38,13 +41,15 @@ export class Terminal {
 	running: boolean;
 	scaleX: number;
 	scaleY: number;
-	tileset: Tileset;
+	tileWidth: number;
+	tileHeight: number;
 	width: number;
 
-	constructor(w: number, h: number, tileset: Tileset) {
+	constructor(w: number, h: number, tw: number, th: number) {
 		this.width = w;
 		this.height = h;
-		this.tileset = tileset;
+		this.tileWidth = tw;
+		this.tileHeight = th;
 		this.keyEvents = [];
 
 		const canvas = document.createElement('canvas');
@@ -114,53 +119,53 @@ export class Terminal {
 	present(
 		console: Console,
 		options: {
-			keepAspect: boolean;
-			integerScaling: boolean;
-			clearColour: string;
-			align: [number, number];
-		} = {
-			keepAspect: true,
-			integerScaling: true,
-			clearColour: '#000000',
-			align: [0.5, 0.5],
-		}
+			keepAspect?: boolean;
+			integerScaling?: boolean;
+			clearColour?: string;
+			align?: [number, number];
+		} = {}
 	) {
-		const { tileWidth, tileHeight } = this.tileset;
+		const keepAspect = opt(options.keepAspect, true);
+		const integerScaling = opt(options.integerScaling, true);
+		const clearColour = opt(options.clearColour, 'black');
+		const align = opt(options.align, [0.5, 0.5]);
+
+		const { tileWidth, tileHeight } = console.tileset;
 		var consoleW, consoleH;
 
 		if (this.redraw) {
 			const { width, height } = this;
 
-			var scaleX = width / console.width / tileWidth;
-			var scaleY = height / console.height / tileHeight;
+			var scaleX = width / console.cols / tileWidth;
+			var scaleY = height / console.rows / tileHeight;
 
-			if (options.integerScaling) {
+			if (integerScaling) {
 				scaleX = Math.max(1, Math.floor(scaleX));
 				scaleY = Math.max(1, Math.floor(scaleY));
 			}
 
-			if (options.keepAspect) {
+			if (keepAspect) {
 				scaleX = Math.min(scaleX, scaleY);
 				scaleY = scaleX;
 			}
 
-			const consoleWidth = scaleX * console.width * tileWidth;
-			const consoleHeight = scaleY * console.height * tileHeight;
+			const consoleWidth = scaleX * console.cols * tileWidth;
+			const consoleHeight = scaleY * console.rows * tileHeight;
 
-			this.offsetX = Math.floor((width - consoleWidth) * options.align[0]);
-			this.offsetY = Math.floor((height - consoleHeight) * options.align[1]);
+			this.offsetX = Math.floor((width - consoleWidth) * align[0]);
+			this.offsetY = Math.floor((height - consoleHeight) * align[1]);
 			this.scaleX = scaleX;
 			this.scaleY = scaleY;
 
-			this.context.fillStyle = options.clearColour;
+			this.context.fillStyle = clearColour;
 			this.context.fillRect(0, 0, width, height);
 			this.redraw = false;
 
 			consoleW = consoleWidth;
 			consoleH = consoleHeight;
 		} else {
-			consoleW = this.scaleX * console.width * tileWidth;
-			consoleH = this.scaleY * console.height * tileHeight;
+			consoleW = this.scaleX * console.cols * tileWidth;
+			consoleH = this.scaleY * console.rows * tileHeight;
 		}
 
 		const src = console.render();
@@ -186,17 +191,12 @@ export class Terminal {
 		cancelAnimationFrame(this.handle);
 	}
 
-	setTileset(tileset: Tileset) {
-		this.tileset = tileset;
-		this.redraw = true;
-	}
-
 	pixelToTile(wx: number, wy: number): [number, number] {
 		const ox = wx - this.element.offsetLeft - this.offsetX;
 		const oy = wy - this.element.offsetTop - this.offsetY;
 
-		const tw = this.tileset.tileWidth * this.scaleX;
-		const th = this.tileset.tileHeight * this.scaleY;
+		const tw = this.tileWidth * this.scaleX;
+		const th = this.tileHeight * this.scaleY;
 
 		return [Math.floor(ox / tw), Math.floor(oy / th)];
 	}

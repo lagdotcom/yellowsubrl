@@ -1,5 +1,4 @@
 import { Console, BlendMode, Map, Colours } from './tcod';
-import GameMap from './GameMap';
 import MessageLog from './MessageLog';
 import GameState from './GameState';
 import { inventoryMenu } from './menus';
@@ -11,10 +10,17 @@ import ecs, {
 	Fighter,
 	Inventory,
 } from './ecs';
-import { XY } from './systems/movement';
 import { isAt, nameOf } from './systems/entities';
-import { colours, barWidth, width, height } from './constants';
+import {
+	colours,
+	barWidth,
+	width,
+	height,
+	mapDisplayHeight,
+	mapDisplayWidth,
+} from './constants';
 import Engine from './Engine';
+import GameMap from './GameMap';
 
 export type ColourMap = { [name: string]: string };
 
@@ -22,6 +28,37 @@ export enum RenderOrder {
 	Corpse,
 	Item,
 	Actor,
+}
+
+function renderMap(
+	con: Console,
+	gameMap: GameMap,
+	fovMap: Map,
+	sx: number,
+	sy: number
+) {
+	for (var yo = 0; yo < mapDisplayHeight; yo++) {
+		const y = sy + yo;
+		for (var xo = 0; xo < mapDisplayWidth; xo++) {
+			const x = sx + xo;
+
+			if (gameMap.contains(x, y)) {
+				const vx = xo * 2;
+				const visible = fovMap.isInFov(x, y);
+				const tile = gameMap.tiles[x][y];
+				var key: string;
+				if (visible) {
+					tile.explored = true;
+					key = tile.blocked ? 'lightWall' : 'lightGround';
+				} else if (tile.explored) {
+					key = tile.blocked ? 'darkWall' : 'darkGround';
+				} else continue;
+
+				con.setCharBackground(vx, yo, colours[key], BlendMode.Set);
+				con.setCharBackground(vx + 1, yo, colours[key], BlendMode.Set);
+			}
+		}
+	}
 }
 
 export function renderAll(engine: Engine) {
@@ -37,29 +74,16 @@ export function renderAll(engine: Engine) {
 		panel,
 		panelY,
 		player,
+		scrollX,
+		scrollY,
 	} = engine;
 
-	if (fovRecompute)
-		for (var y = 0; y < gameMap.height; y++) {
-			for (var x = 0; x < gameMap.width; x++) {
-				const visible = fovMap.isInFov(x, y);
-				const tile = gameMap.tiles[x][y];
-				var key: string;
-				if (visible) {
-					tile.explored = true;
-					key = tile.blocked ? 'lightWall' : 'lightGround';
-				} else if (tile.explored) {
-					key = tile.blocked ? 'darkWall' : 'darkGround';
-				} else continue;
-
-				console.setCharBackground(x, y, colours[key], BlendMode.Set);
-			}
-		}
+	if (fovRecompute) renderMap(console, gameMap, fovMap, scrollX, scrollY);
 
 	renderable
 		.get()
 		.sort((a, b) => a.get(Appearance).order - b.get(Appearance).order)
-		.forEach(e => drawEntity(console, e, fovMap));
+		.forEach(e => drawEntity(console, e, fovMap, scrollX, scrollY));
 
 	panel.clear(' ', undefined, Colours.black);
 
@@ -115,22 +139,43 @@ export function drawMessageLog(
 	});
 }
 
-export function clearAll(con: Console) {
-	renderable.get().forEach(en => clearEntity(con, en.get(Position)));
+export function clearAll(con: Console, ox: number, oy: number) {
+	renderable.get().forEach(en => clearEntity(con, ox, oy, en));
 }
 
-export function drawEntity(console: Console, en: Entity, fovMap: Map) {
+export function drawEntity(
+	console: Console,
+	en: Entity,
+	fovMap: Map,
+	ox: number,
+	oy: number
+) {
 	const appearance = en.get(Appearance);
 	const position = en.get(Position);
 
 	if (fovMap.isInFov(position.x, position.y)) {
+		const vx = (position.x - ox) * 2;
+		const vy = position.y - oy;
+
 		console.setDefaultForeground(appearance.colour);
-		console.putChar(position.x, position.y, appearance.ch);
+		console.putChar(vx, vy, appearance.tile);
+		if (appearance.tile2) console.putChar(vx + 1, vy, appearance.tile2);
 	}
 }
 
-export function clearEntity(console: Console, pos: XY) {
-	console.putChar(pos.x, pos.y, ' ');
+export function clearEntity(
+	console: Console,
+	ox: number,
+	oy: number,
+	en: Entity
+) {
+	const appearance = en.get(Appearance);
+	const position = en.get(Position);
+	const vx = (position.x - ox) * 2;
+	const vy = position.y - oy;
+
+	console.putChar(vx, vy, ' ');
+	if (appearance.tile2) console.putChar(vx + 1, vy, ' ');
 }
 
 export function renderBar(

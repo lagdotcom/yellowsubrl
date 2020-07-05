@@ -21,7 +21,7 @@ export default class DeadResult implements Result {
 
 		entity.add(Appearance, {
 			name: `remains of ${name}`,
-			ch: '%',
+			tile: '%',
 			colour: Colours.darkRed,
 			order: RenderOrder.Corpse,
 		});

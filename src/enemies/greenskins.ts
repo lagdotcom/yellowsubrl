@@ -4,7 +4,7 @@ import EnemySpawn from './EnemySpawn';
 export const orc: EnemySpawn = {
 	name: 'orc',
 	colour: Colours.green,
-	ch: 'o',
+	tile: 'Orc',
 	hp: 10,
 	defense: 0,
 	power: 3,
@@ -13,7 +13,7 @@ export const orc: EnemySpawn = {
 export const troll: EnemySpawn = {
 	name: 'troll',
 	colour: Colours.darkGreen,
-	ch: 'T',
+	tile: 'Troll',
 	hp: 16,
 	defense: 1,
 	power: 4,

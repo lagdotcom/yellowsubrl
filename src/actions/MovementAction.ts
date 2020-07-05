@@ -1,4 +1,4 @@
-import { Entity, Position, Fighter } from '../ecs';
+import { Entity, Position, Fighter, Player } from '../ecs';
 import { getBlocker, nameOf } from '../systems/entities';
 import { attack } from '../systems/combat';
 import Action from './Action';
@@ -24,7 +24,7 @@ export default class MovementAction implements Action {
 		const destX = position.x + this.dx,
 			destY = position.y + this.dy;
 
-		if (!engine.gameMap.inBounds(destX, destY)) return results;
+		if (!engine.gameMap.contains(destX, destY)) return results;
 		if (engine.gameMap.isBlocked(destX, destY)) return results;
 
 		const target = getBlocker(destX, destY);
@@ -41,7 +41,11 @@ export default class MovementAction implements Action {
 		} else {
 			position.x = destX;
 			position.y = destY;
-			engine.fovRecompute = en == engine.player;
+
+			if (en.get(Player)) {
+				engine.fovRecompute = true;
+				engine.updateScroll();
+			}
 		}
 
 		engine.gameStateStack.swap(GameState.EnemyTurn);

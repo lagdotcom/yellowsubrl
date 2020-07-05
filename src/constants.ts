@@ -3,11 +3,14 @@ import RNG from './RNG';
 
 export const rng = new RNG();
 
-export const width = 60;
-export const height = 40;
+export const width = 90;
+export const height = 36;
 
 export const barWidth = 20;
 export const panelHeight = 7;
+
+export const mapDisplayWidth = width / 2;
+export const mapDisplayHeight = height - panelHeight;
 
 export const messageX = barWidth + 2;
 export const messageWidth = width - barWidth - 2;

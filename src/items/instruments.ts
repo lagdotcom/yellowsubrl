@@ -5,12 +5,12 @@ import ItemSpawn from './ItemSpawn';
 const instrument = (
 	name: string,
 	weapon: WeaponCategory,
-	ch: string,
+	tile: string,
 	colour: string
 ): ItemSpawn => ({
 	name,
 	weapon,
-	ch,
+	tile,
 	colour,
 });
 
