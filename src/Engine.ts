@@ -100,6 +100,7 @@ export default class Engine {
 	private lastReportTime: number;
 
 	constructor(tilesets: Tileset[]) {
+		// TODO: debugging only
 		(window as any).G = this;
 
 		this.colours = colours;

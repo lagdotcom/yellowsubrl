@@ -43,6 +43,9 @@ export class Entity {
 		component.add(this, data);
 		this.ecs.update(this);
 
+		// TODO: debugging only
+		(this as any)[component.name] = data;
+
 		return this;
 	}
 
@@ -200,8 +203,10 @@ export class Query {
 }
 
 const ecs = new Manager();
-(window as any).ecs = ecs;
 export default ecs;
+
+// TODO: debugging only
+(window as any).ecs = ecs;
 
 export const Appearance = ecs.register<IAppearance>('Appearance');
 export const AI = ecs.register<IAI>('AI');
