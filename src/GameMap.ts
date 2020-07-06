@@ -97,7 +97,7 @@ export default class GameMap {
 				ecs.find({ all: [Position] }).filter(en => isAt(en, x, y)).length == 0
 			) {
 				const prefab = rng.weighted(itemSpawnData);
-				const item = ecs.entity(prefab);
+				const item = ecs.entity(prefab).add(Position, { x, y });
 			}
 		}
 	}
