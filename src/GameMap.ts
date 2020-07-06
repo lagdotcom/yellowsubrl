@@ -84,23 +84,8 @@ export default class GameMap {
 			const y = rng.randint(room.y1 + 1, room.y2 - 1);
 
 			if (!getBlocker(x, y)) {
-				const { name, tile, colour, hp, defense, power } = rng.weighted(
-					enemySpawnData
-				);
-
-				const enemy = ecs
-					.entity()
-					.add(Appearance, {
-						name,
-						tile,
-						tile2: tile + '2',
-						colour,
-						order: RenderOrder.Actor,
-					})
-					.add(AI, { routine: 'basic', vars: {} })
-					.add(Fighter, { hp, maxHp: hp, defense, power })
-					.add(Position, { x, y })
-					.add(Blocks, {});
+				const prefab = rng.weighted(enemySpawnData);
+				const enemy = ecs.entity(prefab).add(Position, { x, y });
 			}
 		}
 
@@ -111,23 +96,8 @@ export default class GameMap {
 			if (
 				ecs.find({ all: [Position] }).filter(en => isAt(en, x, y)).length == 0
 			) {
-				const {
-					name,
-					tile,
-					colour,
-					use,
-					targeting,
-					targetingMessage,
-					weapon,
-				} = rng.weighted(itemSpawnData);
-
-				const item = ecs
-					.entity()
-					.add(Appearance, { name, tile, colour, order: RenderOrder.Item })
-					.add(Item, { use, targeting, targetingMessage })
-					.add(Position, { x, y });
-
-				if (weapon) item.add(Weapon, { category: weapon });
+				const prefab = rng.weighted(itemSpawnData);
+				const item = ecs.entity(prefab);
 			}
 		}
 	}

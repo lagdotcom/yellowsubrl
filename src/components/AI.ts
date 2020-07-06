@@ -18,5 +18,5 @@ export const AIRoutines: { [name: string]: AIRoutine } = {
 
 export default interface IAI {
 	routine: AIRoutineName;
-	vars: any;
+	vars: object;
 }

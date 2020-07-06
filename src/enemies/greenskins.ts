@@ -1,20 +1,30 @@
+import ecs, { Appearance, AI, Blocks, Fighter } from '../ecs';
 import { Colours } from '../tcod';
-import EnemySpawn from './EnemySpawn';
+import { RenderOrder } from '../renderFunctions';
 
-export const orc: EnemySpawn = {
-	name: 'orc',
-	colour: Colours.green,
-	tile: 'Orc',
-	hp: 10,
-	defense: 0,
-	power: 3,
-};
+const enemy = ecs
+	.prefab('enemy')
+	.add(Blocks, {})
+	.add(AI, { routine: 'basic', vars: {} });
 
-export const troll: EnemySpawn = {
-	name: 'troll',
-	colour: Colours.darkGreen,
-	tile: 'Troll',
-	hp: 16,
-	defense: 1,
-	power: 4,
-};
+export const orc = ecs
+	.prefab('orc', enemy)
+	.add(Appearance, {
+		name: 'orc',
+		tile: 'Orc',
+		tile2: 'Orc2',
+		colour: Colours.green,
+		order: RenderOrder.Actor,
+	})
+	.add(Fighter, { hp: 10, maxHp: 10, defense: 0, power: 3 });
+
+export const troll = ecs
+	.prefab('troll', enemy)
+	.add(Appearance, {
+		name: 'troll',
+		tile: 'Troll',
+		tile2: 'Troll2',
+		colour: Colours.darkGreen,
+		order: RenderOrder.Actor,
+	})
+	.add(Fighter, { hp: 16, maxHp: 16, defense: 1, power: 4 });

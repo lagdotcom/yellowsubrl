@@ -1,3 +1,5 @@
+import { diff } from 'deep-object-diff';
+import { deepAssign } from 'deep-object-assign-with-reduce';
 import { nanoid } from 'nanoid/non-secure';
 import IAppearance from './components/Appearance';
 import IFighter from './components/Fighter';
@@ -32,10 +34,21 @@ export class Component<T> {
 export class Entity {
 	private components: Set<Component<any>>;
 	private destroyed: boolean;
+	private prefabs: string[];
 
-	constructor(private ecs: Manager, public id: string) {
+	constructor(private ecs: Manager, public id: string, ...prefabs: Prefab[]) {
 		this.components = new Set<Component<any>>();
 		this.destroyed = false;
+
+		this.prefabs = [];
+		prefabs.forEach(pf => {
+			const pfd = pf.data();
+			for (var name in pfd) {
+				this.add(ecs.getComponent(name), deepAssign({}, pfd[name]));
+			}
+
+			this.prefabs.push(pf.id);
+		});
 	}
 
 	add<T>(component: Component<T>, data: T) {
@@ -61,6 +74,9 @@ export class Entity {
 		this.components.delete(component);
 		component.remove(this);
 		this.ecs.update(this);
+
+		// TODO: debugging only
+		delete (this as any)[component.name];
 	}
 
 	data() {
@@ -70,6 +86,21 @@ export class Entity {
 		});
 
 		return data;
+	}
+
+	diffData() {
+		return diff(this.prefabData(), this.data());
+	}
+
+	prefabNames() {
+		return this.prefabs;
+	}
+
+	prefabData() {
+		return deepAssign(
+			{},
+			...this.prefabs.map(name => this.ecs.getPrefab(name).data())
+		);
 	}
 
 	destroy() {
@@ -82,16 +113,20 @@ export class Entity {
 	}
 }
 
+export class Prefab extends Entity {}
+
 export class Manager {
-	private components: Set<Component<any>>;
+	private components: { [name: string]: Component<any> };
 	private entities: Set<Entity>;
 	private idGenerator: () => string;
+	private prefabs: { [name: string]: Entity };
 	private queries: Query[];
 
 	constructor() {
-		this.components = new Set<Component<any>>();
+		this.components = {};
 		this.entities = new Set<Entity>();
 		this.idGenerator = () => nanoid();
+		this.prefabs = {};
 		this.queries = [];
 	}
 
@@ -103,23 +138,39 @@ export class Manager {
 
 	register<T>(name: string): Component<T> {
 		const comp = new Component<T>(name);
-		this.components.add(comp);
+		this.components[name] = comp;
 
 		return comp;
 	}
 
-	lookup<T>(name: string): Component<T> | undefined {
-		return Array.from(this.components).find(co => co.name == name);
+	getComponent<T>(name: string): Component<T> {
+		const co = this.components[name];
+		if (!co) throw `Unknown component: ${name}`;
+
+		return co;
 	}
 
 	nextId() {
 		return this.idGenerator();
 	}
 
-	entity(): Entity {
+	entity(...prefabs: Prefab[]): Entity {
 		const id = this.nextId();
-		const en = new Entity(this, id);
+		const en = new Entity(this, id, ...prefabs);
 		return this.attach(en);
+	}
+
+	prefab(name: string, ...prefabs: Prefab[]): Prefab {
+		const pf = new Prefab(this, name, ...prefabs);
+		this.prefabs[name] = pf;
+		return pf;
+	}
+
+	getPrefab(name: string): Prefab {
+		const pf = this.prefabs[name];
+		if (!pf) throw `Unknown prefab: ${name}`;
+
+		return pf;
 	}
 
 	attach(en: Entity): Entity {

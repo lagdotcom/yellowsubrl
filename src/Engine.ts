@@ -58,12 +58,27 @@ import {
 import { AIRoutines } from './components/AI';
 import MessageResult from './results/MessageResult';
 import { mainMenu } from './menus';
+import { deepAssign } from 'deep-object-assign-with-reduce';
 
 interface SaveData {
-	entities: { [id: string]: any };
+	entities: { [id: string]: [string[], any] };
 	map: string;
 	seed: string;
 }
+
+const playerPrefab = ecs
+	.prefab('player')
+	.add(Player, {})
+	.add(Appearance, {
+		name: 'you',
+		tile: 'Player',
+		tile2: 'Player2',
+		colour: Colours.white,
+		order: RenderOrder.Actor,
+	})
+	.add(Fighter, { hp: 30, maxHp: 30, defense: 2, power: 5 })
+	.add(Inventory, { capacity: 26, items: [] })
+	.add(Blocks, {});
 
 export default class Engine {
 	public barWidth: number;
@@ -184,10 +199,13 @@ export default class Engine {
 			map: toReadable(this.gameMap.seed),
 		};
 		ecs.find().forEach(en => {
-			data.entities[en.id] = en.data();
+			data.entities[en.id] = [en.prefabNames(), en.diffData()];
 		});
 
-		localStorage.setItem('ysrl.save', JSON.stringify(data));
+		localStorage.setItem(
+			'ysrl.save',
+			JSON.stringify(data, (k, v) => (v === undefined ? null : v))
+		);
 	}
 
 	loadGame() {
@@ -205,19 +223,25 @@ export default class Engine {
 		ecs.clear();
 
 		for (const id in data.entities) {
-			const en = new Entity(ecs, id);
-			const edata = data.entities[id];
+			const [eprefabs, edata] = data.entities[id];
+			const en = new Entity(
+				ecs,
+				id,
+				...eprefabs.map(name => ecs.getPrefab(name))
+			);
 			ecs.attach(en);
 
 			for (const name in edata) {
-				const co = ecs.lookup(name);
+				const co = ecs.getComponent(name);
 				const cdata = edata[name];
-				if (!co) {
-					console.log(`Unknown component: ${name}`);
-					continue;
-				}
 
-				en.add(co, cdata);
+				if (cdata === null) {
+					en.remove(co);
+				} else if (en.has(co)) {
+					deepAssign(en.get(co) as any, cdata);
+				} else {
+					en.add(co, cdata);
+				}
 			}
 		}
 
@@ -255,21 +279,7 @@ export default class Engine {
 		gameMap.reset(rng.seed, gameMap.width, gameMap.height);
 		const position = mapGenerator.generate(rng, gameMap);
 
-		this.player = ecs
-			.entity()
-			.add(Player, {})
-			.add(Appearance, {
-				name: 'you',
-				tile: 'Player',
-				tile2: 'Player2',
-				colour: Colours.white,
-				order: RenderOrder.Actor,
-			})
-			.add(Fighter, { hp: 30, maxHp: 30, defense: 2, power: 5 })
-			.add(Inventory, { capacity: 26, items: [] })
-			.add(Position, position)
-			.add(Blocks, {});
-
+		this.player = ecs.entity(playerPrefab).add(Position, position);
 		this.fovMap = initializeFov(gameMap);
 		this.updateScroll();
 	}

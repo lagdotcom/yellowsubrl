@@ -1,4 +1,3 @@
-import ItemSpawn from './ItemSpawn';
 import { Colours } from '../tcod';
 import {
 	heal,
@@ -7,57 +6,77 @@ import {
 	castConfuse,
 } from '../itemFunctions';
 import MessageResult from '../results/MessageResult';
+import ecs, { Appearance, Item } from '../ecs';
+import { RenderOrder } from '../renderFunctions';
 
-export const healingPotion: ItemSpawn = {
-	name: 'healing potion',
-	colour: Colours.violet,
-	tile: '!',
-	use: (item, en) => heal({ item, en, amount: 4 }),
-};
+export const healingPotion = ecs
+	.prefab('healing potion')
+	.add(Appearance, {
+		name: 'healing potion',
+		tile: '!',
+		colour: Colours.violet,
+		order: RenderOrder.Item,
+	})
+	.add(Item, { use: (item, en) => heal({ item, en, amount: 4 }) });
 
-export const fireballScroll: ItemSpawn = {
-	name: 'fireball scroll',
-	colour: Colours.red,
-	tile: '#',
-	targeting: true,
-	targetingMessage: new MessageResult(
-		'Left-click a target tile for the fireball, or Esc to cancel.',
-		Colours.lightCyan
-	),
-	use: (item, caster, engine, x, y) =>
-		castFireball({
-			item,
-			caster,
-			fovMap: engine.fovMap,
-			damage: 12,
-			radius: 3,
-			target: { x: x!, y: y! },
-		}),
-};
+export const fireballScroll = ecs
+	.prefab('fireball scroll')
+	.add(Appearance, {
+		name: 'fireball scroll',
+		tile: '#',
+		colour: Colours.red,
+		order: RenderOrder.Item,
+	})
+	.add(Item, {
+		targeting: true,
+		targetingMessage: new MessageResult(
+			'Left-click a target tile for the fireball, or Esc to cancel.',
+			Colours.lightCyan
+		),
+		use: (item, caster, engine, x, y) =>
+			castFireball({
+				item,
+				caster,
+				fovMap: engine.fovMap,
+				damage: 12,
+				radius: 3,
+				target: { x: x!, y: y! },
+			}),
+	});
 
-export const lightningScroll: ItemSpawn = {
-	name: 'lightning scroll',
-	colour: Colours.yellow,
-	tile: '#',
-	use: (item, caster, engine) =>
-		castLightning({
-			item,
-			caster,
-			fovMap: engine.fovMap,
-			damage: 20,
-			range: 5,
-		}),
-};
+export const lightningScroll = ecs
+	.prefab('lightning scroll')
+	.add(Appearance, {
+		name: 'lightning scroll',
+		tile: '#',
+		colour: Colours.yellow,
+		order: RenderOrder.Item,
+	})
+	.add(Item, {
+		use: (item, caster, engine) =>
+			castLightning({
+				item,
+				caster,
+				fovMap: engine.fovMap,
+				damage: 20,
+				range: 5,
+			}),
+	});
 
-export const confusionScroll: ItemSpawn = {
-	name: 'confusion scroll',
-	colour: Colours.lightPink,
-	tile: '#',
-	targeting: true,
-	targetingMessage: new MessageResult(
-		'Left-click an enemy to confuse it, or Esc to cancel.',
-		Colours.lightCyan
-	),
-	use: (item, caster, engine, x, y) =>
-		castConfuse(item, caster, engine.fovMap, 10, { x: x!, y: y! }),
-};
+export const confusionScroll = ecs
+	.prefab('confusion scroll')
+	.add(Appearance, {
+		name: 'confusion scroll',
+		tile: '#',
+		colour: Colours.lightPink,
+		order: RenderOrder.Item,
+	})
+	.add(Item, {
+		targeting: true,
+		targetingMessage: new MessageResult(
+			'Left-click an enemy to confuse it, or Esc to cancel.',
+			Colours.lightCyan
+		),
+		use: (item, caster, engine, x, y) =>
+			castConfuse(item, caster, engine.fovMap, 10, { x: x!, y: y! }),
+	});

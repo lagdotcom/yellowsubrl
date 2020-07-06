@@ -1,18 +1,19 @@
 import { WeaponCategory } from '../components/Weapon';
 import { Colours } from '../tcod';
-import ItemSpawn from './ItemSpawn';
+import ecs, { Prefab, Appearance, Weapon, Item } from '../ecs';
+import { RenderOrder } from '../renderFunctions';
 
 const instrument = (
 	name: string,
-	weapon: WeaponCategory,
+	category: WeaponCategory,
 	tile: string,
 	colour: string
-): ItemSpawn => ({
-	name,
-	weapon,
-	tile,
-	colour,
-});
+): Prefab =>
+	ecs
+		.prefab(name)
+		.add(Appearance, { name, tile, colour, order: RenderOrder.Item })
+		.add(Item, {})
+		.add(Weapon, { category });
 
 export const acoustic = instrument(
 	'acoustic guitar',
