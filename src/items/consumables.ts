@@ -14,7 +14,8 @@ export const healingPotion = ecs
 	.prefab('healing potion')
 	.add(Appearance, {
 		name: 'healing potion',
-		tile: '!',
+		tile: 'Potion',
+		tile2: 'Potion2',
 		colour: Colours.violet,
 		order: RenderOrder.Item,
 	})
@@ -24,7 +25,8 @@ export const fireballScroll = ecs
 	.prefab('fireball scroll')
 	.add(Appearance, {
 		name: 'fireball scroll',
-		tile: '#',
+		tile: 'Scroll',
+		tile2: 'Scroll2',
 		colour: Colours.red,
 		order: RenderOrder.Item,
 	})
@@ -49,7 +51,8 @@ export const lightningScroll = ecs
 	.prefab('lightning scroll')
 	.add(Appearance, {
 		name: 'lightning scroll',
-		tile: '#',
+		tile: 'Scroll',
+		tile2: 'Scroll2',
 		colour: Colours.yellow,
 		order: RenderOrder.Item,
 	})
@@ -68,7 +71,8 @@ export const confusionScroll = ecs
 	.prefab('confusion scroll')
 	.add(Appearance, {
 		name: 'confusion scroll',
-		tile: '#',
+		tile: 'Scroll',
+		tile2: 'Scroll2',
 		colour: Colours.lightPink,
 		order: RenderOrder.Item,
 	})

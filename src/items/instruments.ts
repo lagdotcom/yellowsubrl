@@ -11,35 +11,41 @@ const instrument = (
 ): Prefab =>
 	ecs
 		.prefab(name)
-		.add(Appearance, { name, tile, colour, order: RenderOrder.Item })
+		.add(Appearance, {
+			name,
+			tile,
+			tile2: tile + '2',
+			colour,
+			order: RenderOrder.Item,
+		})
 		.add(Item, {})
 		.add(Weapon, { category });
 
 export const acoustic = instrument(
 	'acoustic guitar',
 	WeaponCategory.String,
-	'/',
+	'Guitar',
 	Colours.brown
 );
 
 export const bass = instrument(
 	'bass guitar',
 	WeaponCategory.String,
-	'/',
+	'Guitar',
 	Colours.black
 );
 
 export const electric = instrument(
 	'electric guitar',
 	WeaponCategory.String,
-	'/',
+	'Guitar',
 	Colours.red
 );
 
 export const flute = instrument(
 	'flute',
 	WeaponCategory.Woodwind,
-	'-',
+	'Flute',
 	Colours.silver
 );
 
@@ -53,7 +59,7 @@ export const sitar = instrument(
 export const snare = instrument(
 	'snare drum',
 	WeaponCategory.Percussion,
-	'#',
+	'Drum',
 	Colours.white
 );
 

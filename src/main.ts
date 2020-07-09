@@ -92,6 +92,16 @@ const tilesetLayout: Charmap = {
 	Orc2: [3, 8],
 	Troll: [4, 8],
 	Troll2: [5, 8],
+	Potion: [6, 8],
+	Potion2: [7, 8],
+	Scroll: [8, 8],
+	Scroll2: [9, 8],
+	Guitar: [10, 8],
+	Guitar2: [11, 8],
+	Flute: [12, 8],
+	Flute2: [13, 8],
+	Drum: [14, 8],
+	Drum2: [15, 8],
 };
 
 async function main() {
