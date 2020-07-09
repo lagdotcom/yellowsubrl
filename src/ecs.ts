@@ -1,15 +1,6 @@
 import { diff } from 'deep-object-diff';
 import { deepAssign } from 'deep-object-assign-with-reduce';
 import { nanoid } from 'nanoid/non-secure';
-import IAppearance from './components/Appearance';
-import IFighter from './components/Fighter';
-import IBlocks from './components/Blocks';
-import IInventory from './components/Inventory';
-import IItem from './components/Item';
-import IPosition from './components/Position';
-import IWeapon from './components/Weapon';
-import IPlayer from './components/Player';
-import IAI from './components/AI';
 
 export class Component<T> {
 	private data: { [id: string]: T };
@@ -44,7 +35,7 @@ export class Entity {
 		prefabs.forEach(pf => {
 			const pfd = pf.data();
 			for (var name in pfd) {
-				this.add(ecs.getComponent(name), deepAssign({}, pfd[name]));
+				this.add(ecs.getComponent(name), pfd[name]);
 			}
 
 			this.prefabs.push(pf.id);
@@ -53,7 +44,7 @@ export class Entity {
 
 	add<T>(component: Component<T>, data: T) {
 		this.components.add(component);
-		component.add(this, data);
+		component.add(this, deepAssign({}, data));
 		this.ecs.update(this);
 
 		// TODO: debugging only
@@ -258,17 +249,3 @@ export default ecs;
 
 // TODO: debugging only
 (window as any).ecs = ecs;
-
-export const Appearance = ecs.register<IAppearance>('Appearance');
-export const AI = ecs.register<IAI>('AI');
-export const Blocks = ecs.register<IBlocks>('Blocks');
-export const Fighter = ecs.register<IFighter>('Fighter');
-export const Inventory = ecs.register<IInventory>('Inventory');
-export const Item = ecs.register<IItem>('Item');
-export const Player = ecs.register<IPlayer>('Player');
-export const Position = ecs.register<IPosition>('Position');
-export const Weapon = ecs.register<IWeapon>('Weapon');
-
-export const blockers = ecs.query({ all: [Blocks, Position] });
-export const hasAI = ecs.query({ all: [AI] });
-export const renderable = ecs.query({ all: [Appearance, Position] });

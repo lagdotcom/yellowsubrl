@@ -1,7 +1,8 @@
 import Action from './Action';
 import Engine from '../Engine';
 import GameState from '../GameState';
-import { Entity, Item } from '../ecs';
+import { Entity } from '../ecs';
+import { Item } from '../components';
 
 export default class ChooseTargetAction implements Action {
 	name: 'choosetarget';

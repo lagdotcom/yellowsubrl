@@ -1,6 +1,7 @@
-import ecs, { Appearance, AI, Blocks, Fighter } from '../ecs';
+import ecs from '../ecs';
 import { Colours } from '../tcod';
 import { RenderOrder } from '../renderFunctions';
+import { AI, Appearance, Blocks, Fighter } from '../components';
 
 const enemy = ecs
 	.prefab('enemy')

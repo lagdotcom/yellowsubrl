@@ -1,10 +1,11 @@
-import { Inventory, Entity } from '../ecs';
+import { Entity } from '../ecs';
 import { dropItemFromInventory } from '../systems/items';
 import Action from './Action';
 import Engine from '../Engine';
 import Result from '../results/Result';
 import GameState from '../GameState';
 import PlaceItemResult from '../results/PlaceItemResult';
+import { Inventory } from '../components';
 
 export default class DropInventoryAction implements Action {
 	name: 'dropinventory';

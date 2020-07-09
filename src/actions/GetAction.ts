@@ -4,8 +4,9 @@ import MessageResult from '../results/MessageResult';
 import { Colours } from '../tcod';
 import Result from '../results/Result';
 import GameState from '../GameState';
-import ecs, { Inventory, Position, Entity, Item } from '../ecs';
+import ecs, { Entity } from '../ecs';
 import { addItemToInventory } from '../systems/items';
+import { Item, Inventory, Position } from '../components';
 
 export default class GetAction implements Action {
 	name: 'get';

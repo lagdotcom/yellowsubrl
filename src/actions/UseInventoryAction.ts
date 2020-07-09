@@ -4,8 +4,9 @@ import MessageResult from '../results/MessageResult';
 import { Colours } from '../tcod';
 import Result from '../results/Result';
 import GameState from '../GameState';
-import { Entity, Inventory, Item } from '../ecs';
+import { Entity } from '../ecs';
 import { nameOf } from '../systems/entities';
+import { Inventory, Item } from '../components';
 
 export default class UseInventoryAction implements Action {
 	name: 'useinventory';

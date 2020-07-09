@@ -1,5 +1,6 @@
 import Result from './Result';
-import { Entity, Position } from '../ecs';
+import { Entity } from '../ecs';
+import { Position } from '../components';
 
 export default class PlaceItemResult implements Result {
 	name: 'placeitem';

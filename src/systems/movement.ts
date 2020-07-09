@@ -1,7 +1,9 @@
 import { getBlocker } from './entities';
 import GameMap from '../GameMap';
-import { Entity, Position, blockers } from '../ecs';
 import { AStar, Map } from '../tcod';
+import { Entity } from '../ecs';
+import { Position } from '../components';
+import { blockers } from '../queries';
 
 export interface XY {
 	x: number;

@@ -1,19 +1,11 @@
 import Tile from './Tile';
 import { Rect } from './mapObjects';
 import RNG, { RNGSeed } from './RNG';
-import { RenderOrder } from './renderFunctions';
 import { itemSpawnData, enemySpawnData } from './spawnData';
-import ecs, {
-	Appearance,
-	Blocks,
-	Fighter,
-	Item,
-	Position,
-	Weapon,
-	AI,
-} from './ecs';
+import ecs from './ecs';
 import { getBlocker, isAt } from './systems/entities';
 import { XY } from './systems/movement';
+import { Position } from './components';
 
 export interface MapGenerator {
 	generate(rng: RNG, gameMap: GameMap): XY;

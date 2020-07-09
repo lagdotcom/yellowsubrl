@@ -1,4 +1,4 @@
-import ecs, { Entity, Fighter, Position, AI } from './ecs';
+import ecs, { Entity } from './ecs';
 import Result from './results/Result';
 import { addHp, takeDamage } from './systems/combat';
 import MessageResult from './results/MessageResult';
@@ -6,6 +6,7 @@ import { Colours, Map } from './tcod';
 import ConsumeItemResult from './results/ConsumeItemResult';
 import { distance, XY } from './systems/movement';
 import { nameOf, isAt } from './systems/entities';
+import { Fighter, Position, AI } from './components';
 
 export function heal({
 	item,

@@ -5,35 +5,25 @@ import {
 	FovAlgorithm,
 	Map,
 	Terminal,
-	Tileset,
 	TerminalKey,
 	TerminalMouse,
+	Tileset,
 } from './tcod';
 import GameState from './GameState';
-import { initializeFov, recomputeFov } from './fovFunctions';
+import { initializeFov, recomputeFov } from './systems/fov';
 import RNG, { toReadable, fromReadable } from './RNG';
 import {
-	renderAll,
 	clearAll,
 	ColourMap,
-	RenderOrder,
 	drawMessageLog,
+	renderAll,
+	RenderOrder,
 } from './renderFunctions';
 import Result from './results/Result';
 import MessageLog from './MessageLog';
 import { handleKeys, handleMouse } from './inputHandlers';
 import Stack from './Stack';
-import ecs, {
-	AI,
-	Appearance,
-	Blocks,
-	Entity,
-	Fighter,
-	hasAI,
-	Inventory,
-	Player,
-	Position,
-} from './ecs';
+import ecs, { Entity } from './ecs';
 import BSPTree from './generator/BSPTree';
 import {
 	barWidth,
@@ -55,10 +45,20 @@ import {
 	rng,
 	width,
 } from './constants';
-import { AIRoutines } from './components/AI';
 import MessageResult from './results/MessageResult';
 import { mainMenu } from './menus';
 import { deepAssign } from 'deep-object-assign-with-reduce';
+import {
+	AI,
+	AIRoutines,
+	Appearance,
+	Blocks,
+	Fighter,
+	Inventory,
+	Player,
+	Position,
+} from './components';
+import { hasAI } from './queries';
 
 interface SaveData {
 	entities: { [id: string]: [string[], any] };

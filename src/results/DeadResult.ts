@@ -4,8 +4,9 @@ import { Colours } from '../tcod';
 import MessageResult from './MessageResult';
 import GameState from '../GameState';
 import { RenderOrder } from '../renderFunctions';
-import { Entity, Appearance, Player, Blocks, Fighter, AI } from '../ecs';
+import { Entity } from '../ecs';
 import { nameOf } from '../systems/entities';
+import { Appearance, Player, AI, Blocks, Fighter } from '../components';
 
 export default class DeadResult implements Result {
 	name: 'dead';
@@ -19,6 +20,7 @@ export default class DeadResult implements Result {
 
 		const name = nameOf(entity);
 
+		// TODO: this should probably just make a new entity haha
 		entity.add(Appearance, {
 			name: `remains of ${name}`,
 			tile: '%',

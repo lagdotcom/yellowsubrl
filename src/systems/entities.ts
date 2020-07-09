@@ -1,6 +1,6 @@
-import ecs, { Blocks, Position, Entity, Appearance } from '../ecs';
-
-const blockers = ecs.query({ all: [Blocks, Position] });
+import { blockers } from '../queries';
+import { Entity } from '../ecs';
+import { Appearance, Position } from '../components';
 
 export function getBlocker(x: number, y: number) {
 	return blockers.get().find(en => isAt(en, x, y));

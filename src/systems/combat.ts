@@ -1,8 +1,9 @@
-import { Entity, Fighter } from '../ecs';
+import { Entity } from '../ecs';
 import Result from '../results/Result';
 import MessageResult from '../results/MessageResult';
 import DeadResult from '../results/DeadResult';
 import { nameOf } from './entities';
+import { Fighter } from '../components';
 
 export function addHp(entity: Entity, amount: number) {
 	const fighter = entity.get(Fighter);

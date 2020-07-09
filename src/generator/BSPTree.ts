@@ -1,7 +1,6 @@
 import RNG from '../RNG';
 import GameMap from '../GameMap';
 import { Rect } from '../mapObjects';
-import { Entity, Position } from '../ecs';
 
 class Leaf {
 	left?: Leaf;

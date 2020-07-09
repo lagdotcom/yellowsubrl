@@ -1,5 +1,6 @@
-import { Entity, Inventory, Position } from '../ecs';
+import { Entity } from '../ecs';
 import Result from './Result';
+import { Inventory, Position } from '../components';
 
 export default class ItemAddedResult implements Result {
 	name: 'itemadded';

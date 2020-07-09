@@ -1,4 +1,3 @@
-import { Entity, Position, Fighter, AI } from '../ecs';
 import Engine from '../Engine';
 import Result from '../results/Result';
 import { distance, moveAstar, moveTowards, XY } from './movement';
@@ -6,7 +5,8 @@ import { attack } from './combat';
 import MessageResult from '../results/MessageResult';
 import { nameOf } from './entities';
 import { Colours } from '../tcod';
-import IAI from '../components/AI';
+import { Entity } from '../ecs';
+import { AI, Position, Fighter, IAI } from '../components';
 
 interface BasicAIVars {
 	goal?: XY;

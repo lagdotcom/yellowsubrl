@@ -1,5 +1,6 @@
 import Result from './Result';
-import ecs, { Entity, Inventory } from '../ecs';
+import ecs, { Entity } from '../ecs';
+import { Inventory } from '../components';
 
 export default class ConsumeItemResult implements Result {
 	name: 'consumeitem';

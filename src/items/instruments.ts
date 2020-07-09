@@ -1,7 +1,7 @@
-import { WeaponCategory } from '../components/Weapon';
 import { Colours } from '../tcod';
-import ecs, { Prefab, Appearance, Weapon, Item } from '../ecs';
+import ecs, { Prefab } from '../ecs';
 import { RenderOrder } from '../renderFunctions';
+import { Appearance, Item, Weapon, WeaponCategory } from '../components';
 
 const instrument = (
 	name: string,

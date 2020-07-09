@@ -2,14 +2,7 @@ import { Console, BlendMode, Map, Colours } from './tcod';
 import MessageLog from './MessageLog';
 import GameState from './GameState';
 import { inventoryMenu } from './menus';
-import ecs, {
-	renderable,
-	Position,
-	Entity,
-	Appearance,
-	Fighter,
-	Inventory,
-} from './ecs';
+import ecs, { Entity } from './ecs';
 import { isAt, nameOf } from './systems/entities';
 import {
 	colours,
@@ -21,6 +14,8 @@ import {
 } from './constants';
 import Engine from './Engine';
 import GameMap from './GameMap';
+import { renderable } from './queries';
+import { Appearance, Fighter, Inventory, Position } from './components';
 
 export type ColourMap = { [name: string]: string };
 

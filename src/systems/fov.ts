@@ -1,5 +1,5 @@
-import GameMap from './GameMap';
-import { Map, FovAlgorithm } from './tcod';
+import GameMap from '../GameMap';
+import { Map, FovAlgorithm } from '../tcod';
 
 export function initializeFov(gameMap: GameMap) {
 	const fovMap = new Map(gameMap.width, gameMap.height);

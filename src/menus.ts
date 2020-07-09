@@ -1,7 +1,7 @@
 import { Console, Colours } from './tcod';
-import Inventory from './components/Inventory';
 import { nameOf } from './systems/entities';
 import { PrintAlign } from './libtcod/Console';
+import { IInventory } from './components';
 
 export function menu(
 	con: Console,
@@ -36,7 +36,7 @@ export function menu(
 export function inventoryMenu(
 	con: Console,
 	header: string,
-	inventory: Inventory,
+	inventory: IInventory,
 	inventoryWidth: number,
 	screenWidth: number,
 	screenHeight: number

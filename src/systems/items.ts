@@ -1,9 +1,10 @@
-import { Entity, Inventory, Position } from '../ecs';
+import { Entity } from '../ecs';
 import { Colours } from '../tcod';
 import { nameOf } from './entities';
 import ItemAddedResult from '../results/ItemAddedResult';
 import Result from '../results/Result';
 import MessageResult from '../results/MessageResult';
+import { Inventory, Position } from '../components';
 
 export function addItemToInventory(item: Entity, owner: Entity) {
 	const results: Result[] = [];

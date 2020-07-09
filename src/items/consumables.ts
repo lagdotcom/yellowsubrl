@@ -6,8 +6,9 @@ import {
 	castConfuse,
 } from '../itemFunctions';
 import MessageResult from '../results/MessageResult';
-import ecs, { Appearance, Item } from '../ecs';
+import ecs from '../ecs';
 import { RenderOrder } from '../renderFunctions';
+import { Appearance, Item } from '../components';
 
 export const healingPotion = ecs
 	.prefab('healing potion')
