@@ -1,4 +1,4 @@
-import { Entity } from '../ecs';
+import ecs, { Entity } from '../ecs';
 import { Colours } from '../tcod';
 import { nameOf } from './entities';
 import ItemAddedResult from '../results/ItemAddedResult';
@@ -6,13 +6,57 @@ import Result from '../results/Result';
 import MessageResult from '../results/MessageResult';
 import { Inventory, Position } from '../components';
 
+const slots = 'abcdefghijklmnopqrstuvwxyz';
+
+export function hasEmptyInventory(owner: Entity) {
+	const inventory = owner.get(Inventory);
+	if (!inventory) return false;
+
+	return Object.keys(inventory.items).length == 0;
+}
+
+export function getFreeInventorySlot(owner: Entity) {
+	const inventory = owner.get(Inventory);
+	if (!inventory) return undefined;
+
+	for (var i = 0; i < slots.length; i++) {
+		const ch = slots[i];
+		if (!inventory.items[ch]) return ch;
+	}
+}
+
+export function findItemInInventory(owner: Entity, id: string) {
+	const inventory = owner.get(Inventory);
+	if (!inventory) return undefined;
+
+	for (var i = 0; i < slots.length; i++) {
+		const ch = slots[i];
+		if (inventory.items[ch] == id) return ch;
+	}
+}
+
+export function getInventoryMenu(owner: Entity) {
+	const inventory = owner.get(Inventory);
+	if (!inventory || hasEmptyInventory(owner))
+		return { '-': 'Inventory is empty.' };
+
+	const menu: { [slot: string]: string } = {};
+	for (var slot in inventory.items) {
+		const item = ecs.getEntity(inventory.items[slot]);
+		if (item) menu[slot] = nameOf(item);
+	}
+
+	return menu;
+}
+
 export function addItemToInventory(item: Entity, owner: Entity) {
 	const results: Result[] = [];
 
 	const inventory = owner.get(Inventory);
 	if (!inventory) return results;
 
-	if (inventory.capacity <= inventory.items.length) {
+	const slot = getFreeInventorySlot(owner);
+	if (!slot) {
 		results.push(
 			new MessageResult(
 				'You cannot carry any more, your inventory is full.',
@@ -22,7 +66,7 @@ export function addItemToInventory(item: Entity, owner: Entity) {
 	} else {
 		item.remove(Position);
 		results.push(
-			new ItemAddedResult(owner, item),
+			new ItemAddedResult(owner, item, slot),
 			new MessageResult(`You pick up the ${nameOf(item)}!`, Colours.blue)
 		);
 	}
@@ -36,12 +80,14 @@ export function dropItemFromInventory(item: Entity, owner: Entity) {
 	const inventory = owner.get(Inventory);
 	if (!inventory) return results;
 
-	const index = inventory.items.indexOf(item);
-	if (index >= 0) inventory.items.splice(index, 1);
+	const slot = findItemInInventory(owner, item.id);
+	if (slot) {
+		delete inventory.items[slot];
 
-	results.push(
-		new MessageResult(`You drop the ${nameOf(item)}.`, Colours.yellow)
-	);
+		results.push(
+			new MessageResult(`You drop the ${nameOf(item)}.`, Colours.yellow)
+		);
+	}
 
 	return results;
 }

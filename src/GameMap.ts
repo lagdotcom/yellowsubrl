@@ -94,13 +94,27 @@ export default class GameMap {
 		}
 	}
 
+	getExplored() {
+		return this.tiles
+			.flat()
+			.filter(tile => tile.explored)
+			.map(tile => tile.tag);
+	}
+
+	reveal(tags: string[]) {
+		this.tiles
+			.flat()
+			.filter(tile => tags.includes(tile.tag))
+			.forEach(tile => (tile.explored = true));
+	}
+
 	private initializeTiles() {
 		const tiles: Tile[][] = [];
 
 		for (var x = 0; x < this.width; x++) {
 			const col: Tile[] = [];
 
-			for (var y = 0; y < this.height; y++) col.push(new Tile(true));
+			for (var y = 0; y < this.height; y++) col.push(new Tile(x, y, true));
 
 			tiles.push(col);
 		}

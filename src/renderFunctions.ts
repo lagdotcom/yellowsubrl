@@ -15,7 +15,7 @@ import {
 import Engine from './Engine';
 import GameMap from './GameMap';
 import { renderable } from './queries';
-import { Appearance, Fighter, Inventory, Position } from './components';
+import { Appearance, Fighter, Position } from './components';
 
 export type ColourMap = { [name: string]: string };
 
@@ -111,14 +111,7 @@ export function renderAll(engine: Engine) {
 			'Press the key next to an item to drop it, or Esc to cancel.\n';
 
 	if (inventoryTitle)
-		inventoryMenu(
-			console,
-			inventoryTitle,
-			player.get(Inventory),
-			50,
-			width,
-			height
-		);
+		inventoryMenu(console, inventoryTitle, player, 50, width, height);
 }
 
 export function drawMessageLog(

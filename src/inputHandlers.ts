@@ -53,8 +53,8 @@ export function handleMouse(gameState: GameState, m?: TerminalMouse) {
 export function handleMainMenuKeys(e: TerminalKey) {
 	const { key } = e;
 
-	if (key == 'a') return new NewGameAction();
-	else if (key == 'b') return new LoadGameAction();
+	if (key == 'n') return new NewGameAction();
+	else if (key == 'l') return new LoadGameAction();
 
 	if (key == 'F') return new ChangeFontAction();
 }
@@ -102,8 +102,7 @@ export function handleShowInventoryKeys(e: TerminalKey) {
 
 	if (key == 'Escape') return new ExitAction();
 
-	const index = key.charCodeAt(0) - asciiForA;
-	if (index >= 0) return new UseInventoryAction(index);
+	return new UseInventoryAction(key);
 }
 
 export function handleDropInventoryKeys(e: TerminalKey) {
@@ -111,8 +110,7 @@ export function handleDropInventoryKeys(e: TerminalKey) {
 
 	if (key == 'Escape') return new ExitAction();
 
-	const index = key.charCodeAt(0) - asciiForA;
-	if (index >= 0) return new DropInventoryAction(index);
+	return new DropInventoryAction(key);
 }
 
 export function handleTargetingKeys(e: TerminalKey) {

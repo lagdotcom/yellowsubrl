@@ -10,6 +10,15 @@ export interface XY {
 	y: number;
 }
 
+export function XYtoTag(p: XY) {
+	return `${p.x},${p.y}`;
+}
+
+export function TagtoXY(tag: string): XY {
+	const [x, y] = tag.split(',').map(parseInt);
+	return { x, y };
+}
+
 export function distance(a: XY, b: XY) {
 	const dx = a.x - b.x;
 	const dy = a.y - b.y;

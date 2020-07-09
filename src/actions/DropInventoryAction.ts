@@ -1,4 +1,4 @@
-import { Entity } from '../ecs';
+import ecs, { Entity } from '../ecs';
 import { dropItemFromInventory } from '../systems/items';
 import Action from './Action';
 import Engine from '../Engine';
@@ -9,7 +9,7 @@ import { Inventory } from '../components';
 
 export default class DropInventoryAction implements Action {
 	name: 'dropinventory';
-	constructor(public index: number) {
+	constructor(public slot: string) {
 		this.name = 'dropinventory';
 	}
 
@@ -19,11 +19,15 @@ export default class DropInventoryAction implements Action {
 		const inventory = entity.get(Inventory);
 		if (!inventory) return results;
 
-		const item = inventory.items[this.index];
+		const itemId = inventory.items[this.slot];
+		if (!itemId) return results;
+
+		const itemEntity = ecs.getEntity(itemId);
+		if (!itemEntity) return results;
 
 		results.push(
-			...dropItemFromInventory(item, entity),
-			new PlaceItemResult(entity, item)
+			...dropItemFromInventory(itemEntity, entity),
+			new PlaceItemResult(entity, itemEntity)
 		);
 
 		if (engine.gameState == GameState.DropInventory) {

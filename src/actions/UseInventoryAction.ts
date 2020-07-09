@@ -4,13 +4,13 @@ import MessageResult from '../results/MessageResult';
 import { Colours } from '../tcod';
 import Result from '../results/Result';
 import GameState from '../GameState';
-import { Entity } from '../ecs';
+import ecs, { Entity } from '../ecs';
 import { nameOf } from '../systems/entities';
 import { Inventory, Item } from '../components';
 
 export default class UseInventoryAction implements Action {
 	name: 'useinventory';
-	constructor(public index: number) {
+	constructor(public slot: string) {
 		this.name = 'useinventory';
 	}
 
@@ -20,7 +20,10 @@ export default class UseInventoryAction implements Action {
 		const inventory = entity.get(Inventory);
 		if (!inventory) return results;
 
-		const itemEntity = inventory.items[this.index];
+		const itemId = inventory.items[this.slot];
+		if (!itemId) return results;
+
+		const itemEntity = ecs.getEntity(itemId);
 		if (!itemEntity) return results;
 
 		const item = itemEntity.get(Item);

@@ -1,6 +1,7 @@
 import Result from './Result';
 import ecs, { Entity } from '../ecs';
 import { Inventory } from '../components';
+import { findItemInInventory } from '../systems/items';
 
 export default class ConsumeItemResult implements Result {
 	name: 'consumeitem';
@@ -14,8 +15,9 @@ export default class ConsumeItemResult implements Result {
 
 		ecs.remove(this.item);
 
-		const index = inventory.items.indexOf(this.item);
-		if (index >= 0) inventory.items.splice(index, 1);
+		const slot = findItemInInventory(this.owner, this.item.id);
+		if (slot) delete inventory.items[slot];
+
 		return [];
 	}
 }

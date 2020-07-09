@@ -47,7 +47,6 @@ import {
 } from './constants';
 import MessageResult from './results/MessageResult';
 import { mainMenu } from './menus';
-import { deepAssign } from 'deep-object-assign-with-reduce';
 import {
 	AI,
 	AIRoutines,
@@ -59,9 +58,11 @@ import {
 	Position,
 } from './components';
 import { hasAI } from './queries';
+import merge from 'lodash.merge';
 
 interface SaveData {
 	entities: { [id: string]: [string[], any] };
+	explored: string[];
 	map: string;
 	seed: string;
 }
@@ -77,7 +78,7 @@ const playerPrefab = ecs
 		order: RenderOrder.Actor,
 	})
 	.add(Fighter, { hp: 30, maxHp: 30, defense: 2, power: 5 })
-	.add(Inventory, { capacity: 26, items: [] })
+	.add(Inventory, { capacity: 26, items: {} })
 	.add(Blocks, {});
 
 export default class Engine {
@@ -195,6 +196,7 @@ export default class Engine {
 
 		const data: SaveData = {
 			entities: {},
+			explored: this.gameMap.getExplored(),
 			seed: toReadable(this.rng.seed),
 			map: toReadable(this.gameMap.seed),
 		};
@@ -220,6 +222,7 @@ export default class Engine {
 		);
 		this.rng.seed = this.gameMap.seed;
 		this.mapGenerator.generate(this.rng, this.gameMap);
+		this.gameMap.reveal(data.explored);
 		ecs.clear();
 
 		for (const id in data.entities) {
@@ -238,7 +241,7 @@ export default class Engine {
 				if (cdata === null) {
 					en.remove(co);
 				} else if (en.has(co)) {
-					deepAssign(en.get(co) as any, cdata);
+					merge(en.get(co), cdata);
 				} else {
 					en.add(co, cdata);
 				}

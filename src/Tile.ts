@@ -1,9 +1,13 @@
+import { XYtoTag } from './systems/movement';
+
 export default class Tile {
+	tag: string;
 	blocked: boolean;
 	blockSight: boolean;
 	explored: boolean;
 
-	constructor(blocked: boolean, blockSight?: boolean) {
+	constructor(x: number, y: number, blocked: boolean, blockSight?: boolean) {
+		this.tag = XYtoTag({ x, y });
 		this.blocked = blocked;
 		this.blockSight = typeof blockSight === 'undefined' ? blocked : blockSight;
 		this.explored = false;

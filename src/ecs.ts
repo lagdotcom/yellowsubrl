@@ -1,6 +1,6 @@
 import { diff } from 'deep-object-diff';
-import { deepAssign } from 'deep-object-assign-with-reduce';
 import { nanoid } from 'nanoid/non-secure';
+import merge from 'lodash.merge';
 
 export class Component<T> {
 	private data: { [id: string]: T };
@@ -44,11 +44,11 @@ export class Entity {
 
 	add<T>(component: Component<T>, data: T) {
 		this.components.add(component);
-		component.add(this, deepAssign({}, data));
+		component.add(this, merge({}, data));
 		this.ecs.update(this);
 
 		// TODO: debugging only
-		(this as any)[component.name] = data;
+		(this as any)[component.name] = component.get(this);
 
 		return this;
 	}
@@ -88,7 +88,7 @@ export class Entity {
 	}
 
 	prefabData() {
-		return deepAssign(
+		return merge(
 			{},
 			...this.prefabs.map(name => this.ecs.getPrefab(name).data())
 		);
@@ -132,6 +132,10 @@ export class Manager {
 		this.components[name] = comp;
 
 		return comp;
+	}
+
+	getEntity(id: string) {
+		return [...this.entities].find(en => en.id == id);
 	}
 
 	getComponent<T>(name: string): Component<T> {

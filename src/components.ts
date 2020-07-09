@@ -42,7 +42,7 @@ export default interface IFighter {
 
 export interface IInventory {
 	capacity: number;
-	items: Entity[];
+	items: { [ch: string]: string };
 }
 
 export type ItemUseFn = (

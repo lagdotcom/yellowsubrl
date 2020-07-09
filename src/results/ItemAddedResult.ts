@@ -4,7 +4,7 @@ import { Inventory, Position } from '../components';
 
 export default class ItemAddedResult implements Result {
 	name: 'itemadded';
-	constructor(public owner: Entity, public item: Entity) {
+	constructor(public owner: Entity, public item: Entity, public slot: string) {
 		this.name = 'itemadded';
 	}
 
@@ -13,7 +13,7 @@ export default class ItemAddedResult implements Result {
 		if (!inventory) return [];
 
 		this.item.remove(Position);
-		inventory.items.push(this.item);
+		inventory.items[this.slot] = this.item.id;
 		return [];
 	}
 }
