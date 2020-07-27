@@ -1,6 +1,9 @@
 import RNG from '../RNG';
 import { Rect } from '../mapObjects';
 import GameMap from '../GameMap';
+import ecs from '../ecs';
+import { stairsPrefab } from '../features/stairs';
+import { Stairs, Position } from '../components';
 
 export default class BoxesAndCorridors {
 	maxRooms: number;
@@ -40,6 +43,7 @@ export default class BoxesAndCorridors {
 	generate(rng: RNG, gameMap: GameMap) {
 		const rooms: Rect[] = [];
 		const position = { x: 0, y: 0 };
+		var last = [0, 0];
 
 		for (var r = 0; r < this.maxRooms; r++) {
 			const w = rng.randint(this.roomMinSize, this.roomMaxSize);
@@ -59,6 +63,7 @@ export default class BoxesAndCorridors {
 			if (ok) {
 				gameMap.createRoom(newRoom);
 				const [newX, newY] = newRoom.centre();
+				last = [newX, newY];
 
 				if (!rooms.length) {
 					position.x = newX;
@@ -84,6 +89,11 @@ export default class BoxesAndCorridors {
 				rooms.push(newRoom);
 			}
 		}
+
+		ecs
+			.entity(stairsPrefab)
+			.add(Stairs, { floor: gameMap.floor + 1 })
+			.add(Position, { x: last[0], y: last[1] });
 
 		return position;
 	}

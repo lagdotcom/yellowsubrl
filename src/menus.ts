@@ -2,6 +2,7 @@ import { Console, Colours } from './tcod';
 import { PrintAlign } from './libtcod/Console';
 import { getInventoryMenu } from './systems/items';
 import { Entity } from './ecs';
+import { Fighter } from './components';
 
 export function menu(
 	con: Console,
@@ -85,4 +86,30 @@ export function mainMenu(
 		screenWidth,
 		screenHeight
 	);
+}
+
+export function levelUpMenu({
+	console,
+	header,
+	player,
+	width,
+	screenWidth,
+	screenHeight,
+}: {
+	console: Console;
+	header: string;
+	player: Entity;
+	width: number;
+	screenWidth: number;
+	screenHeight: number;
+}) {
+	const fighter = player.get(Fighter);
+
+	const options = {
+		c: `Constitution (+20 HP, from ${fighter.maxHp})`,
+		s: `Strength (+1 attack, from ${fighter.power})`,
+		a: `Agility (+1 defense, from ${fighter.defense})`,
+	};
+
+	menu(console, header, options, width, screenWidth, screenHeight);
 }

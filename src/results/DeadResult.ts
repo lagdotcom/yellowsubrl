@@ -7,6 +7,7 @@ import { RenderOrder } from '../renderFunctions';
 import { Entity } from '../ecs';
 import { nameOf } from '../systems/entities';
 import { Appearance, Player, AI, Blocks, Fighter } from '../components';
+import XpResult from './XpResult';
 
 export default class DeadResult implements Result {
 	name: 'dead';
@@ -32,7 +33,10 @@ export default class DeadResult implements Result {
 			engine.gameStateStack.swap(GameState.PlayerDead);
 			results.push(new MessageResult('You died!', Colours.red));
 		} else {
+			const fighter = entity.get(Fighter);
+
 			results.push(new MessageResult(`${name} is dead!`, Colours.orange));
+			if (fighter) results.push(new XpResult(engine.player, fighter.xp));
 
 			entity.remove(AI);
 			entity.remove(Blocks);

@@ -1,7 +1,7 @@
 import { Console, BlendMode, Map, Colours } from './tcod';
 import MessageLog from './MessageLog';
 import GameState from './GameState';
-import { inventoryMenu } from './menus';
+import { inventoryMenu, levelUpMenu } from './menus';
 import ecs, { Entity } from './ecs';
 import { isAt, nameOf } from './systems/entities';
 import {
@@ -20,6 +20,7 @@ import { Appearance, Fighter, Position } from './components';
 export type ColourMap = { [name: string]: string };
 
 export enum RenderOrder {
+	Stairs,
 	Corpse,
 	Item,
 	Actor,
@@ -99,6 +100,7 @@ export function renderAll(engine: Engine) {
 
 	panel.setDefaultForeground(Colours.lightGrey);
 	panel.print(1, 0, getNamesUnderMouse(mouseX, mouseY, fovMap));
+	panel.print(1, 3, `Dungeon level: ${gameMap.floor}`);
 
 	panel.blit(console, 0, panelY);
 
@@ -112,6 +114,16 @@ export function renderAll(engine: Engine) {
 
 	if (inventoryTitle)
 		inventoryMenu(console, inventoryTitle, player, 50, width, height);
+
+	if (gameState == GameState.LevelUp)
+		levelUpMenu({
+			console,
+			header: 'Level up! Choose a stat to raise',
+			player,
+			width: 40,
+			screenWidth: width,
+			screenHeight: height,
+		});
 }
 
 export function drawMessageLog(
@@ -141,9 +153,10 @@ export function drawEntity(
 	const appearance = en.get(Appearance);
 	const position = en.get(Position);
 
-	if (fovMap.isInFov(position.x, position.y)) {
+	if (fovMap.isInFov(position.x, position.y) || appearance.revealed) {
 		const vx = (position.x - ox) * 2;
 		const vy = position.y - oy;
+		if (appearance.revealforever) appearance.revealed = true;
 
 		console.setDefaultForeground(appearance.colour);
 		console.putChar(vx, vy, appearance.tile);

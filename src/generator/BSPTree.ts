@@ -1,6 +1,9 @@
 import RNG from '../RNG';
 import GameMap from '../GameMap';
 import { Rect } from '../mapObjects';
+import ecs from '../ecs';
+import { stairsPrefab } from '../features/stairs';
+import { Stairs, Position } from '../components';
 
 class Leaf {
 	left?: Leaf;
@@ -137,6 +140,7 @@ export default class BSPTree {
 			});
 		}
 
+		var last = [0, 0];
 		var first = true;
 		root.createRoom(rng, gameMap, minRoom);
 		leaves.forEach(l => {
@@ -145,15 +149,22 @@ export default class BSPTree {
 					first = false;
 					position.x = rng.randint(l.room.x1 + 1, l.room.x2 - 1);
 					position.y = rng.randint(l.room.y1 + 1, l.room.y2 - 1);
-				} else
+				} else {
 					gameMap.placeEntities(
 						rng,
 						l.room,
 						this.maxMonstersPerRoom,
 						this.maxItemsPerRoom
 					);
+					last = l.room.centre();
+				}
 			}
 		});
+
+		ecs
+			.entity(stairsPrefab)
+			.add(Stairs, { floor: gameMap.floor + 1 })
+			.add(Position, { x: last[0], y: last[1] });
 
 		return position;
 	}

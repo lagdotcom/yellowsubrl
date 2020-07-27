@@ -18,6 +18,7 @@ export const healingPotion = ecs
 		tile2: 'Potion2',
 		colour: Colours.violet,
 		order: RenderOrder.Item,
+		revealforever: true,
 	})
 	.add(Item, { use: (item, en) => heal({ item, en, amount: 4 }) });
 
@@ -29,6 +30,7 @@ export const fireballScroll = ecs
 		tile2: 'Scroll2',
 		colour: Colours.red,
 		order: RenderOrder.Item,
+		revealforever: true,
 	})
 	.add(Item, {
 		targeting: true,
@@ -55,6 +57,7 @@ export const lightningScroll = ecs
 		tile2: 'Scroll2',
 		colour: Colours.yellow,
 		order: RenderOrder.Item,
+		revealforever: true,
 	})
 	.add(Item, {
 		use: (item, caster, engine) =>
@@ -75,6 +78,7 @@ export const confusionScroll = ecs
 		tile2: 'Scroll2',
 		colour: Colours.lightPink,
 		order: RenderOrder.Item,
+		revealforever: true,
 	})
 	.add(Item, {
 		targeting: true,

@@ -16,6 +16,8 @@ import SaveGameAction from './actions/SaveGameAction';
 import ScrollAction from './actions/ScrollAction';
 import ShowInventoryAction from './actions/ShowInventoryAction';
 import UseInventoryAction from './actions/UseInventoryAction';
+import TakeStairsAction from './actions/TakeStairsAction';
+import LevelUpAction, { LevelUpResponse } from './actions/LevelUpAction';
 
 export function handleKeys(gameState: GameState, e?: TerminalKey) {
 	if (!e) return;
@@ -38,6 +40,9 @@ export function handleKeys(gameState: GameState, e?: TerminalKey) {
 
 		case GameState.Targeting:
 			return handleTargetingKeys(e);
+
+		case GameState.LevelUp:
+			return handleLevelUpKeys(e);
 	}
 }
 
@@ -78,6 +83,7 @@ export function handlePlayerTurnKeys(e: TerminalKey) {
 	if (key == 'g') return new GetAction();
 	else if (key == 'i') return new ShowInventoryAction(GameState.ShowInventory);
 	else if (key == 'd') return new ShowInventoryAction(GameState.DropInventory);
+	else if (key == '>' || key == 'Enter') return new TakeStairsAction();
 
 	if (key == 'S') return new SaveGameAction();
 	else if (key == 'R') return new RemakeAction();
@@ -120,4 +126,10 @@ export function handleTargetingKeys(e: TerminalKey) {
 export function handleTargetingMouse(m: TerminalMouse) {
 	if (m.button == 0) return new ChooseTargetAction(m.x, m.y);
 	if (m.button == 2) return new CancelTargetingAction();
+}
+
+export function handleLevelUpKeys(e: TerminalKey) {
+	if (e.key == 'a') return new LevelUpAction(LevelUpResponse.Agility);
+	if (e.key == 'h') return new LevelUpAction(LevelUpResponse.HP);
+	if (e.key == 's') return new LevelUpAction(LevelUpResponse.Strength);
 }

@@ -102,6 +102,9 @@ const tilesetLayout: Charmap = {
 	Flute2: [13, 8],
 	Drum: [14, 8],
 	Drum2: [15, 8],
+
+	Stairs: [16, 8],
+	Stairs2: [17, 8],
 };
 
 async function main() {

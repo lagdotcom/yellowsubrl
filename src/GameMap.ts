@@ -12,19 +12,21 @@ export interface MapGenerator {
 }
 
 export default class GameMap {
+	floor!: number;
 	width!: number;
 	height!: number;
 	seed!: RNGSeed;
 	tiles!: Tile[][];
 
-	constructor(seed: RNGSeed, width: number, height: number) {
-		this.reset(seed, width, height);
+	constructor(seed: RNGSeed, width: number, height: number, floor: number) {
+		this.reset(seed, width, height, floor);
 	}
 
-	reset(seed: RNGSeed, width: number, height: number) {
+	reset(seed: RNGSeed, width: number, height: number, floor: number) {
 		this.seed = seed;
 		this.width = width;
 		this.height = height;
+		this.floor = floor;
 
 		this.tiles = this.initializeTiles();
 	}

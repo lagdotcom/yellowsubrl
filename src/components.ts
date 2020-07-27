@@ -29,6 +29,8 @@ export interface IAppearance {
 	tile2?: string;
 	colour: string;
 	order: RenderOrder;
+	revealforever?: boolean;
+	revealed?: boolean;
 }
 
 export interface IBlocks {}
@@ -38,6 +40,7 @@ export default interface IFighter {
 	maxHp: number;
 	defense: number;
 	power: number;
+	xp: number;
 }
 
 export interface IInventory {
@@ -61,9 +64,20 @@ export interface IItem {
 
 export interface IPlayer {}
 
+export interface ILevel {
+	currentLevel: number;
+	currentXp: number;
+	levelUpBase: number;
+	levelUpFactor: number;
+}
+
 export interface IPosition {
 	x: number;
 	y: number;
+}
+
+export interface IStairs {
+	floor: number;
 }
 
 export enum WeaponCategory {
@@ -83,6 +97,8 @@ export const Blocks = ecs.register<IBlocks>('Blocks');
 export const Fighter = ecs.register<IFighter>('Fighter');
 export const Inventory = ecs.register<IInventory>('Inventory');
 export const Item = ecs.register<IItem>('Item');
+export const Level = ecs.register<ILevel>('Level');
 export const Player = ecs.register<IPlayer>('Player');
 export const Position = ecs.register<IPosition>('Position');
+export const Stairs = ecs.register<IStairs>('Stairs');
 export const Weapon = ecs.register<IWeapon>('Weapon');

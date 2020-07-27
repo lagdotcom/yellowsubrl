@@ -17,6 +17,7 @@ const instrument = (
 			tile2: tile + '2',
 			colour,
 			order: RenderOrder.Item,
+			revealforever: true,
 		})
 		.add(Item, {})
 		.add(Weapon, { category });

@@ -17,7 +17,6 @@ import {
 	ColourMap,
 	drawMessageLog,
 	renderAll,
-	RenderOrder,
 } from './renderFunctions';
 import Result from './results/Result';
 import MessageLog from './MessageLog';
@@ -47,39 +46,18 @@ import {
 } from './constants';
 import MessageResult from './results/MessageResult';
 import { mainMenu } from './menus';
-import {
-	AI,
-	AIRoutines,
-	Appearance,
-	Blocks,
-	Fighter,
-	Inventory,
-	Player,
-	Position,
-} from './components';
+import { AI, AIRoutines, Player, Position } from './components';
 import { hasAI } from './queries';
 import merge from 'lodash.merge';
+import { ringoPrefab } from './features/players';
 
 interface SaveData {
 	entities: { [id: string]: [string[], any] };
 	explored: string[];
 	map: string;
 	seed: string;
+	floor: number;
 }
-
-const playerPrefab = ecs
-	.prefab('player')
-	.add(Player, {})
-	.add(Appearance, {
-		name: 'you',
-		tile: 'Player',
-		tile2: 'Player2',
-		colour: Colours.white,
-		order: RenderOrder.Actor,
-	})
-	.add(Fighter, { hp: 30, maxHp: 30, defense: 2, power: 5 })
-	.add(Inventory, { capacity: 26, items: {} })
-	.add(Blocks, {});
 
 export default class Engine {
 	public barWidth: number;
@@ -142,7 +120,7 @@ export default class Engine {
 
 		this.mapHeight = mapHeight;
 		this.mapWidth = mapWidth;
-		this.gameMap = new GameMap(rng.seed, mapWidth, mapHeight);
+		this.gameMap = new GameMap(rng.seed, mapWidth, mapHeight, 1);
 
 		const tileset = tilesets[0];
 		this.context = new Terminal(
@@ -199,6 +177,7 @@ export default class Engine {
 			explored: this.gameMap.getExplored(),
 			seed: toReadable(this.rng.seed),
 			map: toReadable(this.gameMap.seed),
+			floor: this.gameMap.floor,
 		};
 		ecs.find().forEach(en => {
 			data.entities[en.id] = [en.prefabNames(), en.diffData()];
@@ -218,7 +197,8 @@ export default class Engine {
 		this.gameMap.reset(
 			fromReadable(data.map),
 			this.gameMap.width,
-			this.gameMap.height
+			this.gameMap.height,
+			data.floor
 		);
 		this.rng.seed = this.gameMap.seed;
 		this.mapGenerator.generate(this.rng, this.gameMap);
@@ -279,10 +259,10 @@ export default class Engine {
 
 		ecs.clear();
 
-		gameMap.reset(rng.seed, gameMap.width, gameMap.height);
+		gameMap.reset(rng.seed, gameMap.width, gameMap.height, gameMap.floor);
 		const position = mapGenerator.generate(rng, gameMap);
 
-		this.player = ecs.entity(playerPrefab).add(Position, position);
+		this.player = ecs.entity(ringoPrefab).add(Position, position);
 		this.fovMap = initializeFov(gameMap);
 		this.updateScroll();
 	}
