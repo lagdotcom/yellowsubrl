@@ -18,6 +18,8 @@ import ShowInventoryAction from './actions/ShowInventoryAction';
 import UseInventoryAction from './actions/UseInventoryAction';
 import TakeStairsAction from './actions/TakeStairsAction';
 import LevelUpAction, { LevelUpResponse } from './actions/LevelUpAction';
+import ShowCharacterAction from './actions/ShowCharacterAction';
+import WaitAction from './actions/WaitAction';
 
 export function handleKeys(gameState: GameState, e?: TerminalKey) {
 	if (!e) return;
@@ -43,6 +45,9 @@ export function handleKeys(gameState: GameState, e?: TerminalKey) {
 
 		case GameState.LevelUp:
 			return handleLevelUpKeys(e);
+
+		case GameState.CharacterScreen:
+			return handleCharacterKeys(e);
 	}
 }
 
@@ -79,11 +84,13 @@ export function handlePlayerTurnKeys(e: TerminalKey) {
 	else if (key == '9' || key == 'PageUp') return dirAction(ctrl, 1, -1);
 	else if (key == '1' || key == 'End') return dirAction(ctrl, -1, 1);
 	else if (key == '3' || key == 'PageDown') return dirAction(ctrl, 1, 1);
+	else if (key == '5' || key == 'Clear') return new WaitAction();
 
 	if (key == 'g') return new GetAction();
 	else if (key == 'i') return new ShowInventoryAction(GameState.ShowInventory);
 	else if (key == 'd') return new ShowInventoryAction(GameState.DropInventory);
 	else if (key == '>' || key == 'Enter') return new TakeStairsAction();
+	else if (key == 'c') return new ShowCharacterAction();
 
 	if (key == 'S') return new SaveGameAction();
 	else if (key == 'R') return new RemakeAction();
@@ -132,4 +139,8 @@ export function handleLevelUpKeys(e: TerminalKey) {
 	if (e.key == 'a') return new LevelUpAction(LevelUpResponse.Agility);
 	if (e.key == 'h') return new LevelUpAction(LevelUpResponse.HP);
 	if (e.key == 's') return new LevelUpAction(LevelUpResponse.Strength);
+}
+
+export function handleCharacterKeys(e: TerminalKey) {
+	if (e.key == 'Escape') return new ExitAction();
 }

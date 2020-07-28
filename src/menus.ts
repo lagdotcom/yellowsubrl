@@ -2,7 +2,8 @@ import { Console, Colours } from './tcod';
 import { PrintAlign } from './libtcod/Console';
 import { getInventoryMenu } from './systems/items';
 import { Entity } from './ecs';
-import { Fighter } from './components';
+import { Fighter, Level } from './components';
+import { xpForNextLevel } from './systems/experience';
 
 export function menu(
 	con: Console,
@@ -112,4 +113,35 @@ export function levelUpMenu({
 	};
 
 	menu(console, header, options, width, screenWidth, screenHeight);
+}
+
+export function characterScreen(
+	console: Console,
+	player: Entity,
+	width: number,
+	height: number,
+	screenWidth: number,
+	screenHeight: number
+) {
+	const window = new Console(width, height, console.tileset);
+	const fighter = player.get(Fighter);
+	const lvl = player.get(Level);
+
+	var row = 1;
+	const show = function (s: string) {
+		window.printBox(0, row, width, height, s, Colours.white);
+		row++;
+	};
+
+	show('Character Information');
+	show(`Level: ${lvl.currentLevel}`);
+	show(`Experience: ${lvl.currentXp}`);
+	show(`Experience to Level: ${xpForNextLevel(player)}`);
+	show(`Maximum HP: ${fighter.maxHp}`);
+	show(`Attack: ${fighter.power}`);
+	show(`Defense: ${fighter.defense}`);
+
+	const x = Math.floor(screenWidth / 2 - width / 2);
+	const y = Math.floor(screenHeight / 2 - height / 2);
+	window.blit(console, x, y);
 }

@@ -1,7 +1,7 @@
 import { Console, BlendMode, Map, Colours } from './tcod';
 import MessageLog from './MessageLog';
 import GameState from './GameState';
-import { inventoryMenu, levelUpMenu } from './menus';
+import { inventoryMenu, levelUpMenu, characterScreen } from './menus';
 import ecs, { Entity } from './ecs';
 import { isAt, nameOf } from './systems/entities';
 import {
@@ -124,6 +124,8 @@ export function renderAll(engine: Engine) {
 			screenWidth: width,
 			screenHeight: height,
 		});
+	else if (gameState == GameState.CharacterScreen)
+		characterScreen(console, player, 30, 10, width, height);
 }
 
 export function drawMessageLog(

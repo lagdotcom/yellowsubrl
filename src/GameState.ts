@@ -7,6 +7,7 @@ enum GameState {
 	DropInventory,
 	Targeting,
 	LevelUp,
+	CharacterScreen,
 }
 
 export default GameState;
