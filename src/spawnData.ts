@@ -17,6 +17,7 @@ import {
 	violin,
 } from './items/instruments';
 import { Prefab } from './ecs';
+import { sword, shield } from './items/equipment';
 
 export function fscale(floor: number, ...entries: [number, number][]) {
 	var found = 0;
@@ -35,16 +36,18 @@ export function getItemSpawnChances(floor: number): [number, Prefab][] {
 		[fscale(floor, [25, 6]), fireballScroll],
 		[fscale(floor, [25, 4]), lightningScroll],
 		[fscale(floor, [10, 2]), confusionScroll],
+		[fscale(floor, [5, 4]), sword],
+		[fscale(floor, [15, 8]), shield],
 
-		[5, acoustic],
-		[5, bass],
-		[5, electric],
-		[5, flute],
-		[5, sitar],
-		[5, snare],
-		[5, trombone],
-		[5, tuba],
-		[5, violin],
+		// [5, acoustic],
+		// [5, bass],
+		// [5, electric],
+		// [5, flute],
+		// [5, sitar],
+		// [5, snare],
+		// [5, trombone],
+		// [5, tuba],
+		// [5, violin],
 	];
 }
 

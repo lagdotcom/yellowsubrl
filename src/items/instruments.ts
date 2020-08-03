@@ -1,7 +1,13 @@
 import { Colours } from '../tcod';
 import ecs, { Prefab } from '../ecs';
 import { RenderOrder } from '../renderFunctions';
-import { Appearance, Item, Weapon, WeaponCategory } from '../components';
+import {
+	Appearance,
+	Item,
+	Weapon,
+	WeaponCategory,
+	Equippable,
+} from '../components';
 
 const instrument = (
 	name: string,
@@ -20,6 +26,7 @@ const instrument = (
 			revealforever: true,
 		})
 		.add(Item, {})
+		.add(Equippable, { slot: 'main', stats: {} })
 		.add(Weapon, { category });
 
 export const acoustic = instrument(

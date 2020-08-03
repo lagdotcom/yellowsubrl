@@ -3,18 +3,20 @@ import { dropItemFromInventory } from '../systems/items';
 import Action from './Action';
 import Engine from '../Engine';
 import Result from '../results/Result';
-import GameState from '../GameState';
 import PlaceItemResult from '../results/PlaceItemResult';
 import { Inventory } from '../components';
+import { isEquipped, toggleEquip } from '../systems/equipment';
+import CloseInventoryResult from '../results/CloseInventoryResult';
+import ConsumeTurnResult from '../results/ConsumeTurnResult';
+import { isAlive } from '../systems/combat';
 
 export default class DropInventoryAction implements Action {
-	name: 'dropinventory';
-	constructor(public slot: string) {
-		this.name = 'dropinventory';
-	}
+	constructor(public slot: string) {}
 
 	perform(engine: Engine, entity: Entity) {
 		const results: Result[] = [];
+
+		if (!isAlive(entity)) return results;
 
 		const inventory = entity.get(Inventory);
 		if (!inventory) return results;
@@ -25,16 +27,15 @@ export default class DropInventoryAction implements Action {
 		const itemEntity = ecs.getEntity(itemId);
 		if (!itemEntity) return results;
 
+		if (isEquipped(entity, itemEntity))
+			results.push(...toggleEquip(entity, itemEntity));
+
 		results.push(
 			...dropItemFromInventory(itemEntity, entity),
-			new PlaceItemResult(entity, itemEntity)
+			new PlaceItemResult(entity, itemEntity),
+			new CloseInventoryResult(),
+			new ConsumeTurnResult()
 		);
-
-		if (engine.gameState == GameState.DropInventory) {
-			engine.refresh();
-			engine.gameStateStack.pop();
-		}
-		engine.gameStateStack.swap(GameState.EnemyTurn);
 
 		return results;
 	}

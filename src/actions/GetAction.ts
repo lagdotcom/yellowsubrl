@@ -7,13 +7,9 @@ import GameState from '../GameState';
 import ecs, { Entity } from '../ecs';
 import { addItemToInventory } from '../systems/items';
 import { Item, Inventory, Position } from '../components';
+import ConsumeTurnResult from '../results/ConsumeTurnResult';
 
 export default class GetAction implements Action {
-	name: 'get';
-	constructor() {
-		this.name = 'get';
-	}
-
 	perform(engine: Engine, entity: Entity) {
 		const results: Result[] = [];
 
@@ -36,7 +32,7 @@ export default class GetAction implements Action {
 				results.push(...addItemToInventory(it, entity));
 			});
 
-			engine.gameStateStack.swap(GameState.EnemyTurn);
+			results.push(new ConsumeTurnResult());
 		}
 
 		return results;

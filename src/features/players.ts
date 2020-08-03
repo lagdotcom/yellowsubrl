@@ -6,6 +6,7 @@ import {
 	Inventory,
 	Blocks,
 	Level,
+	Equipment,
 } from '../components';
 import { Colours } from '../tcod';
 import { RenderOrder } from '../renderFunctions';
@@ -20,7 +21,8 @@ export const ringoPrefab = ecs
 		colour: Colours.white,
 		order: RenderOrder.Actor,
 	})
-	.add(Fighter, { hp: 100, maxHp: 100, defense: 1, power: 4, xp: 0 })
+	.add(Fighter, { hp: 100, stats: { maxHp: 100, defense: 1, power: 2 }, xp: 0 })
+	.add(Equipment, {})
 	.add(Inventory, { capacity: 26, items: {} })
 	.add(Blocks, {})
 	.add(Level, {

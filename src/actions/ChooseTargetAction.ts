@@ -5,10 +5,7 @@ import { Entity } from '../ecs';
 import { Item } from '../components';
 
 export default class ChooseTargetAction implements Action {
-	name: 'choosetarget';
-	constructor(public x: number, public y: number) {
-		this.name = 'choosetarget';
-	}
+	constructor(public x: number, public y: number) {}
 
 	perform(engine: Engine, entity: Entity) {
 		if (engine.gameState != GameState.Targeting || !engine.targetingItem)

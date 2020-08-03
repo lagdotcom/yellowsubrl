@@ -7,6 +7,7 @@ import ConsumeItemResult from './results/ConsumeItemResult';
 import { distance, XY } from './systems/movement';
 import { nameOf, isAt } from './systems/entities';
 import { Fighter, Position, AI } from './components';
+import { getStat } from './systems/stats';
 
 export function heal({
 	item,
@@ -21,7 +22,7 @@ export function heal({
 	const fighter = en.get(Fighter);
 	if (!fighter) return results;
 
-	if (fighter.hp >= fighter.maxHp)
+	if (fighter.hp >= getStat(en, 'maxHp'))
 		results.push(
 			new MessageResult('You are already at full health.', Colours.yellow)
 		);

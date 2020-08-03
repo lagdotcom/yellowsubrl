@@ -35,11 +35,29 @@ export interface IAppearance {
 
 export interface IBlocks {}
 
-export default interface IFighter {
-	hp: number;
-	maxHp: number;
+export interface EquipmentSlots {
+	main?: string;
+	offhand?: string;
+}
+export type Slot = keyof EquipmentSlots;
+
+export interface Stats {
 	defense: number;
+	maxHp: number;
 	power: number;
+}
+export type Stat = keyof Stats;
+
+export type IEquipment = EquipmentSlots;
+
+export interface IEquippable {
+	slot: Slot;
+	stats: Partial<Stats>;
+}
+
+export interface IFighter {
+	hp: number;
+	stats: Stats;
 	xp: number;
 }
 
@@ -94,6 +112,8 @@ export interface IWeapon {
 export const Appearance = ecs.register<IAppearance>('Appearance');
 export const AI = ecs.register<IAI>('AI');
 export const Blocks = ecs.register<IBlocks>('Blocks');
+export const Equipment = ecs.register<IEquipment>('Equipment');
+export const Equippable = ecs.register<IEquippable>('Equippable');
 export const Fighter = ecs.register<IFighter>('Fighter');
 export const Inventory = ecs.register<IInventory>('Inventory');
 export const Item = ecs.register<IItem>('Item');

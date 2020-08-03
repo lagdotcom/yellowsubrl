@@ -6,7 +6,9 @@ import Result from '../results/Result';
 import GameState from '../GameState';
 import ecs, { Entity } from '../ecs';
 import { nameOf } from '../systems/entities';
-import { Inventory, Item } from '../components';
+import { Inventory, Item, Equippable, Equipment } from '../components';
+import { toggleEquip } from '../systems/equipment';
+import { isAlive } from '../systems/combat';
 
 export default class UseInventoryAction implements Action {
 	name: 'useinventory';
@@ -16,6 +18,8 @@ export default class UseInventoryAction implements Action {
 
 	perform(engine: Engine, entity: Entity) {
 		const results: Result[] = [];
+
+		if (!isAlive(entity)) return results;
 
 		const inventory = entity.get(Inventory);
 		if (!inventory) return results;
@@ -29,14 +33,18 @@ export default class UseInventoryAction implements Action {
 		const item = itemEntity.get(Item);
 		if (!item) return results;
 
-		if (!item.use)
-			results.push(
-				new MessageResult(
-					`The ${nameOf(itemEntity)} cannot be used.`,
-					Colours.yellow
-				)
-			);
-		else if (item.targeting) {
+		if (!item.use) {
+			const equipment = entity.get(Equipment);
+			const quip = itemEntity.get(Equippable);
+			if (equipment && quip) results.push(...toggleEquip(entity, itemEntity));
+			else
+				results.push(
+					new MessageResult(
+						`The ${nameOf(itemEntity)} cannot be used.`,
+						Colours.yellow
+					)
+				);
+		} else if (item.targeting) {
 			engine.refresh();
 			engine.gameStateStack.swap(GameState.Targeting);
 			engine.targetingItem = itemEntity;
@@ -44,16 +52,6 @@ export default class UseInventoryAction implements Action {
 			results.push(item.targetingMessage!);
 		} else {
 			results.push(...item.use(itemEntity, entity, engine));
-		}
-
-		// TODO: this is such a bad hack, should be fixed when I get energy system
-		if (results.find(r => r.name == 'consumeitem')) {
-			if (engine.gameState == GameState.ShowInventory) {
-				engine.refresh();
-				engine.gameStateStack.pop();
-			}
-
-			engine.gameStateStack.swap(GameState.EnemyTurn);
 		}
 
 		return results;

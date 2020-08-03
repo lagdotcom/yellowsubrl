@@ -9,11 +9,6 @@ import { Colours } from '../tcod';
 import { addHp } from '../systems/combat';
 
 export default class TakeStairsAction implements Action {
-	name: string;
-	constructor() {
-		this.name = 'takestairs';
-	}
-
 	perform(engine: Engine, entity: Entity): Result[] {
 		const pos = entity.get(Position);
 		if (!pos) return [];
@@ -26,11 +21,12 @@ export default class TakeStairsAction implements Action {
 			return [new MessageResult('There are no stairs here.', Colours.yellow)];
 
 		engine.gameMap.floor++;
+		engine.player.remove(Position); // this prevents the player from being deleted
 		engine.newMap();
 
 		const fighter = entity.get(Fighter);
 		if (fighter) {
-			addHp(entity, Math.floor(fighter.maxHp / 2));
+			addHp(entity, Math.floor(fighter.stats.maxHp / 2));
 			return [
 				new MessageResult(
 					'You take a moment to rest, and recover your strength.',

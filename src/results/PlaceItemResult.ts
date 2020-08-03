@@ -3,10 +3,7 @@ import { Entity } from '../ecs';
 import { Position } from '../components';
 
 export default class PlaceItemResult implements Result {
-	name: 'placeitem';
-	constructor(private owner: Entity, private item: Entity) {
-		this.name = 'placeitem';
-	}
+	constructor(private owner: Entity, private item: Entity) {}
 
 	perform(): Result[] {
 		const position = this.owner.get(Position);

@@ -8,10 +8,7 @@ import { Level } from '../components';
 import GameState from '../GameState';
 
 export default class XpResult implements Result {
-	name: string;
-	constructor(public entity: Entity, public xp: number) {
-		this.name = 'xp';
-	}
+	constructor(public entity: Entity, public xp: number) {}
 
 	perform(engine: Engine): Result[] {
 		const { entity, xp } = this;

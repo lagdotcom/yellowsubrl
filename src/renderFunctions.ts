@@ -17,6 +17,7 @@ import GameMap from './GameMap';
 import { renderable } from './queries';
 import { Appearance, Fighter, Position } from './components';
 import { PrintAlign } from './libtcod/Console';
+import { getStat } from './systems/stats';
 
 export type ColourMap = { [name: string]: string };
 
@@ -94,7 +95,7 @@ export function renderAll(engine: Engine) {
 		barWidth,
 		'HP',
 		fighter.hp,
-		fighter.maxHp,
+		getStat(player, 'maxHp'),
 		Colours.lightRed,
 		Colours.darkRed
 	);

@@ -101,7 +101,6 @@ export function handlePlayerTurnKeys(e: TerminalKey) {
 export function handlePlayerDeadKeys(e: TerminalKey) {
 	const { key } = e;
 
-	// TODO: this is kinda wrong; would let you use potions while dead
 	if (key == 'i') return new ShowInventoryAction(GameState.ShowInventory);
 
 	if (key == 'R') return new RemakeAction();
@@ -137,7 +136,7 @@ export function handleTargetingMouse(m: TerminalMouse) {
 
 export function handleLevelUpKeys(e: TerminalKey) {
 	if (e.key == 'a') return new LevelUpAction(LevelUpResponse.Agility);
-	if (e.key == 'h') return new LevelUpAction(LevelUpResponse.HP);
+	if (e.key == 'c') return new LevelUpAction(LevelUpResponse.HP);
 	if (e.key == 's') return new LevelUpAction(LevelUpResponse.Strength);
 }
 

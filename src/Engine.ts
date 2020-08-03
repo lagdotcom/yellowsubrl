@@ -48,6 +48,10 @@ import { AI, AIRoutines, Player, Position } from './components';
 import { hasAI } from './queries';
 import merge from 'lodash.merge';
 import { ringoPrefab } from './features/players';
+import { dagger } from './items/equipment';
+import ItemAddedResult from './results/ItemAddedResult';
+import EquipItemResult from './results/EquipItemResult';
+import { isAlive } from './systems/combat';
 
 interface SaveData {
 	entities: { [id: string]: [string[], any] };
@@ -158,6 +162,10 @@ export default class Engine {
 		this.gameStateStack.swap(GameState.PlayerTurn);
 		this.player = ecs.entity(ringoPrefab);
 		this.newMap();
+
+		const weapon = ecs.entity(dagger);
+		new ItemAddedResult(this.player, weapon, 'a').perform();
+		new EquipItemResult(this.player, weapon).perform();
 	}
 
 	saveGame() {
@@ -248,16 +256,20 @@ export default class Engine {
 	newMap() {
 		const { gameMap, mapGenerator, rng } = this;
 
-		ecs.clear();
+		// remove all items on the dungeon floor
+		ecs
+			.query({ all: [Position] }, false)
+			.get()
+			.forEach(e => {
+				e.destroy();
+			});
 
 		gameMap.reset(rng.seed, gameMap.width, gameMap.height, gameMap.floor);
 		const start = mapGenerator.generate(rng, gameMap);
 
 		this.fovMap = initializeFov(gameMap);
 
-		const pos = this.player.get(Position);
-		pos.x = start.x;
-		pos.y = start.y;
+		this.player.add(Position, { ...start });
 
 		this.updateScroll();
 	}
@@ -359,7 +371,9 @@ export default class Engine {
 				AIRoutines[en.get(AI).routine](en, this.player, this).map(this.resolve);
 			});
 
-			this.gameStateStack.swap(GameState.PlayerTurn);
+			this.gameStateStack.swap(
+				isAlive(this.player) ? GameState.PlayerTurn : GameState.PlayerDead
+			);
 		}
 	}
 

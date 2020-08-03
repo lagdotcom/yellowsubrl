@@ -4,7 +4,7 @@ import { nameOf } from './entities';
 import ItemAddedResult from '../results/ItemAddedResult';
 import Result from '../results/Result';
 import MessageResult from '../results/MessageResult';
-import { Inventory, Position } from '../components';
+import { Inventory, Position, Equipment } from '../components';
 
 const slots = 'abcdefghijklmnopqrstuvwxyz';
 
@@ -40,10 +40,17 @@ export function getInventoryMenu(owner: Entity) {
 	if (!inventory || hasEmptyInventory(owner))
 		return { '-': 'Inventory is empty.' };
 
+	const equipment = owner.get(Equipment);
 	const menu: { [slot: string]: string } = {};
 	for (var slot in inventory.items) {
 		const item = ecs.getEntity(inventory.items[slot]);
-		if (item) menu[slot] = nameOf(item);
+		if (item) {
+			var entry = nameOf(item);
+			if (equipment.main === item.id) entry += ' (in main hand)';
+			else if (equipment.offhand === item.id) entry += ' (in off hand)';
+
+			menu[slot] = entry;
+		}
 	}
 
 	return menu;

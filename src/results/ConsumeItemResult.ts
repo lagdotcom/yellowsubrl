@@ -2,12 +2,11 @@ import Result from './Result';
 import ecs, { Entity } from '../ecs';
 import { Inventory } from '../components';
 import { findItemInInventory } from '../systems/items';
+import CloseInventoryResult from './CloseInventoryResult';
+import ConsumeTurnResult from './ConsumeTurnResult';
 
 export default class ConsumeItemResult implements Result {
-	name: 'consumeitem';
-	constructor(private owner: Entity, private item: Entity) {
-		this.name = 'consumeitem';
-	}
+	constructor(private owner: Entity, private item: Entity) {}
 
 	perform(): Result[] {
 		const inventory = this.owner.get(Inventory);
@@ -18,6 +17,6 @@ export default class ConsumeItemResult implements Result {
 		const slot = findItemInInventory(this.owner, this.item.id);
 		if (slot) delete inventory.items[slot];
 
-		return [];
+		return [new CloseInventoryResult(), new ConsumeTurnResult()];
 	}
 }

@@ -11,10 +11,7 @@ export enum LevelUpResponse {
 }
 
 export default class LevelUpAction implements Action {
-	name: string;
-	constructor(public response: LevelUpResponse) {
-		this.name = 'levelup';
-	}
+	constructor(public response: LevelUpResponse) {}
 
 	perform(engine: Engine, entity: Entity) {
 		if (engine.gameState != GameState.LevelUp) return [];
@@ -24,15 +21,15 @@ export default class LevelUpAction implements Action {
 		switch (this.response) {
 			case LevelUpResponse.HP:
 				fighter.hp += 20;
-				fighter.maxHp += 20;
+				fighter.stats.maxHp += 20;
 				break;
 
 			case LevelUpResponse.Strength:
-				fighter.power++;
+				fighter.stats.power++;
 				break;
 
 			case LevelUpResponse.Agility:
-				fighter.defense++;
+				fighter.stats.defense++;
 				break;
 		}
 

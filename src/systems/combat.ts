@@ -4,12 +4,12 @@ import MessageResult from '../results/MessageResult';
 import DeadResult from '../results/DeadResult';
 import { nameOf } from './entities';
 import { Fighter } from '../components';
+import { getStat } from './stats';
 
 export function addHp(entity: Entity, amount: number) {
 	const fighter = entity.get(Fighter);
 	if (fighter) {
-		fighter.hp += amount;
-		if (fighter.hp > fighter.maxHp) fighter.hp = fighter.maxHp;
+		fighter.hp = Math.min(fighter.hp + amount, getStat(entity, 'maxHp'));
 	}
 }
 
@@ -23,7 +23,7 @@ export function attack(attacker: Entity, victim: Entity) {
 	const myName = nameOf(attacker);
 	const yourName = nameOf(victim);
 
-	const damage = me.power - you.defense;
+	const damage = getStat(attacker, 'power') - getStat(victim, 'defense');
 
 	if (damage > 0) {
 		results.push(
@@ -51,4 +51,9 @@ export function takeDamage(entity: Entity, amount: number) {
 	if (fighter.hp <= 0) results.push(new DeadResult(entity));
 
 	return results;
+}
+
+export function isAlive(entity: Entity) {
+	const fighter = entity.get(Fighter);
+	return fighter && fighter.hp > 0;
 }

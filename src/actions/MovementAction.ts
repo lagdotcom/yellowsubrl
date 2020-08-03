@@ -3,16 +3,13 @@ import { getBlocker, nameOf } from '../systems/entities';
 import { attack } from '../systems/combat';
 import Action from './Action';
 import Engine from '../Engine';
-import GameState from '../GameState';
 import MessageResult from '../results/MessageResult';
 import Result from '../results/Result';
 import { Fighter, Position, Player } from '../components';
+import ConsumeTurnResult from '../results/ConsumeTurnResult';
 
 export default class MovementAction implements Action {
-	name: 'movement';
-	constructor(private dx: number, private dy: number) {
-		this.name = 'movement';
-	}
+	constructor(private dx: number, private dy: number) {}
 
 	perform(engine: Engine, en: Entity) {
 		const results: Result[] = [];
@@ -49,7 +46,7 @@ export default class MovementAction implements Action {
 			}
 		}
 
-		engine.gameStateStack.swap(GameState.EnemyTurn);
+		results.push(new ConsumeTurnResult());
 		return results;
 	}
 }

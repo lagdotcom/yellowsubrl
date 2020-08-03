@@ -4,6 +4,7 @@ import { getInventoryMenu } from './systems/items';
 import { Entity } from './ecs';
 import { Fighter, Level } from './components';
 import { xpForNextLevel } from './systems/experience';
+import { getStat } from './systems/stats';
 
 export function menu(
 	con: Console,
@@ -107,9 +108,9 @@ export function levelUpMenu({
 	const fighter = player.get(Fighter);
 
 	const options = {
-		c: `Constitution (+20 HP, from ${fighter.maxHp})`,
-		s: `Strength (+1 attack, from ${fighter.power})`,
-		a: `Agility (+1 defense, from ${fighter.defense})`,
+		c: `Constitution (+20 HP, from ${fighter.stats.maxHp})`,
+		s: `Strength (+1 attack, from ${fighter.stats.power})`,
+		a: `Agility (+1 defense, from ${fighter.stats.defense})`,
 	};
 
 	menu(console, header, options, width, screenWidth, screenHeight);
@@ -137,9 +138,9 @@ export function characterScreen(
 	show(`Level: ${lvl.currentLevel}`);
 	show(`Experience: ${lvl.currentXp}`);
 	show(`Experience to Level: ${xpForNextLevel(player)}`);
-	show(`Maximum HP: ${fighter.maxHp}`);
-	show(`Attack: ${fighter.power}`);
-	show(`Defense: ${fighter.defense}`);
+	show(`Maximum HP: ${getStat(player, 'maxHp')}`);
+	show(`Attack: ${getStat(player, 'power')}`);
+	show(`Defense: ${getStat(player, 'defense')}`);
 
 	const x = Math.floor(screenWidth / 2 - width / 2);
 	const y = Math.floor(screenHeight / 2 - height / 2);

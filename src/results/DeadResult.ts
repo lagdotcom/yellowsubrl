@@ -10,10 +10,7 @@ import { Appearance, Player, AI, Blocks, Fighter } from '../components';
 import XpResult from './XpResult';
 
 export default class DeadResult implements Result {
-	name: 'dead';
-	constructor(public entity: Entity) {
-		this.name = 'dead';
-	}
+	constructor(public entity: Entity) {}
 
 	perform(engine: Engine): Result[] {
 		const { entity } = this;
