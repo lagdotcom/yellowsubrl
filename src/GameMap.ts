@@ -1,11 +1,11 @@
 import Tile from './Tile';
 import { Rect } from './mapObjects';
 import RNG, { RNGSeed } from './RNG';
-import { itemSpawnData, enemySpawnData } from './spawnData';
 import ecs from './ecs';
 import { getBlocker, isAt } from './systems/entities';
 import { XY } from './systems/movement';
 import { Position } from './components';
+import { getItemSpawnChances, getEnemySpawnChances, fscale } from './spawnData';
 
 export interface MapGenerator {
 	generate(rng: RNG, gameMap: GameMap): XY;
@@ -64,21 +64,19 @@ export default class GameMap {
 		}
 	}
 
-	placeEntities(
-		rng: RNG,
-		room: Rect,
-		maxMonstersPerRoom: number,
-		maxItemsPerRoom: number
-	) {
-		const numberOfMonsters = rng.randint(0, maxMonstersPerRoom);
-		const numberOfItems = rng.randint(0, maxItemsPerRoom);
+	placeEntities(rng: RNG, room: Rect) {
+		const numberOfMonsters = rng.randint(
+			0,
+			fscale(this.floor, [2, 1], [3, 4], [5, 6])
+		);
+		const numberOfItems = rng.randint(0, fscale(this.floor, [1, 1], [2, 4]));
 
 		for (var i = 0; i < numberOfMonsters; i++) {
 			const x = rng.randint(room.x1 + 1, room.x2 - 1);
 			const y = rng.randint(room.y1 + 1, room.y2 - 1);
 
 			if (!getBlocker(x, y)) {
-				const prefab = rng.weighted(enemySpawnData);
+				const prefab = rng.weighted(getEnemySpawnChances(this.floor));
 				const enemy = ecs.entity(prefab).add(Position, { x, y });
 			}
 		}
@@ -90,7 +88,7 @@ export default class GameMap {
 			if (
 				ecs.find({ all: [Position] }).filter(en => isAt(en, x, y)).length == 0
 			) {
-				const prefab = rng.weighted(itemSpawnData);
+				const prefab = rng.weighted(getItemSpawnChances(this.floor));
 				const item = ecs.entity(prefab).add(Position, { x, y });
 			}
 		}

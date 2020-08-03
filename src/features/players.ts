@@ -20,7 +20,7 @@ export const ringoPrefab = ecs
 		colour: Colours.white,
 		order: RenderOrder.Actor,
 	})
-	.add(Fighter, { hp: 30, maxHp: 30, defense: 2, power: 5, xp: 0 })
+	.add(Fighter, { hp: 100, maxHp: 100, defense: 1, power: 4, xp: 0 })
 	.add(Inventory, { capacity: 26, items: {} })
 	.add(Blocks, {})
 	.add(Level, {

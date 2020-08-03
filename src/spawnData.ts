@@ -18,24 +18,39 @@ import {
 } from './items/instruments';
 import { Prefab } from './ecs';
 
-export const itemSpawnData: [number, Prefab][] = [
-	[70, healingPotion],
-	[15, fireballScroll],
-	[10, lightningScroll],
-	[10, confusionScroll],
+export function fscale(floor: number, ...entries: [number, number][]) {
+	var found = 0;
 
-	[5, acoustic],
-	[5, bass],
-	[5, electric],
-	[5, flute],
-	[5, sitar],
-	[5, snare],
-	[5, trombone],
-	[5, tuba],
-	[5, violin],
-];
+	for (var i = 0; i < entries.length; i++) {
+		const [chance, target] = entries[i];
+		if (floor >= target) found = chance;
+	}
 
-export const enemySpawnData: [number, Prefab][] = [
-	[8, orc],
-	[2, troll],
-];
+	return found;
+}
+
+export function getItemSpawnChances(floor: number): [number, Prefab][] {
+	return [
+		[70, healingPotion],
+		[fscale(floor, [25, 6]), fireballScroll],
+		[fscale(floor, [25, 4]), lightningScroll],
+		[fscale(floor, [10, 2]), confusionScroll],
+
+		[5, acoustic],
+		[5, bass],
+		[5, electric],
+		[5, flute],
+		[5, sitar],
+		[5, snare],
+		[5, trombone],
+		[5, tuba],
+		[5, violin],
+	];
+}
+
+export function getEnemySpawnChances(floor: number): [number, Prefab][] {
+	return [
+		[80, orc],
+		[fscale(floor, [15, 3], [30, 5], [60, 7]), troll],
+	];
+}

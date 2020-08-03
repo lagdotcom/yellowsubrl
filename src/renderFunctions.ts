@@ -16,6 +16,7 @@ import Engine from './Engine';
 import GameMap from './GameMap';
 import { renderable } from './queries';
 import { Appearance, Fighter, Position } from './components';
+import { PrintAlign } from './libtcod/Console';
 
 export type ColourMap = { [name: string]: string };
 
@@ -199,12 +200,15 @@ export function renderBar(
 	if (width > 0) panel.drawRect(x, y, width, 1, 0, undefined, barColour);
 
 	panel.printBox(
-		Math.floor(x + totalWidth / 2),
+		x,
 		y,
 		totalWidth,
 		1,
 		`${name}: ${value}/${maximum}`,
-		Colours.white
+		Colours.white,
+		undefined,
+		BlendMode.None,
+		PrintAlign.Center
 	);
 }
 

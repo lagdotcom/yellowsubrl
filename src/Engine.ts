@@ -35,8 +35,6 @@ import {
 	mapDisplayWidth,
 	mapHeight,
 	mapWidth,
-	maxItemsPerRoom,
-	maxMonstersPerRoom,
 	messageHeight,
 	messageWidth,
 	messageX,
@@ -107,16 +105,8 @@ export default class Engine {
 		// 	roomMaxSize,
 		// 	mapWidth,
 		// 	mapHeight,
-		// 	maxMonstersPerRoom,
 		// });
-		this.mapGenerator = new BSPTree(
-			5,
-			10,
-			20,
-			75,
-			maxMonstersPerRoom,
-			maxItemsPerRoom
-		);
+		this.mapGenerator = new BSPTree(5, 10, 20, 75);
 
 		this.mapHeight = mapHeight;
 		this.mapWidth = mapWidth;
@@ -166,6 +156,7 @@ export default class Engine {
 
 	newGame() {
 		this.gameStateStack.swap(GameState.PlayerTurn);
+		this.player = ecs.entity(ringoPrefab);
 		this.newMap();
 	}
 
@@ -260,10 +251,14 @@ export default class Engine {
 		ecs.clear();
 
 		gameMap.reset(rng.seed, gameMap.width, gameMap.height, gameMap.floor);
-		const position = mapGenerator.generate(rng, gameMap);
+		const start = mapGenerator.generate(rng, gameMap);
 
-		this.player = ecs.entity(ringoPrefab).add(Position, position);
 		this.fovMap = initializeFov(gameMap);
+
+		const pos = this.player.get(Position);
+		pos.x = start.x;
+		pos.y = start.y;
+
 		this.updateScroll();
 	}
 

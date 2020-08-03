@@ -27,9 +27,6 @@ export const fovAlgorithm = FovAlgorithm.RedBlob;
 export const fovLightWalls = true;
 export const fovRadius = 10;
 
-export const maxMonstersPerRoom = 3;
-export const maxItemsPerRoom = 2;
-
 export const colours: { [key: string]: string } = {
 	darkWall: toRGB(0, 0, 100),
 	darkGround: toRGB(50, 50, 150),

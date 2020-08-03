@@ -17,7 +17,7 @@ export const orc = ecs
 		colour: Colours.green,
 		order: RenderOrder.Actor,
 	})
-	.add(Fighter, { hp: 10, maxHp: 10, defense: 0, power: 3, xp: 35 });
+	.add(Fighter, { hp: 20, maxHp: 20, defense: 0, power: 4, xp: 35 });
 
 export const troll = ecs
 	.prefab('troll', enemy)
@@ -28,4 +28,4 @@ export const troll = ecs
 		colour: Colours.darkGreen,
 		order: RenderOrder.Actor,
 	})
-	.add(Fighter, { hp: 16, maxHp: 16, defense: 1, power: 4, xp: 100 });
+	.add(Fighter, { hp: 30, maxHp: 30, defense: 2, power: 8, xp: 100 });

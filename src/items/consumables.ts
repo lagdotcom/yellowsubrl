@@ -20,7 +20,7 @@ export const healingPotion = ecs
 		order: RenderOrder.Item,
 		revealforever: true,
 	})
-	.add(Item, { use: (item, en) => heal({ item, en, amount: 4 }) });
+	.add(Item, { use: (item, en) => heal({ item, en, amount: 40 }) });
 
 export const fireballScroll = ecs
 	.prefab('fireball scroll')
@@ -43,7 +43,7 @@ export const fireballScroll = ecs
 				item,
 				caster,
 				fovMap: engine.fovMap,
-				damage: 12,
+				damage: 25,
 				radius: 3,
 				target: { x: x!, y: y! },
 			}),
@@ -65,7 +65,7 @@ export const lightningScroll = ecs
 				item,
 				caster,
 				fovMap: engine.fovMap,
-				damage: 20,
+				damage: 40,
 				range: 5,
 			}),
 	});
