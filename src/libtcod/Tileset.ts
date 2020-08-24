@@ -9,9 +9,9 @@ const tcodLayout = [
 	'',
 ];
 
-export type Charmap = { [ch: string]: [number, number] };
+export type Charmap = { [ch: string]: [x: number, y: number] };
 
-function convertLayout(layout: string[]) {
+function convertLayout(layout: readonly string[]) {
 	const charmap: Charmap = {};
 
 	// process the lookup table

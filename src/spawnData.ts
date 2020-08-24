@@ -18,8 +18,9 @@ import {
 } from './items/instruments';
 import { Prefab } from './ecs';
 import { sword, shield } from './items/equipment';
+import { WeightTable } from './RNG';
 
-export function fscale(floor: number, ...entries: [number, number][]) {
+export function fscale(floor: number, ...entries: WeightTable<number>) {
 	var found = 0;
 
 	for (var i = 0; i < entries.length; i++) {
@@ -30,7 +31,7 @@ export function fscale(floor: number, ...entries: [number, number][]) {
 	return found;
 }
 
-export function getItemSpawnChances(floor: number): [number, Prefab][] {
+export function getItemSpawnChances(floor: number): WeightTable<Prefab> {
 	return [
 		[70, healingPotion],
 		[fscale(floor, [25, 6]), fireballScroll],
@@ -51,7 +52,7 @@ export function getItemSpawnChances(floor: number): [number, Prefab][] {
 	];
 }
 
-export function getEnemySpawnChances(floor: number): [number, Prefab][] {
+export function getEnemySpawnChances(floor: number): WeightTable<Prefab> {
 	return [
 		[80, orc],
 		[fscale(floor, [15, 3], [30, 5], [60, 7]), troll],

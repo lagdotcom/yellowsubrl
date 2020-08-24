@@ -67,6 +67,8 @@ export function fromReadable(raw: string) {
 	return seed;
 }
 
+export type WeightTable<T> = readonly [weight: number, item: T][];
+
 /**
  * RNG using xorshift128
  */
@@ -127,11 +129,11 @@ export default class RNG {
 		return fn(...choices);
 	}
 
-	choose<T>(options: T[]) {
+	choose<T>(options: readonly T[]) {
 		return options[this.randint(0, options.length - 1)];
 	}
 
-	weighted<T>(options: [number, T][]) {
+	weighted<T>(options: WeightTable<T>) {
 		const total = options.map(o => o[0]).reduce((a, b) => a + b);
 		const roll = this.randint(0, total - 1);
 		var running = 0;

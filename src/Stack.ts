@@ -1,7 +1,7 @@
 export default class Stack<T> {
 	private items: T[];
 
-	constructor(...items: T[]) {
+	constructor(...items: readonly T[]) {
 		this.items = items.slice();
 	}
 
@@ -13,7 +13,7 @@ export default class Stack<T> {
 		return this.items[this.items.length - 1];
 	}
 
-	push(...items: T[]) {
+	push(...items: readonly T[]) {
 		this.items.push(...items);
 	}
 
@@ -21,7 +21,7 @@ export default class Stack<T> {
 		return this.items.pop();
 	}
 
-	swap(...items: T[]) {
+	swap(...items: readonly T[]) {
 		const top = this.pop();
 		this.push(...items);
 		return top;

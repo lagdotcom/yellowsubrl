@@ -122,7 +122,7 @@ export class Terminal {
 			keepAspect?: boolean;
 			integerScaling?: boolean;
 			clearColour?: string;
-			align?: [number, number];
+			align?: [x: number, y: number];
 		} = {}
 	) {
 		const keepAspect = opt(options.keepAspect, true);
@@ -191,7 +191,7 @@ export class Terminal {
 		cancelAnimationFrame(this.handle);
 	}
 
-	pixelToTile(wx: number, wy: number): [number, number] {
+	pixelToTile(wx: number, wy: number): [x: number, y: number] {
 		const ox = wx - this.element.offsetLeft - this.offsetX;
 		const oy = wy - this.element.offsetTop - this.offsetY;
 

@@ -54,7 +54,7 @@ import EquipItemResult from './results/EquipItemResult';
 import { isAlive } from './systems/combat';
 
 interface SaveData {
-	entities: { [id: string]: [string[], any] };
+	entities: { [id: string]: [templates: string[], args: any] };
 	explored: string[];
 	map: string;
 	seed: string;
@@ -88,14 +88,14 @@ export default class Engine {
 	public scrollX: number;
 	public scrollY: number;
 	public targetingItem?: Entity;
-	public tilesets: Tileset[];
+	public tilesets: readonly Tileset[];
 	public width: number;
 
 	private fpsString: string;
 	private frames: number;
 	private lastReportTime: number;
 
-	constructor(tilesets: Tileset[]) {
+	constructor(tilesets: readonly Tileset[]) {
 		// TODO: debugging only
 		(window as any).G = this;
 

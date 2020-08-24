@@ -25,7 +25,7 @@ class GridGraph {
 
 	neighbours(co: coord, diagonalCost: number) {
 		const { x, y } = co;
-		var choices: [coord, number][] = [
+		var choices: [co: coord, cost: number][] = [
 			[at(x, y - 1), 1],
 			[at(x - 1, y), 1],
 			[at(x + 1, y), 1],

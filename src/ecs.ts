@@ -27,7 +27,11 @@ export class Entity {
 	private destroyed: boolean;
 	private prefabs: string[];
 
-	constructor(private ecs: Manager, public id: string, ...prefabs: Prefab[]) {
+	constructor(
+		private ecs: Manager,
+		public id: string,
+		...prefabs: readonly Prefab[]
+	) {
 		this.components = new Set<Component<any>>();
 		this.destroyed = false;
 
@@ -149,13 +153,13 @@ export class Manager {
 		return this.idGenerator();
 	}
 
-	entity(...prefabs: Prefab[]): Entity {
+	entity(...prefabs: readonly Prefab[]): Entity {
 		const id = this.nextId();
 		const en = new Entity(this, id, ...prefabs);
 		return this.attach(en);
 	}
 
-	prefab(name: string, ...prefabs: Prefab[]): Prefab {
+	prefab(name: string, ...prefabs: readonly Prefab[]): Prefab {
 		const pf = new Prefab(this, name, ...prefabs);
 		this.prefabs[name] = pf;
 		return pf;
@@ -189,9 +193,9 @@ export class Manager {
 			any,
 			none,
 		}: {
-			all?: Component<any>[];
-			any?: Component<any>[];
-			none?: Component<any>[];
+			all?: readonly Component<any>[];
+			any?: readonly Component<any>[];
+			none?: readonly Component<any>[];
 		} = {},
 		save: boolean = true
 	) {
@@ -218,9 +222,9 @@ export class Manager {
 
 	find(
 		options: {
-			all?: Component<any>[];
-			any?: Component<any>[];
-			none?: Component<any>[];
+			all?: readonly Component<any>[];
+			any?: readonly Component<any>[];
+			none?: readonly Component<any>[];
 		} = {}
 	) {
 		return this.query(options, false).get();
@@ -230,7 +234,10 @@ export class Manager {
 export class Query {
 	private entities: Set<Entity>;
 
-	constructor(initial: Entity[], public match: (en: Entity) => boolean) {
+	constructor(
+		initial: readonly Entity[],
+		public match: (en: Entity) => boolean
+	) {
 		this.entities = new Set(initial.filter(match));
 	}
 

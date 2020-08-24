@@ -23,7 +23,7 @@ export class Rect {
 		return x >= 0 && x < this.width && y >= 0 && y < this.height;
 	}
 
-	centre(): [number, number] {
+	centre(): [x: number, y: number] {
 		const cx = Math.floor((this.x1 + this.x2) / 2);
 		const cy = Math.floor((this.y1 + this.y2) / 2);
 
