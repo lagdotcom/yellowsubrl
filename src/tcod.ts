@@ -9,6 +9,7 @@ export function toRGB(r: number, g: number, b: number) {
 }
 
 export const Colours = {
+	default: 'default',
 	black: toRGB(0, 0, 0),
 	blue: toRGB(0, 0, 255),
 	brown: toRGB(165, 42, 42),

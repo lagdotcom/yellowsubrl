@@ -18,7 +18,7 @@ export const ringoPrefab = ecs
 		name: 'you',
 		tile: 'Player',
 		tile2: 'Player2',
-		colour: Colours.white,
+		colour: Colours.default,
 		order: RenderOrder.Actor,
 	})
 	.add(Fighter, { hp: 100, stats: { maxHp: 100, defense: 1, power: 2 }, xp: 0 })

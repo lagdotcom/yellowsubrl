@@ -1,3 +1,5 @@
+import { Colours } from '../tcod';
+
 const tcodLayout = [
 	` !"#$%&'()*+,-./0123456789:;<=>?`,
 	'@[\\]^_`{|}~░▒▓│─┼┤┴├┬└┌┐┘▘▝▀▗▚▐▖',
@@ -110,11 +112,18 @@ export class Tileset {
 
 		const { canvas, context, src, tileWidth, tileHeight } = this;
 
-		context.globalCompositeOperation = 'copy';
-		context.fillStyle = fg;
-		context.fillRect(0, 0, tileWidth, tileHeight);
+		if (fg !== Colours.default) {
+			context.globalCompositeOperation = 'copy';
+			context.fillStyle = fg;
+			context.fillRect(0, 0, tileWidth, tileHeight);
 
-		context.globalCompositeOperation = 'destination-in';
+			context.globalCompositeOperation = 'destination-in';
+		} else {
+			context.globalCompositeOperation = 'copy';
+
+			context.fillStyle = 'transparent';
+			context.fillRect(0, 0, tileWidth, tileHeight);
+		}
 		context.drawImage(
 			src,
 			loc[0],
