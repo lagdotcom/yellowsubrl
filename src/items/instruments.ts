@@ -9,14 +9,19 @@ import {
 	Equippable,
 } from '../components';
 
-const instrument = (
+const instrument = ecs
+	.prefab('instrument')
+	.add(Item, {})
+	.add(Equippable, { slot: 'main', stats: {} });
+
+const makeInstrumentPrefab = (
 	name: string,
 	category: WeaponCategory,
 	tile: string,
 	colour: string
 ): Prefab =>
 	ecs
-		.prefab(name)
+		.prefab(name, instrument)
 		.add(Appearance, {
 			name,
 			tile,
@@ -25,74 +30,72 @@ const instrument = (
 			order: RenderOrder.Item,
 			revealforever: true,
 		})
-		.add(Item, {})
-		.add(Equippable, { slot: 'main', stats: {} })
 		.add(Weapon, { category });
 
-export const acoustic = instrument(
+export const acoustic = makeInstrumentPrefab(
 	'acoustic guitar',
 	WeaponCategory.String,
 	'Guitar',
 	Colours.brown
 );
 
-export const bass = instrument(
+export const bass = makeInstrumentPrefab(
 	'bass guitar',
 	WeaponCategory.String,
 	'Guitar',
 	Colours.black
 );
 
-export const electric = instrument(
+export const electric = makeInstrumentPrefab(
 	'electric guitar',
 	WeaponCategory.String,
 	'Guitar',
 	Colours.red
 );
 
-export const flute = instrument(
+export const flute = makeInstrumentPrefab(
 	'flute',
 	WeaponCategory.Woodwind,
 	'Flute',
 	Colours.silver
 );
 
-export const sitar = instrument(
+export const sitar = makeInstrumentPrefab(
 	'sitar',
 	WeaponCategory.String,
 	'\\',
 	Colours.brown
 );
 
-export const snare = instrument(
+export const snare = makeInstrumentPrefab(
 	'snare drum',
 	WeaponCategory.Percussion,
 	'Drum',
 	Colours.white
 );
 
-export const trombone = instrument(
+export const trombone = makeInstrumentPrefab(
 	'trombone',
 	WeaponCategory.Brass,
 	'c',
 	Colours.yellow
 );
 
-export const trumpet = instrument(
+export const trumpet = makeInstrumentPrefab(
 	'trumpet',
 	WeaponCategory.Brass,
 	'c',
 	Colours.silver
 );
 
-export const tuba = instrument(
+export const tuba = makeInstrumentPrefab(
 	'tuba',
 	WeaponCategory.Brass,
 	'U',
 	Colours.yellow
 );
 
-export const violin = instrument(
+export const violin = makeInstrumentPrefab(
 	'violin',
 	WeaponCategory.String,
 	'_',
