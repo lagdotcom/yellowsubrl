@@ -31,6 +31,20 @@ export default class GameMap {
 		this.tiles = this.initializeTiles();
 	}
 
+	debug() {
+		var s = '';
+		for (var y = 0; y < this.height; y++) {
+			for (var x = 0; x < this.width; x++) {
+				if (this.tiles[x][y].blocked) s += '#';
+				else s += ' ';
+			}
+
+			s += '\n';
+		}
+
+		console.log(s);
+	}
+
 	contains(x: number, y: number) {
 		return x >= 0 && x < this.width && y >= 0 && y < this.height;
 	}

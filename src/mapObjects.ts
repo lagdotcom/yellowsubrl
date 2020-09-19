@@ -20,7 +20,7 @@ export class Rect {
 	}
 
 	contains(x: number, y: number) {
-		return x >= 0 && x < this.width && y >= 0 && y < this.height;
+		return x >= this.x1 && x < this.x2 && y >= this.y1 && y < this.y2;
 	}
 
 	centre(): [x: number, y: number] {
