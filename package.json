@@ -4,6 +4,7 @@
 	"description": "A roguelike made following a Python tutorial.",
 	"main": "src/main.ts",
 	"scripts": {
+		"preinstall": "npx npm-force-resolutions",
 		"build": "webpack -p",
 		"dev": "webpack -d",
 		"start": "webpack-dev-server -d --content-base ./dist --open",
@@ -28,5 +29,8 @@
 		"deep-object-diff": "^1.1.0",
 		"lodash.merge": "^4.6.2",
 		"nanoid": "^3.1.12"
+	},
+	"resolutions": {
+		"node-forge": "0.10.0"
 	}
 }
