@@ -3,13 +3,9 @@ import { Rect } from './mapObjects';
 import RNG, { RNGSeed } from './RNG';
 import ecs from './ecs';
 import { getBlocker, isAt } from './systems/entities';
-import { XY } from './systems/movement';
 import { Position } from './components';
 import { getItemSpawnChances, getEnemySpawnChances, fscale } from './spawnData';
-
-export interface MapGenerator {
-	generate(rng: RNG, gameMap: GameMap): XY;
-}
+import XY, { XYTag, XYtoTag } from './XY';
 
 export default class GameMap {
 	floor!: number;
@@ -76,6 +72,71 @@ export default class GameMap {
 			this.tiles[x][y].blocked = false;
 			this.tiles[x][y].blockSight = false;
 		}
+	}
+
+	addBorder() {
+		const { width, height } = this;
+
+		for (var x = 0; x < width; x++) {
+			this.tiles[x][0].blocked = true;
+			this.tiles[x][0].blockSight = true;
+			this.tiles[x][height - 1].blocked = true;
+			this.tiles[x][height - 1].blockSight = true;
+		}
+
+		for (var y = 0; y < height; y++) {
+			this.tiles[0][y].blocked = true;
+			this.tiles[0][y].blockSight = true;
+			this.tiles[width - 1][y].blocked = true;
+			this.tiles[width - 1][y].blockSight = true;
+		}
+	}
+
+	fill(
+		sx: number,
+		sy: number,
+		w: number,
+		h: number,
+		blocked: boolean,
+		blockSight: boolean = blocked
+	) {
+		for (var x = 0; x < w; x++) {
+			for (var y = 0; y < h; y++) {
+				this.tiles[sx + x][sy + y].blocked = blocked;
+				this.tiles[sx + x][sy + y].blockSight = blockSight;
+			}
+		}
+	}
+
+	flood(sx: number, sy: number, blocked: boolean) {
+		const adjacents: XY[] = [
+			{ x: 1, y: 0 },
+			{ x: -1, y: 0 },
+			{ x: 0, y: 1 },
+			{ x: 0, y: -1 },
+		];
+
+		const area = new Set<XYTag>();
+		const checked = new Set<XYTag>();
+		const check: XY[] = [{ x: sx, y: sy }];
+
+		while (check.length) {
+			const xy = check.pop()!;
+			if (this.tiles[xy.x][xy.y].blocked === blocked) {
+				area.add(XYtoTag(xy));
+
+				adjacents.forEach(j => {
+					const neighbour = { x: xy.x + j.x, y: xy.y + j.y };
+					const tag = XYtoTag(neighbour);
+					if (this.contains(neighbour.x, neighbour.y) && !checked.has(tag)) {
+						check.push(neighbour);
+						checked.add(tag);
+					}
+				});
+			}
+		}
+
+		return area;
 	}
 
 	placeEntities(rng: RNG, room: Rect) {

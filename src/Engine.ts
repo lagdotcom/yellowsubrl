@@ -1,4 +1,5 @@
-import GameMap, { MapGenerator } from './GameMap';
+import GameMap from './GameMap';
+import { MapGenerator } from './MapGenerator';
 import {
 	Colours,
 	Console,
@@ -23,7 +24,6 @@ import MessageLog from './MessageLog';
 import { handleKeys, handleMouse } from './inputHandlers';
 import Stack from './Stack';
 import ecs, { Entity } from './ecs';
-import BSPTree from './generator/BSPTree';
 import {
 	barWidth,
 	colours,
@@ -52,6 +52,7 @@ import { dagger } from './items/equipment';
 import ItemAddedResult from './results/ItemAddedResult';
 import EquipItemResult from './results/EquipItemResult';
 import { isAlive } from './systems/combat';
+import ThePier from './generator/ThePier';
 
 interface SaveData {
 	entities: { [id: string]: [templates: string[], args: any] };
@@ -110,7 +111,8 @@ export default class Engine {
 		// 	mapWidth,
 		// 	mapHeight,
 		// });
-		this.mapGenerator = new BSPTree(5, 10, 20, 75);
+		//this.mapGenerator = new BSPTree(5, 10, 20, 75);
+		this.mapGenerator = new ThePier();
 
 		this.mapHeight = mapHeight;
 		this.mapWidth = mapWidth;
@@ -184,7 +186,7 @@ export default class Engine {
 
 		localStorage.setItem(
 			'ysrl.save',
-			JSON.stringify(data, (k, v) => (v === undefined ? null : v))
+			JSON.stringify(data, (_, v) => (v === undefined ? null : v))
 		);
 	}
 

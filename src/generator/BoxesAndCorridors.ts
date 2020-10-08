@@ -4,8 +4,9 @@ import GameMap from '../GameMap';
 import ecs from '../ecs';
 import { stairsPrefab } from '../features/stairs';
 import { Stairs, Position } from '../components';
+import { MapGenerator } from '../MapGenerator';
 
-export default class BoxesAndCorridors {
+export default class BoxesAndCorridors implements MapGenerator {
 	maxRooms: number;
 	roomMinSize: number;
 	roomMaxSize: number;

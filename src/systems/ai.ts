@@ -1,6 +1,7 @@
 import Engine from '../Engine';
 import Result from '../results/Result';
-import { distance, moveAstar, moveTowards, XY } from './movement';
+import { distance, moveAstar, moveTowards } from './movement';
+import XY from '../XY';
 import { attack } from './combat';
 import MessageResult from '../results/MessageResult';
 import { nameOf } from './entities';

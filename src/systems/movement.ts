@@ -4,20 +4,7 @@ import { AStar, Map } from '../tcod';
 import { Entity } from '../ecs';
 import { Position } from '../components';
 import { blockers } from '../queries';
-
-export interface XY {
-	x: number;
-	y: number;
-}
-
-export function XYtoTag(p: XY) {
-	return `${p.x},${p.y}`;
-}
-
-export function TagtoXY(tag: string): XY {
-	const [x, y] = tag.split(',').map(parseInt);
-	return { x, y };
-}
+import XY from '../XY';
 
 export function distance(a: XY, b: XY) {
 	const dx = a.x - b.x;

@@ -4,6 +4,7 @@ import { Rect } from '../mapObjects';
 import ecs from '../ecs';
 import { stairsPrefab } from '../features/stairs';
 import { Stairs, Position } from '../components';
+import { MapGenerator } from '../MapGenerator';
 
 class Leaf {
 	left?: Leaf;
@@ -104,7 +105,7 @@ class Leaf {
 	}
 }
 
-export default class BSPTree {
+export default class BSPTree implements MapGenerator {
 	constructor(
 		public minRoom: number,
 		public minLeaf: number,

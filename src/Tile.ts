@@ -1,4 +1,4 @@
-import { XYtoTag } from './systems/movement';
+import { XYtoTag } from './XY';
 
 export default class Tile {
 	tag: string;
