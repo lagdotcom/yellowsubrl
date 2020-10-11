@@ -105,13 +105,18 @@ const tilesetLayout: Charmap = {
 
 	Stairs: [16, 8],
 	Stairs2: [17, 8],
+
+	Door: [0, 9],
+	Door2: [1, 9],
+	BowlerHat: [2, 9],
+	BowlerHat2: [3, 9],
 };
 
 async function main() {
 	const bigGroovy = await Tileset.createFromUrl(
 		groovySrc,
 		32,
-		9,
+		10,
 		tilesetLayout
 	);
 

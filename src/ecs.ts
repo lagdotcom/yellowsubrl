@@ -9,31 +9,29 @@ export class Component<T> {
 		this.data = {};
 	}
 
-	add(en: Entity, data: T) {
+	add(en: BaseEntity, data: T) {
 		this.data[en.id] = data;
 	}
 
-	remove(en: Entity) {
+	remove(en: BaseEntity) {
 		delete this.data[en.id];
 	}
 
-	get(en: Entity) {
+	get(en: BaseEntity) {
 		return this.data[en.id];
 	}
 }
 
-export class Entity {
-	private components: Set<Component<any>>;
-	private destroyed: boolean;
-	private prefabs: string[];
+abstract class BaseEntity {
+	protected components: Set<Component<any>>;
+	protected prefabs: string[];
 
 	constructor(
-		private ecs: Manager,
+		protected ecs: Manager,
 		public id: string,
 		...prefabs: readonly Prefab[]
 	) {
 		this.components = new Set<Component<any>>();
-		this.destroyed = false;
 
 		this.prefabs = [];
 		prefabs.forEach(pf => {
@@ -49,7 +47,6 @@ export class Entity {
 	add<T>(component: Component<T>, data: T) {
 		this.components.add(component);
 		component.add(this, merge({}, data));
-		this.ecs.update(this);
 
 		// TODO: debugging only
 		(this as any)[component.name] = component.get(this);
@@ -68,7 +65,6 @@ export class Entity {
 	remove<T>(component: Component<T>) {
 		this.components.delete(component);
 		component.remove(this);
-		this.ecs.update(this);
 
 		// TODO: debugging only
 		delete (this as any)[component.name];
@@ -97,6 +93,27 @@ export class Entity {
 			...this.prefabs.map(name => this.ecs.getPrefab(name).data())
 		);
 	}
+}
+
+export class Entity extends BaseEntity {
+	private destroyed: boolean;
+
+	constructor(ecs: Manager, id: string, ...prefabs: readonly Prefab[]) {
+		super(ecs, id, ...prefabs);
+		this.destroyed = false;
+	}
+
+	add<T>(component: Component<T>, data: T) {
+		super.add(component, data);
+		this.ecs.update(this);
+
+		return this;
+	}
+
+	remove<T>(component: Component<T>) {
+		super.remove(component);
+		this.ecs.update(this);
+	}
 
 	destroy() {
 		if (!this.destroyed) {
@@ -108,13 +125,13 @@ export class Entity {
 	}
 }
 
-export class Prefab extends Entity {}
+export class Prefab extends BaseEntity {}
 
 export class Manager {
 	private components: { [name: string]: Component<any> };
 	private entities: Set<Entity>;
 	private idGenerator: () => string;
-	private prefabs: { [name: string]: Entity };
+	private prefabs: { [name: string]: Prefab };
 	private queries: Query[];
 
 	constructor() {

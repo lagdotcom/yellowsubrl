@@ -1,13 +1,21 @@
 import Engine from '../Engine';
 import Result from '../results/Result';
 import { distance, moveAstar, moveTowards } from './movement';
-import XY from '../XY';
+import XY, { atSamePosition } from '../XY';
 import { attack } from './combat';
 import MessageResult from '../results/MessageResult';
 import { nameOf } from './entities';
 import { Colours } from '../tcod';
 import { Entity } from '../ecs';
-import { AI, Position, Fighter, IAI } from '../components';
+import {
+	AI,
+	Position,
+	Fighter,
+	IAI,
+	AIRoutine,
+	AIRoutineName,
+} from '../components';
+import { pierDoorAI, pierEnemyAI } from '../features/pier';
 
 interface BasicAIVars {
 	goal?: XY;
@@ -20,8 +28,7 @@ export function basicAI(me: Entity, target: Entity, engine: Engine) {
 	const targetpos = target.get(Position);
 	if (!position || !targetpos) return results;
 
-	if (vars.goal && vars.goal.x == position.x && vars.goal.y == position.y)
-		vars.goal = undefined;
+	if (vars.goal && atSamePosition(vars.goal, position)) vars.goal = undefined;
 
 	const playerAt = target.get(Position);
 	if (engine.fovMap.isInFov(position.x, position.y))
@@ -68,3 +75,10 @@ export function confusedAI(me: Entity, target: Entity, engine: Engine) {
 
 	return results;
 }
+
+export const AIRoutines: { [name in AIRoutineName]: AIRoutine } = {
+	basic: basicAI,
+	confused: confusedAI,
+	pierDoor: pierDoorAI,
+	pierEnemy: pierEnemyAI,
+};

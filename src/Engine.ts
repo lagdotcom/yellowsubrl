@@ -44,7 +44,7 @@ import {
 } from './constants';
 import MessageResult from './results/MessageResult';
 import { mainMenu } from './menus';
-import { AI, AIRoutines, Player, Position } from './components';
+import { AI, Player, Position } from './components';
 import { hasAI } from './queries';
 import merge from 'lodash.merge';
 import { ringoPrefab } from './features/players';
@@ -53,6 +53,7 @@ import ItemAddedResult from './results/ItemAddedResult';
 import EquipItemResult from './results/EquipItemResult';
 import { isAlive } from './systems/combat';
 import ThePier from './generator/ThePier';
+import { AIRoutines } from './systems/ai';
 
 interface SaveData {
 	entities: { [id: string]: [templates: string[], args: any] };

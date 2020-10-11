@@ -1,22 +1,16 @@
 import ecs, { Entity } from './ecs';
 import Result from './results/Result';
-import { basicAI, confusedAI } from './systems/ai';
 import { RenderOrder } from './renderFunctions';
 import Engine from './Engine';
 import MessageResult from './results/MessageResult';
 
-export type AIRoutineName = 'basic' | 'confused';
+export type AIRoutineName = 'basic' | 'confused' | 'pierDoor' | 'pierEnemy';
 
 export type AIRoutine = (
 	me: Entity,
 	target: Entity,
 	engine: Engine
 ) => Result[];
-
-export const AIRoutines: { [name: string]: AIRoutine } = {
-	basic: basicAI,
-	confused: confusedAI,
-};
 
 export interface IAI {
 	routine: AIRoutineName;
@@ -80,6 +74,8 @@ export interface IItem {
 	targetingMessage?: MessageResult;
 }
 
+export interface IPierDoor {}
+
 export interface IPlayer {}
 
 export interface ILevel {
@@ -118,6 +114,7 @@ export const Fighter = ecs.register<IFighter>('Fighter');
 export const Inventory = ecs.register<IInventory>('Inventory');
 export const Item = ecs.register<IItem>('Item');
 export const Level = ecs.register<ILevel>('Level');
+export const PierDoor = ecs.register<IPierDoor>('PierDoor');
 export const Player = ecs.register<IPlayer>('Player');
 export const Position = ecs.register<IPosition>('Position');
 export const Stairs = ecs.register<IStairs>('Stairs');

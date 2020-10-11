@@ -1,3 +1,6 @@
+import { AI, Position } from '../components';
+import ecs from '../ecs';
+import { PierDoorAIVars, pierDoorPrefab } from '../features/pier';
 import GameMap from '../GameMap';
 import { MapGenerator } from '../MapGenerator';
 import RNG from '../RNG';
@@ -70,6 +73,7 @@ export default class ThePier implements MapGenerator {
 			});
 		});
 
+		// carve out the columns and place doors
 		columns.forEach(x => {
 			for (var y = 0; y < gameMap.height; y++) {
 				if (!gameMap.tiles[x][y].blocked) {
@@ -90,6 +94,34 @@ export default class ThePier implements MapGenerator {
 				}
 			}
 		});
+
+		// place all valid doors
+		for (var x = 0; x < gameMap.width; x++) {
+			for (var y = 0; y < gameMap.height; y++) {
+				if (gameMap.tiles[x][y].blocked) {
+					const up = y > 0 && !gameMap.tiles[x][y - 1].blocked;
+					const right =
+						x < gameMap.width - 1 && !gameMap.tiles[x + 1][y].blocked;
+					const down =
+						y < gameMap.height - 1 && !gameMap.tiles[x][y + 1].blocked;
+					const left = x > 0 && !gameMap.tiles[x - 1][y].blocked;
+
+					if (up || right || down || left) {
+						const door = ecs.entity(pierDoorPrefab).add(Position, { x, y });
+						const vars = {
+							directions: [],
+							cooldown: rng.randint(10, 100),
+						} as PierDoorAIVars;
+						if (up) vars.directions.push('u');
+						if (right) vars.directions.push('r');
+						if (down) vars.directions.push('d');
+						if (left) vars.directions.push('l');
+
+						door.add(AI, { routine: 'pierDoor', vars });
+					}
+				}
+			}
+		}
 
 		// TODO: a better way of generating this
 		while (true) {

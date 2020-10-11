@@ -6,6 +6,7 @@ import { getBlocker, isAt } from './systems/entities';
 import { Position } from './components';
 import { getItemSpawnChances, getEnemySpawnChances, fscale } from './spawnData';
 import XY, { XYTag, XYtoTag } from './XY';
+import { adjacentOffsets } from './Direction';
 
 export default class GameMap {
 	floor!: number;
@@ -109,13 +110,6 @@ export default class GameMap {
 	}
 
 	flood(sx: number, sy: number, blocked: boolean) {
-		const adjacents: XY[] = [
-			{ x: 1, y: 0 },
-			{ x: -1, y: 0 },
-			{ x: 0, y: 1 },
-			{ x: 0, y: -1 },
-		];
-
 		const area = new Set<XYTag>();
 		const checked = new Set<XYTag>();
 		const check: XY[] = [{ x: sx, y: sy }];
@@ -125,7 +119,7 @@ export default class GameMap {
 			if (this.tiles[xy.x][xy.y].blocked === blocked) {
 				area.add(XYtoTag(xy));
 
-				adjacents.forEach(j => {
+				adjacentOffsets.forEach(j => {
 					const neighbour = { x: xy.x + j.x, y: xy.y + j.y };
 					const tag = XYtoTag(neighbour);
 					if (this.contains(neighbour.x, neighbour.y) && !checked.has(tag)) {
@@ -152,7 +146,6 @@ export default class GameMap {
 
 			if (!getBlocker(x, y)) {
 				const prefab = rng.weighted(getEnemySpawnChances(this.floor));
-				const enemy = ecs.entity(prefab).add(Position, { x, y });
 			}
 		}
 
@@ -164,7 +157,6 @@ export default class GameMap {
 				ecs.find({ all: [Position] }).filter(en => isAt(en, x, y)).length == 0
 			) {
 				const prefab = rng.weighted(getItemSpawnChances(this.floor));
-				const item = ecs.entity(prefab).add(Position, { x, y });
 			}
 		}
 	}

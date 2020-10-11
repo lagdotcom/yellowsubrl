@@ -139,6 +139,13 @@ export function castFireball({
 	return results;
 }
 
+function confuse(victim: Entity, duration: number) {
+	victim.add(AI, {
+		routine: 'confused',
+		vars: { duration, previous: victim.get(AI) },
+	});
+}
+
 export function castConfuse(
 	item: Entity,
 	caster: Entity,
@@ -162,10 +169,7 @@ export function castConfuse(
 		.find({ all: [AI, Position] })
 		.find(en => isAt(en, target.x, target.y));
 	if (victim) {
-		victim.add(AI, {
-			routine: 'confused',
-			vars: { duration, previous: victim.get(AI) },
-		});
+		confuse(victim, duration);
 		results.push(
 			new ConsumeItemResult(caster, item),
 			new MessageResult(
