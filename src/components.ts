@@ -4,14 +4,12 @@ import { RenderOrder } from './renderFunctions';
 import Engine from './Engine';
 import MessageResult from './results/MessageResult';
 
+export interface AIRoutine {
+	hurt?: (me: Entity, attacker: Entity, amount: number) => Result[];
+	think: (me: Entity, engine: Engine) => Result[];
+}
+
 export type AIRoutineName = 'basic' | 'confused' | 'pierDoor' | 'pierEnemy';
-
-export type AIRoutine = (
-	me: Entity,
-	target: Entity,
-	engine: Engine
-) => Result[];
-
 export interface IAI {
 	routine: AIRoutineName;
 	vars: object;

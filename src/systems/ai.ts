@@ -15,14 +15,15 @@ import {
 	AIRoutine,
 	AIRoutineName,
 } from '../components';
-import { pierDoorAI, pierEnemyAI } from '../features/pier';
+import { pierDoorThink, pierEnemyHurt, pierEnemyThink } from '../features/pier';
 
 interface BasicAIVars {
 	goal?: XY;
 }
-export function basicAI(me: Entity, target: Entity, engine: Engine) {
+export function basicThink(me: Entity, engine: Engine) {
 	const results: Result[] = [];
 	const vars = me.get(AI).vars as BasicAIVars;
+	const target = engine.player;
 
 	const position = me.get(Position);
 	const targetpos = target.get(Position);
@@ -51,7 +52,7 @@ interface ConfusedAIVars {
 	duration: number;
 	previous: IAI;
 }
-export function confusedAI(me: Entity, target: Entity, engine: Engine) {
+export function confusedThink(me: Entity, engine: Engine) {
 	const results: Result[] = [];
 	const vars = me.get(AI).vars as ConfusedAIVars;
 
@@ -77,8 +78,8 @@ export function confusedAI(me: Entity, target: Entity, engine: Engine) {
 }
 
 export const AIRoutines: { [name in AIRoutineName]: AIRoutine } = {
-	basic: basicAI,
-	confused: confusedAI,
-	pierDoor: pierDoorAI,
-	pierEnemy: pierEnemyAI,
+	basic: { think: basicThink },
+	confused: { think: confusedThink },
+	pierDoor: { think: pierDoorThink },
+	pierEnemy: { think: pierEnemyThink, hurt: pierEnemyHurt },
 };

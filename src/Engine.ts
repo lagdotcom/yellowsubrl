@@ -371,7 +371,7 @@ export default class Engine {
 	private enemyActions() {
 		if (this.gameState == GameState.EnemyTurn) {
 			hasAI.get().forEach(en => {
-				AIRoutines[en.get(AI).routine](en, this.player, this).map(this.resolve);
+				AIRoutines[en.get(AI).routine].think(en, this).map(this.resolve);
 			});
 
 			this.gameStateStack.swap(

@@ -7,6 +7,7 @@ import Engine from '../Engine';
 import { RenderOrder } from '../renderFunctions';
 import { attack } from '../systems/combat';
 import { getBlocker } from '../systems/entities';
+import { distance } from '../systems/movement';
 import { Colours } from '../tcod';
 import { pointSum, atSamePosition } from '../XY';
 
@@ -28,7 +29,7 @@ export interface PierDoorAIVars {
 	directions: Direction[];
 	cooldown: number;
 }
-export function pierDoorAI(me: Entity, target: Entity, engine: Engine) {
+export function pierDoorThink(me: Entity, engine: Engine) {
 	const pos = me.get(Position);
 	const vars = me.get(AI).vars as PierDoorAIVars;
 
@@ -53,9 +54,9 @@ export function pierDoorAI(me: Entity, target: Entity, engine: Engine) {
 
 export interface PierEnemyAIVars {
 	direction: Direction;
-	angry: boolean;
+	target?: string;
 }
-export function pierEnemyAI(me: Entity, target: Entity, engine: Engine) {
+export function pierEnemyThink(me: Entity) {
 	const pos = me.get(Position);
 	const vars = me.get(AI).vars as PierEnemyAIVars;
 
@@ -68,6 +69,18 @@ export function pierEnemyAI(me: Entity, target: Entity, engine: Engine) {
 		.filter(e => atSamePosition(e.get(Position), destination));
 	if (exits.length) {
 		return [new VanishAction(me)];
+	}
+
+	if (vars.target) {
+		const target = ecs.getEntity(vars.target);
+		if (target) {
+			if (distance(pos, target?.get(Position)) < 2) {
+				return attack(me, target);
+			}
+		}
+
+		// don't stay angry
+		vars.target = undefined;
 	}
 
 	const blocker = getBlocker(destination.x, destination.y);
@@ -95,7 +108,12 @@ export function pierEnemyAI(me: Entity, target: Entity, engine: Engine) {
 
 	pos.x = destination.x;
 	pos.y = destination.y;
+	return [];
+}
 
-	// TODO
+export function pierEnemyHurt(me: Entity, attacker: Entity) {
+	const vars = me.get(AI).vars as PierEnemyAIVars;
+	vars.target = attacker.id;
+
 	return [];
 }

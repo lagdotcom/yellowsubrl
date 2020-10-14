@@ -78,7 +78,7 @@ export function castLightning({
 				)} with a loud thunder! The damage is ${damage}.`,
 				Colours.cyan
 			),
-			...takeDamage(target, damage),
+			...takeDamage(target, damage, caster),
 			new ConsumeItemResult(caster, item)
 		);
 	} else {
@@ -131,7 +131,7 @@ export function castFireball({
 				new MessageResult(
 					`The ${nameOf(en)} gets burned for ${damage} hit points.`
 				),
-				...takeDamage(en, damage)
+				...takeDamage(en, damage, caster)
 			);
 		}
 	});

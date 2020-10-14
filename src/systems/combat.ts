@@ -3,8 +3,9 @@ import Result from '../results/Result';
 import MessageResult from '../results/MessageResult';
 import DeadResult from '../results/DeadResult';
 import { nameOf } from './entities';
-import { Fighter } from '../components';
+import { AI, Fighter } from '../components';
 import { getStat } from './stats';
+import { AIRoutines } from './ai';
 
 export function addHp(entity: Entity, amount: number) {
 	const fighter = entity.get(Fighter);
@@ -31,7 +32,7 @@ export function attack(attacker: Entity, victim: Entity) {
 				`${myName} attacks ${yourName} for ${damage} hit points.`
 			)
 		);
-		results.push(...takeDamage(victim, damage));
+		results.push(...takeDamage(victim, damage, attacker));
 	} else {
 		results.push(
 			new MessageResult(`${myName} attacks ${yourName} but does no damage.`)
@@ -41,13 +42,19 @@ export function attack(attacker: Entity, victim: Entity) {
 	return results;
 }
 
-export function takeDamage(entity: Entity, amount: number) {
+export function takeDamage(entity: Entity, amount: number, attacker: Entity) {
 	const results: Result[] = [];
 
 	const fighter = entity.get(Fighter);
 	if (!fighter) return results;
 
 	fighter.hp -= amount;
+	const ai = entity.get(AI);
+	if (ai && ai.routine) {
+		const routine = AIRoutines[ai.routine];
+		if (routine.hurt) routine.hurt(entity, attacker, amount);
+	}
+
 	if (fighter.hp <= 0) results.push(new DeadResult(entity));
 
 	return results;
