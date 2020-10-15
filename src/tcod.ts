@@ -15,9 +15,11 @@ export const Colours = {
 	brown: toRGB(165, 42, 42),
 	cyan: toRGB(0, 255, 255),
 	darkGreen: toRGB(0, 100, 0),
+	darkGrey: toRGB(169, 169, 169),
 	darkOrange: toRGB(255, 140, 0),
 	darkRed: toRGB(139, 0, 0),
 	green: toRGB(0, 128, 0),
+	grey: toRGB(128, 128, 128), // don't ask me why grey is darker than darkgrey in html
 	lightCyan: toRGB(128, 255, 255),
 	lightGreen: toRGB(128, 255, 128),
 	lightGrey: toRGB(211, 211, 211),

@@ -3,10 +3,9 @@ import Engine from '../Engine';
 import { Colours } from '../tcod';
 import MessageResult from './MessageResult';
 import GameState from '../GameState';
-import { RenderOrder } from '../renderFunctions';
-import { Entity } from '../ecs';
+import ecs, { Entity } from '../ecs';
 import { nameOf } from '../systems/entities';
-import { Appearance, Player, AI, Blocks, Fighter } from '../components';
+import { Player, Fighter, Drops, Position } from '../components';
 import XpResult from './XpResult';
 
 export default class DeadResult implements Result {
@@ -17,14 +16,17 @@ export default class DeadResult implements Result {
 		const results = [];
 
 		const name = nameOf(entity);
+		const at = entity.get(Position);
 
-		// TODO: this should probably just make a new entity haha
-		entity.add(Appearance, {
-			name: `remains of ${name}`,
-			tile: '%',
-			colour: Colours.darkRed,
-			order: RenderOrder.Corpse,
-		});
+		const drops = entity.get(Drops);
+		if (drops) {
+			drops.entries.forEach(entry => {
+				if (engine.rng.randint(1, 100) <= entry.chance) {
+					const prefab = engine.rng.weighted(entry.table);
+					ecs.entity(ecs.getPrefab(prefab)).add(Position, { x: at.x, y: at.y });
+				}
+			});
+		}
 
 		if (entity.has(Player)) {
 			engine.gameStateStack.swap(GameState.PlayerDead);
@@ -35,9 +37,7 @@ export default class DeadResult implements Result {
 			results.push(new MessageResult(`${name} is dead!`, Colours.orange));
 			if (fighter) results.push(new XpResult(engine.player, fighter.xp));
 
-			entity.remove(AI);
-			entity.remove(Blocks);
-			entity.remove(Fighter);
+			entity.destroy();
 		}
 
 		return results;

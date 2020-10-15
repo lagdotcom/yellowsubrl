@@ -3,6 +3,7 @@ import Result from './results/Result';
 import { RenderOrder } from './renderFunctions';
 import Engine from './Engine';
 import MessageResult from './results/MessageResult';
+import { WeightTable } from './RNG';
 
 export interface AIRoutine {
 	hurt?: (me: Entity, attacker: Entity, amount: number) => Result[];
@@ -27,7 +28,15 @@ export interface IAppearance {
 
 export interface IBlocks {}
 
+export interface IDrops {
+	entries: {
+		chance: number;
+		table: WeightTable<string>;
+	}[];
+}
+
 export interface EquipmentSlots {
+	head?: string;
 	main?: string;
 	offhand?: string;
 }
@@ -106,6 +115,7 @@ export interface IWeapon {
 export const Appearance = ecs.register<IAppearance>('Appearance');
 export const AI = ecs.register<IAI>('AI');
 export const Blocks = ecs.register<IBlocks>('Blocks');
+export const Drops = ecs.register<IDrops>('Drops');
 export const Equipment = ecs.register<IEquipment>('Equipment');
 export const Equippable = ecs.register<IEquippable>('Equippable');
 export const Fighter = ecs.register<IFighter>('Fighter');
