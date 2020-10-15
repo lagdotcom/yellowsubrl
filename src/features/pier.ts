@@ -2,7 +2,7 @@ import VanishAction from '../actions/VanishAction';
 import { AI, Appearance, Fighter, PierDoor, Position } from '../components';
 import Direction, { getOffset } from '../Direction';
 import ecs, { Entity } from '../ecs';
-import { bowlerHat } from '../enemies/pier';
+import { bowlerHat, eggcup } from '../enemies/pier';
 import Engine from '../Engine';
 import { RenderOrder } from '../renderFunctions';
 import { attack } from '../systems/combat';
@@ -11,7 +11,7 @@ import { distance } from '../systems/movement';
 import { Colours } from '../tcod';
 import { pointSum, atSamePosition } from '../XY';
 
-const pierEnemies = [bowlerHat];
+const pierEnemies = [bowlerHat, eggcup];
 const doors = ecs.query({ all: [PierDoor] });
 
 export const pierDoorPrefab = ecs

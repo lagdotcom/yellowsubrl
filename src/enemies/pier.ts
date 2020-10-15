@@ -22,3 +22,14 @@ export const bowlerHat = ecs
 		xp: 1,
 		stats: { defense: 0, power: 2, maxHp: 4 },
 	});
+
+export const eggcup = ecs
+	.prefab('eggcup', enemy)
+	.add(Appearance, {
+		name: 'eggcup',
+		tile: 'Eggcup',
+		tile2: 'Eggcup2',
+		colour: Colours.white,
+		order: RenderOrder.Actor,
+	})
+	.add(Fighter, { hp: 10, xp: 1, stats: { defense: 1, power: 1, maxHp: 10 } });
