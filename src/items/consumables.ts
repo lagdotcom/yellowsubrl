@@ -7,11 +7,11 @@ import {
 } from '../itemFunctions';
 import MessageResult from '../results/MessageResult';
 import ecs from '../ecs';
-import { RenderOrder } from '../renderFunctions';
+import RenderOrder from '../RenderOrder';
 import { Appearance, Item } from '../components';
 
 export const healingPotion = ecs
-	.prefab('healing potion')
+	.prefab('item.healingpotion')
 	.add(Appearance, {
 		name: 'healing potion',
 		tile: 'Potion',
@@ -23,7 +23,7 @@ export const healingPotion = ecs
 	.add(Item, { use: (item, en) => heal({ item, en, amount: 40 }) });
 
 export const fireballScroll = ecs
-	.prefab('fireball scroll')
+	.prefab('item.fireballscroll')
 	.add(Appearance, {
 		name: 'fireball scroll',
 		tile: 'Scroll',
@@ -50,7 +50,7 @@ export const fireballScroll = ecs
 	});
 
 export const lightningScroll = ecs
-	.prefab('lightning scroll')
+	.prefab('item.lightningscroll')
 	.add(Appearance, {
 		name: 'lightning scroll',
 		tile: 'Scroll',
@@ -71,7 +71,7 @@ export const lightningScroll = ecs
 	});
 
 export const confusionScroll = ecs
-	.prefab('confusion scroll')
+	.prefab('item.confusionscroll')
 	.add(Appearance, {
 		name: 'confusion scroll',
 		tile: 'Scroll',

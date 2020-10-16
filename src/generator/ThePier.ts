@@ -3,6 +3,7 @@ import ecs from '../ecs';
 import { PierDoorAIVars, pierDoorPrefab } from '../features/pier';
 import GameMap from '../GameMap';
 import { MapGenerator } from '../MapGenerator';
+import Realm from '../Realm';
 import RNG from '../RNG';
 import XY, { TagtoXY, XYTag, XYtoTag } from '../XY';
 
@@ -17,7 +18,7 @@ export default class ThePier implements MapGenerator {
 		public maxRectSize: number = 7
 	) {}
 
-	generate(rng: RNG, gameMap: GameMap): XY {
+	generate(realm: Realm, rng: RNG, gameMap: GameMap): XY {
 		const columns = [];
 		const rows = [];
 

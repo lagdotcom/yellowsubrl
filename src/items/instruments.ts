@@ -1,6 +1,6 @@
 import { Colours } from '../tcod';
 import ecs, { Prefab } from '../ecs';
-import { RenderOrder } from '../renderFunctions';
+import RenderOrder from '../RenderOrder';
 import {
 	Appearance,
 	Item,
@@ -10,7 +10,7 @@ import {
 } from '../components';
 
 const instrument = ecs
-	.prefab('instrument')
+	.prefab('item.instrument')
 	.add(Item, {})
 	.add(Equippable, { slot: 'main', stats: {} });
 

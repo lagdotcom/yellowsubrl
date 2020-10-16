@@ -5,6 +5,7 @@ import ecs from '../ecs';
 import { stairsPrefab } from '../features/stairs';
 import { Stairs, Position } from '../components';
 import { MapGenerator } from '../MapGenerator';
+import Realm from '../Realm';
 
 export default class BoxesAndCorridors implements MapGenerator {
 	maxRooms: number;
@@ -33,7 +34,7 @@ export default class BoxesAndCorridors implements MapGenerator {
 		this.mapHeight = mapHeight;
 	}
 
-	generate(rng: RNG, gameMap: GameMap) {
+	generate(realm: Realm, rng: RNG, gameMap: GameMap) {
 		const rooms: Rect[] = [];
 		const position = { x: 0, y: 0 };
 		var last = [0, 0];
@@ -73,7 +74,7 @@ export default class BoxesAndCorridors implements MapGenerator {
 					}
 				}
 
-				gameMap.placeEntities(rng, newRoom);
+				gameMap.placeEntities(realm, rng, newRoom);
 				rooms.push(newRoom);
 			}
 		}

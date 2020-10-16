@@ -5,7 +5,7 @@ import ecs, { Entity } from '../ecs';
 import BowlerHatEnemy from '../enemies/pier/BowlerHatEnemy';
 import EggcupEnemy from '../enemies/pier/EggcupEnemy';
 import Engine from '../Engine';
-import { RenderOrder } from '../renderFunctions';
+import RenderOrder from '../RenderOrder';
 import { attack } from '../systems/combat';
 import { getBlocker } from '../systems/entities';
 import { distance } from '../systems/movement';

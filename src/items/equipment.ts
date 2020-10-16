@@ -1,10 +1,10 @@
 import ecs from '../ecs';
 import { Appearance, Item, Equippable } from '../components';
 import { Colours } from '../tcod';
-import { RenderOrder } from '../renderFunctions';
+import RenderOrder from '../RenderOrder';
 
 export const dagger = ecs
-	.prefab('dagger')
+	.prefab('item.dagger')
 	.add(Appearance, {
 		name: 'dagger',
 		tile: '/',
@@ -15,7 +15,7 @@ export const dagger = ecs
 	.add(Equippable, { slot: 'main', stats: { power: 2 } });
 
 export const sword = ecs
-	.prefab('sword')
+	.prefab('item.sword')
 	.add(Appearance, {
 		name: 'sword',
 		tile: '/',
@@ -26,7 +26,7 @@ export const sword = ecs
 	.add(Equippable, { slot: 'main', stats: { power: 3 } });
 
 export const shield = ecs
-	.prefab('shield')
+	.prefab('item.shield')
 	.add(Appearance, {
 		name: 'shield',
 		tile: '[',

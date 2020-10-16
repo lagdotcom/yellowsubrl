@@ -5,6 +5,7 @@ import ecs from '../ecs';
 import { stairsPrefab } from '../features/stairs';
 import { Stairs, Position } from '../components';
 import { MapGenerator } from '../MapGenerator';
+import Realm from '../Realm';
 
 class Leaf {
 	left?: Leaf;
@@ -113,7 +114,7 @@ export default class BSPTree implements MapGenerator {
 		public splitChance: number
 	) {}
 
-	generate(rng: RNG, gameMap: GameMap) {
+	generate(realm: Realm, rng: RNG, gameMap: GameMap) {
 		const { minRoom, minLeaf, maxLeaf, splitChance } = this;
 
 		const root = new Leaf(0, 0, gameMap.width, gameMap.height);
@@ -149,7 +150,7 @@ export default class BSPTree implements MapGenerator {
 					position.x = rng.randint(l.room.x1 + 1, l.room.x2 - 1);
 					position.y = rng.randint(l.room.y1 + 1, l.room.y2 - 1);
 				} else {
-					gameMap.placeEntities(rng, l.room);
+					gameMap.placeEntities(realm, rng, l.room);
 					last = l.room.centre();
 				}
 			}

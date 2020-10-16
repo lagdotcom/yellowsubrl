@@ -1,11 +1,13 @@
+import { RingoPrefab } from './features/players';
+import { dagger } from './items/equipment';
 import { PierRealm } from './realms';
 import Scenario from './Scenario';
 
 const RingoScenario: Scenario = {
 	description: 'Play as Ringo, the hapless drummer.',
-	player: 'player.ringo',
+	player: RingoPrefab,
 	realm: PierRealm,
-	inventory: ['dagger'],
+	inventory: [dagger],
 };
 
 const scenarios: { [key: string]: Scenario } = {

@@ -21,13 +21,6 @@ import { getStat } from './systems/stats';
 
 export type ColourMap = { [name: string]: string };
 
-export enum RenderOrder {
-	Stairs,
-	Corpse,
-	Item,
-	Actor,
-}
-
 function renderMap(
 	con: Console,
 	gameMap: GameMap,

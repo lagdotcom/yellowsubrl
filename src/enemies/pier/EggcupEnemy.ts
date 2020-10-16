@@ -1,6 +1,6 @@
 import { Appearance, Fighter } from '../../components';
 import ecs from '../../ecs';
-import { RenderOrder } from '../../renderFunctions';
+import RenderOrder from '../../RenderOrder';
 import { Colours } from '../../tcod';
 import PierEnemy from './PierEnemy';
 

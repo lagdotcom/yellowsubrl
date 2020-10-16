@@ -4,9 +4,10 @@ import RNG, { RNGSeed } from './RNG';
 import ecs from './ecs';
 import { getBlocker, isAt } from './systems/entities';
 import { Position } from './components';
-import { getItemSpawnChances, getEnemySpawnChances, fscale } from './spawnData';
 import XY, { XYTag, XYtoTag } from './XY';
 import { adjacentOffsets } from './Direction';
+import Realm from './Realm';
+import { fscale } from './spawnData';
 
 export default class GameMap {
 	floor!: number;
@@ -133,7 +134,7 @@ export default class GameMap {
 		return area;
 	}
 
-	placeEntities(rng: RNG, room: Rect) {
+	placeEntities(realm: Realm, rng: RNG, room: Rect) {
 		const numberOfMonsters = rng.randint(
 			0,
 			fscale(this.floor, [2, 1], [3, 4], [5, 6])
@@ -145,7 +146,7 @@ export default class GameMap {
 			const y = rng.randint(room.y1 + 1, room.y2 - 1);
 
 			if (!getBlocker(x, y)) {
-				const prefab = rng.weighted(getEnemySpawnChances(this.floor));
+				const prefab = rng.weighted(realm.getEnemySpawnChances(this.floor));
 			}
 		}
 
@@ -156,7 +157,7 @@ export default class GameMap {
 			if (
 				ecs.find({ all: [Position] }).filter(en => isAt(en, x, y)).length == 0
 			) {
-				const prefab = rng.weighted(getItemSpawnChances(this.floor));
+				const prefab = rng.weighted(realm.getItemSpawnChances(this.floor));
 			}
 		}
 	}

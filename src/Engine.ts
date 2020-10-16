@@ -155,13 +155,13 @@ export default class Engine {
 
 	newGame(scen: Scenario) {
 		this.gameStateStack.swap(GameState.PlayerTurn);
-		this.player = ecs.entity(ecs.getPrefab(scen.player));
+		this.player = ecs.entity(scen.player);
 		this.realm = scen.realm;
 		this.mapGenerator = scen.realm.generator;
 		this.newMap();
 
 		scen.inventory.forEach((prefab, i) => {
-			const item = ecs.entity(ecs.getPrefab(prefab));
+			const item = ecs.entity(prefab);
 			new ItemAddedResult(
 				this.player,
 				item,
@@ -211,7 +211,7 @@ export default class Engine {
 		const realm = realms[data.realm];
 		this.realm = realm;
 		this.mapGenerator = realm.generator;
-		realm.generator.generate(this.rng, this.gameMap);
+		realm.generator.generate(realm, this.rng, this.gameMap);
 		this.gameMap.reveal(data.explored);
 		ecs.clear();
 
@@ -265,7 +265,10 @@ export default class Engine {
 	}
 
 	newMap() {
-		const { gameMap, mapGenerator, rng } = this;
+		const { gameMap, mapGenerator, realm, rng } = this;
+		if (!realm) {
+			throw new Error('Realm not set.');
+		}
 		if (!mapGenerator) {
 			throw new Error('Map Generator not set.');
 		}
@@ -277,7 +280,7 @@ export default class Engine {
 			.forEach(e => e.destroy());
 
 		gameMap.reset(rng.seed, gameMap.width, gameMap.height, gameMap.floor);
-		const start = mapGenerator.generate(rng, gameMap);
+		const start = mapGenerator.generate(realm, rng, gameMap);
 
 		this.fovMap = initializeFov(gameMap);
 

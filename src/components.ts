@@ -1,6 +1,6 @@
 import ecs, { Entity } from './ecs';
 import Result from './results/Result';
-import { RenderOrder } from './renderFunctions';
+import RenderOrder from './RenderOrder';
 import Engine from './Engine';
 import MessageResult from './results/MessageResult';
 import { WeightTable } from './RNG';

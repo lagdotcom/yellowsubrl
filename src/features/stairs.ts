@@ -1,7 +1,7 @@
 import ecs from '../ecs';
 import { Appearance } from '../components';
 import { Colours } from '../tcod';
-import { RenderOrder } from '../renderFunctions';
+import RenderOrder from '../RenderOrder';
 
 export const stairsPrefab = ecs.prefab('stairs').add(Appearance, {
 	name: 'stairs',
