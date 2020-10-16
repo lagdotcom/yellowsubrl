@@ -43,17 +43,17 @@ import {
 	width,
 } from './constants';
 import MessageResult from './results/MessageResult';
-import { mainMenu } from './menus';
-import { AI, Player, Position } from './components';
+import { mainMenu, setupMenu } from './menus';
+import { AI, Equippable, Player, Position } from './components';
 import { hasAI } from './queries';
 import merge from 'lodash.merge';
-import { ringoPrefab } from './features/players';
-import { dagger } from './items/equipment';
 import ItemAddedResult from './results/ItemAddedResult';
 import EquipItemResult from './results/EquipItemResult';
 import { isAlive } from './systems/combat';
-import ThePier from './generator/ThePier';
 import { AIRoutines } from './systems/ai';
+import Scenario from './Scenario';
+import Realm, { RealmName } from './Realm';
+import realms from './realms';
 
 interface SaveData {
 	entities: { [id: string]: [templates: string[], args: any] };
@@ -61,6 +61,7 @@ interface SaveData {
 	map: string;
 	seed: string;
 	floor: number;
+	realm: RealmName;
 }
 
 export default class Engine {
@@ -76,7 +77,7 @@ export default class Engine {
 	public gameMap: GameMap;
 	public gameStateStack: Stack<GameState>;
 	public height: number;
-	public mapGenerator: MapGenerator;
+	public mapGenerator?: MapGenerator;
 	public mapHeight: number;
 	public mapWidth: number;
 	public messageLog: MessageLog;
@@ -86,6 +87,7 @@ export default class Engine {
 	public panelHeight: number;
 	public panelY: number;
 	public player!: Entity;
+	public realm?: Realm;
 	public rng: RNG;
 	public scrollX: number;
 	public scrollY: number;
@@ -104,16 +106,6 @@ export default class Engine {
 		this.colours = colours;
 		this.rng = rng;
 		this.tilesets = tilesets;
-
-		// this.mapGenerator = new BoxesAndCorridors({
-		// 	maxRooms,
-		// 	roomMinSize,
-		// 	roomMaxSize,
-		// 	mapWidth,
-		// 	mapHeight,
-		// });
-		//this.mapGenerator = new BSPTree(5, 10, 20, 75);
-		this.mapGenerator = new ThePier();
 
 		this.mapHeight = mapHeight;
 		this.mapWidth = mapWidth;
@@ -161,18 +153,29 @@ export default class Engine {
 		return this.gameStateStack.top;
 	}
 
-	newGame() {
+	newGame(scen: Scenario) {
 		this.gameStateStack.swap(GameState.PlayerTurn);
-		this.player = ecs.entity(ringoPrefab);
+		this.player = ecs.entity(ecs.getPrefab(scen.player));
+		this.realm = scen.realm;
+		this.mapGenerator = scen.realm.generator;
 		this.newMap();
 
-		const weapon = ecs.entity(dagger);
-		new ItemAddedResult(this.player, weapon, 'a').perform();
-		new EquipItemResult(this.player, weapon).perform();
+		scen.inventory.forEach((prefab, i) => {
+			const item = ecs.entity(ecs.getPrefab(prefab));
+			new ItemAddedResult(
+				this.player,
+				item,
+				String.fromCharCode(97 + i)
+			).perform();
+			if (item.has(Equippable))
+				new EquipItemResult(this.player, item).perform();
+		});
 	}
 
 	saveGame() {
-		// TODO: map reveal not saved
+		if (!this.realm) {
+			throw new Error('Realm not set.');
+		}
 
 		const data: SaveData = {
 			entities: {},
@@ -180,6 +183,7 @@ export default class Engine {
 			seed: toReadable(this.rng.seed),
 			map: toReadable(this.gameMap.seed),
 			floor: this.gameMap.floor,
+			realm: this.realm.name,
 		};
 		ecs.find().forEach(en => {
 			data.entities[en.id] = [en.prefabNames(), en.diffData()];
@@ -203,7 +207,11 @@ export default class Engine {
 			data.floor
 		);
 		this.rng.seed = this.gameMap.seed;
-		this.mapGenerator.generate(this.rng, this.gameMap);
+
+		const realm = realms[data.realm];
+		this.realm = realm;
+		this.mapGenerator = realm.generator;
+		realm.generator.generate(this.rng, this.gameMap);
 		this.gameMap.reveal(data.explored);
 		ecs.clear();
 
@@ -258,14 +266,15 @@ export default class Engine {
 
 	newMap() {
 		const { gameMap, mapGenerator, rng } = this;
+		if (!mapGenerator) {
+			throw new Error('Map Generator not set.');
+		}
 
 		// remove all items on the dungeon floor
 		ecs
 			.query({ all: [Position] }, false)
 			.get()
-			.forEach(e => {
-				e.destroy();
-			});
+			.forEach(e => e.destroy());
 
 		gameMap.reset(rng.seed, gameMap.width, gameMap.height, gameMap.floor);
 		const start = mapGenerator.generate(rng, gameMap);
@@ -284,6 +293,16 @@ export default class Engine {
 	private main() {
 		if (this.gameState == GameState.MainMenu) {
 			mainMenu(this.console, width, height);
+			drawMessageLog(this.messageLog, this.console, 30);
+			this.context.present(this.console);
+
+			const { key } = this.context.checkForEvents();
+			this.update(key);
+			return;
+		}
+
+		if (this.gameState == GameState.ChoosingSetup) {
+			setupMenu(this.console, width, height);
 			drawMessageLog(this.messageLog, this.console, 30);
 			this.context.present(this.console);
 

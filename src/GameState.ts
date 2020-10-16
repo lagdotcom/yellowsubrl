@@ -1,5 +1,6 @@
 enum GameState {
 	MainMenu,
+	ChoosingSetup,
 	PlayerTurn,
 	EnemyTurn,
 	PlayerDead,

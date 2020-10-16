@@ -2,6 +2,7 @@ import { TerminalKey } from './tcod';
 import { TerminalMouse } from './libtcod/Terminal';
 import CancelTargetingAction from './actions/CancelTargetingAction';
 import ChangeFontAction from './actions/ChangeFontAction';
+import ChooseScenarioAction from './actions/ChooseScenarioAction';
 import ChooseTargetAction from './actions/ChooseTargetAction';
 import DropInventoryAction from './actions/DropInventoryAction';
 import ExitAction from './actions/ExitAction';
@@ -20,6 +21,7 @@ import TakeStairsAction from './actions/TakeStairsAction';
 import LevelUpAction, { LevelUpResponse } from './actions/LevelUpAction';
 import ShowCharacterAction from './actions/ShowCharacterAction';
 import WaitAction from './actions/WaitAction';
+import scenarios from './scenarios';
 
 export function handleKeys(gameState: GameState, e?: TerminalKey) {
 	if (!e) return;
@@ -27,6 +29,9 @@ export function handleKeys(gameState: GameState, e?: TerminalKey) {
 	switch (gameState) {
 		case GameState.MainMenu:
 			return handleMainMenuKeys(e);
+
+		case GameState.ChoosingSetup:
+			return handleSetupMenuKeys(e);
 
 		case GameState.PlayerTurn:
 			return handlePlayerTurnKeys(e);
@@ -63,10 +68,18 @@ export function handleMouse(gameState: GameState, m?: TerminalMouse) {
 export function handleMainMenuKeys(e: TerminalKey) {
 	const { key } = e;
 
-	if (key == 'n') return new NewGameAction();
+	if (key == 'n') return new ChooseScenarioAction();
 	else if (key == 'l') return new LoadGameAction();
 
 	if (key == 'F') return new ChangeFontAction();
+}
+
+export function handleSetupMenuKeys(e: TerminalKey) {
+	const { key } = e;
+
+	if (key in scenarios) {
+		return new NewGameAction(scenarios[key]);
+	}
 }
 
 function dirAction(ctrl: boolean, dx: number, dy: number) {

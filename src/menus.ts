@@ -5,15 +5,23 @@ import { Entity } from './ecs';
 import { Fighter, Level } from './components';
 import { xpForNextLevel } from './systems/experience';
 import { getStat } from './systems/stats';
+import { scenarioDescriptions } from './scenarios';
 
 export function menu(
 	con: Console,
 	header: string,
 	options: { [key: string]: string },
-	width: number,
 	screenWidth: number,
-	screenHeight: number
+	screenHeight: number,
+	width?: number
 ) {
+	if (width === undefined) {
+		width = Math.max(
+			header.length,
+			...Object.values(options).map(s => s.length + 4)
+		);
+	}
+
 	const headerHeight = con.getHeightRect(0, 0, width, screenHeight, header);
 	const height = Object.keys(options).length + headerHeight;
 
@@ -44,13 +52,13 @@ export function inventoryMenu(
 		con,
 		header,
 		getInventoryMenu(player),
-		inventoryWidth,
 		screenWidth,
-		screenHeight
+		screenHeight,
+		inventoryWidth
 	);
 }
 
-export function mainMenu(
+function mainMenuHeader(
 	con: Console,
 	screenWidth: number,
 	screenHeight: number
@@ -79,12 +87,36 @@ export function mainMenu(
 		undefined,
 		PrintAlign.Center
 	);
+}
+
+export function mainMenu(
+	con: Console,
+	screenWidth: number,
+	screenHeight: number
+) {
+	mainMenuHeader(con, screenWidth, screenHeight);
 
 	menu(
 		con,
 		'',
 		{ n: 'Play a new game', l: 'Continue last game' },
-		24,
+		screenWidth,
+		screenHeight,
+		24
+	);
+}
+
+export function setupMenu(
+	con: Console,
+	screenWidth: number,
+	screenHeight: number
+) {
+	mainMenuHeader(con, screenWidth, screenHeight);
+
+	menu(
+		con,
+		'Choose a scenario.',
+		scenarioDescriptions,
 		screenWidth,
 		screenHeight
 	);
@@ -113,7 +145,7 @@ export function levelUpMenu({
 		a: `Agility (+1 defense, from ${fighter.stats.defense})`,
 	};
 
-	menu(console, header, options, width, screenWidth, screenHeight);
+	menu(console, header, options, screenWidth, screenHeight, width);
 }
 
 export function characterScreen(
