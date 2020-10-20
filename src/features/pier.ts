@@ -1,5 +1,12 @@
 import VanishAction from '../actions/VanishAction';
-import { AI, Appearance, Fighter, PierDoor, Position } from '../components';
+import {
+	AI,
+	Appearance,
+	Fighter,
+	IAppearance,
+	PierDoor,
+	Position,
+} from '../components';
 import Direction, { getOffset } from '../Direction';
 import ecs, { Entity } from '../ecs';
 import BowlerHatEnemy from '../enemies/pier/BowlerHatEnemy';
@@ -26,18 +33,35 @@ export const pierDoorPrefab = ecs
 		order: RenderOrder.Stairs,
 	});
 
+function open(app: IAppearance) {
+	app.tile = 'DoorOpen';
+	app.tile2 = 'DoorOpen2';
+}
+
+function close(app: IAppearance) {
+	app.tile = 'Door';
+	app.tile2 = 'Door2';
+}
+
 export interface PierDoorAIVars {
 	directions: Direction[];
 	cooldown: number;
+	open?: boolean;
 }
 export function pierDoorThink(me: Entity, engine: Engine) {
+	const app = me.get(Appearance);
 	const pos = me.get(Position);
 	const vars = me.get(AI).vars as PierDoorAIVars;
 
-	if (vars.cooldown > 0) {
-		vars.cooldown--;
-		return [];
+	vars.cooldown--;
+	if (vars.cooldown <= 1 || vars.open) {
+		open(app);
+	} else {
+		close(app);
 	}
+
+	vars.open = false;
+	if (vars.cooldown > 0) return [];
 
 	const direction = engine.rng.choose(vars.directions);
 	const offset = getOffset(direction);
@@ -69,13 +93,19 @@ export function pierEnemyThink(me: Entity) {
 		.get()
 		.filter(e => atSamePosition(e.get(Position), destination));
 	if (exits.length) {
+		const door = exits[0];
+		(door.get(AI).vars as PierDoorAIVars).open = true;
+
+		const doora = door.get(Appearance);
+		open(doora);
+
 		return [new VanishAction(me)];
 	}
 
 	if (vars.target) {
 		const target = ecs.getEntity(vars.target);
 		if (target) {
-			if (distance(pos, target?.get(Position)) < 2) {
+			if (distance(pos, target.get(Position)) < 2) {
 				return attack(me, target);
 			}
 		}
