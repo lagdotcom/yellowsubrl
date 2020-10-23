@@ -1,5 +1,5 @@
 import { Prefab } from './ecs';
-import { MapGenerator } from './MapGenerator';
+import MapGenerator from './MapGenerator';
 import { WeightTable } from './RNG';
 
 export type RealmName = 'pier';

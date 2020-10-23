@@ -10,7 +10,7 @@ export enum FovAlgorithm {
 }
 
 function raycasting(
-	map: Map,
+	map: TileMap,
 	cx: number,
 	cy: number,
 	radius: number,
@@ -66,7 +66,7 @@ function raycasting(
 
 const sunRays = 90;
 function raycasting2(
-	map: Map,
+	map: TileMap,
 	cx: number,
 	cy: number,
 	radius: number,
@@ -116,7 +116,7 @@ function raycasting2(
 }
 
 function sunburst(
-	map: Map,
+	map: TileMap,
 	cx: number,
 	cy: number,
 	radius: number,
@@ -151,7 +151,7 @@ const algorithms = {
 	[FovAlgorithm.Raycasting2]: raycasting2,
 	[FovAlgorithm.Sunburst]: sunburst,
 	[FovAlgorithm.RedBlob]: (
-		map: Map,
+		map: TileMap,
 		x: number,
 		y: number,
 		radius: number,
@@ -183,7 +183,7 @@ class MapTile {
 	}
 }
 
-export class Map {
+export default class TileMap {
 	width: number;
 	height: number;
 	tiles: MapTile[][];

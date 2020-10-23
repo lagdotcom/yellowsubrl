@@ -5,7 +5,7 @@ import Result from '../results/Result';
 import { Stairs, Position, Fighter } from '../components';
 import { isAt } from '../systems/entities';
 import MessageResult from '../results/MessageResult';
-import { Colours } from '../tcod';
+import Colours from '../Colours';
 import { addHp } from '../systems/combat';
 
 export default class TakeStairsAction implements Action {

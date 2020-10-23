@@ -1,5 +1,5 @@
 import ecs, { Entity } from '../ecs';
-import { Colours } from '../tcod';
+import Colours from '../Colours';
 import { nameOf } from './entities';
 import ItemAddedResult from '../results/ItemAddedResult';
 import Result from '../results/Result';

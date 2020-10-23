@@ -1,4 +1,4 @@
-export class Rect {
+export default class Rect {
 	x1: number;
 	y1: number;
 	x2: number;

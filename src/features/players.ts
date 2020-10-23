@@ -8,7 +8,7 @@ import {
 	Level,
 	Equipment,
 } from '../components';
-import { Colours } from '../tcod';
+import Colours from '../Colours';
 import RenderOrder from '../RenderOrder';
 
 export const RingoPrefab = ecs

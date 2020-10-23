@@ -1,4 +1,5 @@
-import { Console, BlendMode, Map, Colours } from './tcod';
+import Colours from './Colours';
+import TileMap from './lib/TileMap';
 import MessageLog from './MessageLog';
 import GameState from './GameState';
 import { inventoryMenu, levelUpMenu, characterScreen } from './menus';
@@ -16,15 +17,15 @@ import Engine from './Engine';
 import GameMap from './GameMap';
 import { renderable } from './queries';
 import { Appearance, Fighter, Position } from './components';
-import { PrintAlign } from './libtcod/Console';
+import TileConsole, { BlendMode, PrintAlign } from './lib/TileConsole';
 import { getStat } from './systems/stats';
 
 export type ColourMap = { [name: string]: string };
 
 function renderMap(
-	con: Console,
+	con: TileConsole,
 	gameMap: GameMap,
-	fovMap: Map,
+	fovMap: TileMap,
 	sx: number,
 	sy: number
 ) {
@@ -125,7 +126,7 @@ export function renderAll(engine: Engine) {
 
 export function drawMessageLog(
 	messageLog: MessageLog,
-	panel: Console,
+	panel: TileConsole,
 	sy: number = 1
 ) {
 	var y = sy;
@@ -136,14 +137,14 @@ export function drawMessageLog(
 	});
 }
 
-export function clearAll(con: Console, ox: number, oy: number) {
+export function clearAll(con: TileConsole, ox: number, oy: number) {
 	renderable.get().forEach(en => clearEntity(con, ox, oy, en));
 }
 
 export function drawEntity(
-	console: Console,
+	console: TileConsole,
 	en: Entity,
-	fovMap: Map,
+	fovMap: TileMap,
 	ox: number,
 	oy: number
 ) {
@@ -162,7 +163,7 @@ export function drawEntity(
 }
 
 export function clearEntity(
-	console: Console,
+	console: TileConsole,
 	ox: number,
 	oy: number,
 	en: Entity
@@ -177,7 +178,7 @@ export function clearEntity(
 }
 
 export function renderBar(
-	panel: Console,
+	panel: TileConsole,
 	x: number,
 	y: number,
 	totalWidth: number,
@@ -206,7 +207,7 @@ export function renderBar(
 	);
 }
 
-export function getNamesUnderMouse(x: number, y: number, fovMap: Map) {
+export function getNamesUnderMouse(x: number, y: number, fovMap: TileMap) {
 	const names = ecs
 		.find({ all: [Position] })
 		.filter(en => isAt(en, x, y) && fovMap.isInFov(x, y))

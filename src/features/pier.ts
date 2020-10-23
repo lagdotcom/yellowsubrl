@@ -16,7 +16,7 @@ import RenderOrder from '../RenderOrder';
 import { attack } from '../systems/combat';
 import { getBlocker } from '../systems/entities';
 import { distance } from '../systems/movement';
-import { Colours } from '../tcod';
+import Colours from '../Colours';
 import { pointSum, atSamePosition } from '../XY';
 
 const pierEnemies = [BowlerHatEnemy, EggcupEnemy];

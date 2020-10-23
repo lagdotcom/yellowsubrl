@@ -1,5 +1,5 @@
-import { Colours } from '../tcod';
-import { Tileset } from './Tileset';
+import Colours from '../Colours';
+import Tileset from './Tileset';
 
 export enum BlendMode {
 	None = 'source-over', // TODO?
@@ -36,7 +36,7 @@ interface ConsoleTile {
 	blend: BlendMode;
 }
 
-export class Console {
+export default class TileConsole {
 	cols: number;
 	context: CanvasRenderingContext2D;
 	defaultBg: string;
@@ -225,7 +225,7 @@ export class Console {
 	}
 
 	blit(
-		dest: Console,
+		dest: TileConsole,
 		dx: number,
 		dy: number,
 		sx: number = 0,

@@ -1,14 +1,8 @@
-export * from './libtcod/AStar';
-export * from './libtcod/Console';
-export * from './libtcod/Map';
-export * from './libtcod/Terminal';
-export * from './libtcod/Tileset';
-
 export function toRGB(r: number, g: number, b: number) {
 	return `rgb(${r},${g},${b})`;
 }
 
-export const Colours = {
+const Colours = {
 	default: 'default',
 	black: toRGB(0, 0, 0),
 	blue: toRGB(0, 0, 255),
@@ -35,3 +29,4 @@ export const Colours = {
 	violet: toRGB(238, 130, 238),
 	yellow: toRGB(255, 255, 0),
 };
+export default Colours;

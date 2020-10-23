@@ -1,4 +1,4 @@
-import { Colours } from '../tcod';
+import Colours from '../Colours';
 
 const tcodLayout = [
 	` !"#$%&'()*+,-./0123456789:;<=>?`,
@@ -41,7 +41,7 @@ export const Charmaps = {
 	TCOD: convertLayout(tcodLayout),
 };
 
-export class Tileset {
+export default class Tileset {
 	canvas: HTMLCanvasElement;
 	charmap: Charmap;
 	context: CanvasRenderingContext2D;

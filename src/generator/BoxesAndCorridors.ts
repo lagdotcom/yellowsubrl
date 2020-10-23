@@ -1,10 +1,10 @@
 import RNG from '../RNG';
-import { Rect } from '../mapObjects';
+import Rect from '../Rect';
 import GameMap from '../GameMap';
 import ecs from '../ecs';
 import { stairsPrefab } from '../features/stairs';
 import { Stairs, Position } from '../components';
-import { MapGenerator } from '../MapGenerator';
+import MapGenerator from '../MapGenerator';
 import Realm from '../Realm';
 
 export default class BoxesAndCorridors implements MapGenerator {

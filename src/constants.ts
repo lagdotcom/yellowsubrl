@@ -1,7 +1,5 @@
-import { toRGB, FovAlgorithm } from './tcod';
-import RNG from './RNG';
-
-export const rng = new RNG();
+import { toRGB } from './Colours';
+import { FovAlgorithm } from './lib/TileMap';
 
 export const width = 90;
 export const height = 36;

@@ -1,5 +1,5 @@
-import { Console, Colours } from './tcod';
-import { PrintAlign } from './libtcod/Console';
+import Colours from './Colours';
+import TileConsole, { PrintAlign } from './lib/TileConsole';
 import { getInventoryMenu } from './systems/items';
 import { Entity } from './ecs';
 import { Fighter, Level } from './components';
@@ -8,7 +8,7 @@ import { getStat } from './systems/stats';
 import { scenarioDescriptions } from './scenarios';
 
 export function menu(
-	con: Console,
+	con: TileConsole,
 	header: string,
 	options: { [key: string]: string },
 	screenWidth: number,
@@ -25,7 +25,7 @@ export function menu(
 	const headerHeight = con.getHeightRect(0, 0, width, screenHeight, header);
 	const height = Object.keys(options).length + headerHeight;
 
-	const window = new Console(width, height, con.tileset);
+	const window = new TileConsole(width, height, con.tileset);
 	window.printBox(0, 0, width, headerHeight, header, Colours.white);
 
 	var optionY = headerHeight;
@@ -41,7 +41,7 @@ export function menu(
 }
 
 export function inventoryMenu(
-	con: Console,
+	con: TileConsole,
 	header: string,
 	player: Entity,
 	inventoryWidth: number,
@@ -59,7 +59,7 @@ export function inventoryMenu(
 }
 
 function mainMenuHeader(
-	con: Console,
+	con: TileConsole,
 	screenWidth: number,
 	screenHeight: number
 ) {
@@ -90,7 +90,7 @@ function mainMenuHeader(
 }
 
 export function mainMenu(
-	con: Console,
+	con: TileConsole,
 	screenWidth: number,
 	screenHeight: number
 ) {
@@ -107,7 +107,7 @@ export function mainMenu(
 }
 
 export function setupMenu(
-	con: Console,
+	con: TileConsole,
 	screenWidth: number,
 	screenHeight: number
 ) {
@@ -130,7 +130,7 @@ export function levelUpMenu({
 	screenWidth,
 	screenHeight,
 }: {
-	console: Console;
+	console: TileConsole;
 	header: string;
 	player: Entity;
 	width: number;
@@ -149,15 +149,14 @@ export function levelUpMenu({
 }
 
 export function characterScreen(
-	console: Console,
+	console: TileConsole,
 	player: Entity,
 	width: number,
 	height: number,
 	screenWidth: number,
 	screenHeight: number
 ) {
-	const window = new Console(width, height, console.tileset);
-	const fighter = player.get(Fighter);
+	const window = new TileConsole(width, height, console.tileset);
 	const lvl = player.get(Level);
 
 	var row = 1;

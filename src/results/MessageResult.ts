@@ -1,5 +1,5 @@
 import Result from './Result';
-import { Colours } from '../tcod';
+import Colours from '../Colours';
 import Engine from '../Engine';
 
 export default class MessageResult implements Result {

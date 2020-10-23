@@ -1,5 +1,4 @@
-import { TerminalKey } from './tcod';
-import { TerminalMouse } from './libtcod/Terminal';
+import { TerminalKey, TerminalMouse } from './lib/Terminal';
 import CancelTargetingAction from './actions/CancelTargetingAction';
 import ChangeFontAction from './actions/ChangeFontAction';
 import ChooseScenarioAction from './actions/ChooseScenarioAction';

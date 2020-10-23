@@ -1,4 +1,4 @@
-import { Colours } from '../tcod';
+import Colours from '../Colours';
 import ecs, { Prefab } from '../ecs';
 import RenderOrder from '../RenderOrder';
 import {

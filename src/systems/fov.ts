@@ -1,8 +1,8 @@
 import GameMap from '../GameMap';
-import { Map, FovAlgorithm } from '../tcod';
+import TileMap, { FovAlgorithm } from '../lib/TileMap';
 
 export function initializeFov(gameMap: GameMap) {
-	const fovMap = new Map(gameMap.width, gameMap.height);
+	const fovMap = new TileMap(gameMap.width, gameMap.height);
 
 	for (var x = 0; x < fovMap.width; x++) {
 		for (var y = 0; y < fovMap.height; y++) {
@@ -19,7 +19,7 @@ export function initializeFov(gameMap: GameMap) {
 }
 
 export function recomputeFov(
-	fovMap: Map,
+	fovMap: TileMap,
 	x: number,
 	y: number,
 	radius: number,

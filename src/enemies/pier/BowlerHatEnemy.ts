@@ -1,7 +1,7 @@
 import { Appearance, Fighter, Drops, Equippable, Item } from '../../components';
 import ecs from '../../ecs';
 import RenderOrder from '../../RenderOrder';
-import { Colours } from '../../tcod';
+import Colours from '../../Colours';
 import PierEnemy from './PierEnemy';
 
 const BowlerHatEnemy = ecs

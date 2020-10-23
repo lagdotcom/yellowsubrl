@@ -1,15 +1,10 @@
 import GameMap from './GameMap';
-import { MapGenerator } from './MapGenerator';
-import {
-	Colours,
-	Console,
-	FovAlgorithm,
-	Map,
-	Terminal,
-	TerminalKey,
-	TerminalMouse,
-	Tileset,
-} from './tcod';
+import MapGenerator from './MapGenerator';
+import Colours from './Colours';
+import Terminal, { TerminalKey, TerminalMouse } from './lib/Terminal';
+import TileConsole from './lib/TileConsole';
+import TileMap, { FovAlgorithm } from './lib/TileMap';
+import Tileset from './lib/Tileset';
 import GameState from './GameState';
 import { initializeFov, recomputeFov } from './systems/fov';
 import RNG, { toReadable, fromReadable } from './RNG';
@@ -39,7 +34,6 @@ import {
 	messageWidth,
 	messageX,
 	panelHeight,
-	rng,
 	width,
 } from './constants';
 import MessageResult from './results/MessageResult';
@@ -67,11 +61,11 @@ interface SaveData {
 export default class Engine {
 	public barWidth: number;
 	public colours: ColourMap;
-	public console: Console;
+	public console: TileConsole;
 	public context: Terminal;
 	public fovAlgorithm: FovAlgorithm;
 	public fovLightWalls: boolean;
-	public fovMap: Map;
+	public fovMap: TileMap;
 	public fovRadius: number;
 	public fovRecompute!: boolean;
 	public gameMap: GameMap;
@@ -83,7 +77,7 @@ export default class Engine {
 	public messageLog: MessageLog;
 	public mouseX: number;
 	public mouseY: number;
-	public panel: Console;
+	public panel: TileConsole;
 	public panelHeight: number;
 	public panelY: number;
 	public player!: Entity;
@@ -104,12 +98,12 @@ export default class Engine {
 		(window as any).G = this;
 
 		this.colours = colours;
-		this.rng = rng;
+		this.rng = new RNG();
 		this.tilesets = tilesets;
 
 		this.mapHeight = mapHeight;
 		this.mapWidth = mapWidth;
-		this.gameMap = new GameMap(rng.seed, mapWidth, mapHeight, 1);
+		this.gameMap = new GameMap(this.rng.seed, mapWidth, mapHeight, 1);
 
 		const tileset = tilesets[0];
 		this.context = new Terminal(
@@ -124,14 +118,14 @@ export default class Engine {
 
 		this.height = height;
 		this.width = width;
-		this.console = new Console(width, height, tileset);
+		this.console = new TileConsole(width, height, tileset);
 		this.scrollX = 0;
 		this.scrollY = 0;
 
 		this.barWidth = barWidth;
 		this.panelHeight = panelHeight;
 		this.panelY = height - panelHeight;
-		this.panel = new Console(width, panelHeight, tileset);
+		this.panel = new TileConsole(width, panelHeight, tileset);
 
 		this.messageLog = new MessageLog(messageX, messageWidth, messageHeight);
 

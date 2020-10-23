@@ -3,7 +3,7 @@ import Engine from '../Engine';
 import { Entity } from '../ecs';
 import { addXp } from '../systems/experience';
 import MessageResult from './MessageResult';
-import { Colours } from '../tcod';
+import Colours from '../Colours';
 import { Level } from '../components';
 import GameState from '../GameState';
 

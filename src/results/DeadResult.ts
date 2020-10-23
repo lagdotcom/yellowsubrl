@@ -1,6 +1,6 @@
 import Result from './Result';
 import Engine from '../Engine';
-import { Colours } from '../tcod';
+import Colours from '../Colours';
 import MessageResult from './MessageResult';
 import GameState from '../GameState';
 import ecs, { Entity } from '../ecs';

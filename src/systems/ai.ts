@@ -5,7 +5,7 @@ import XY, { atSamePosition } from '../XY';
 import { attack } from './combat';
 import MessageResult from '../results/MessageResult';
 import { nameOf } from './entities';
-import { Colours } from '../tcod';
+import Colours from '../Colours';
 import { Entity } from '../ecs';
 import {
 	AI,

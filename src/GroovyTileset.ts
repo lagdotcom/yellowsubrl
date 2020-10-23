@@ -1,5 +1,5 @@
 import source from '../res/groovy12x24.png';
-import { Charmap } from './libtcod/Tileset';
+import { Charmap } from './lib/Tileset';
 
 const GroovyTileset = {
 	source,

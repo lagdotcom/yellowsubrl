@@ -2,7 +2,8 @@ import ecs, { Entity } from './ecs';
 import Result from './results/Result';
 import { addHp, takeDamage } from './systems/combat';
 import MessageResult from './results/MessageResult';
-import { Colours, Map } from './tcod';
+import Colours from './Colours';
+import TileMap from './lib/TileMap';
 import ConsumeItemResult from './results/ConsumeItemResult';
 import { distance } from './systems/movement';
 import XY from './XY';
@@ -47,7 +48,7 @@ export function castLightning({
 }: {
 	item: Entity;
 	caster: Entity;
-	fovMap: Map;
+	fovMap: TileMap;
 	damage: number;
 	range: number;
 }) {
@@ -100,7 +101,7 @@ export function castFireball({
 }: {
 	item: Entity;
 	caster: Entity;
-	fovMap: Map;
+	fovMap: TileMap;
 	damage: number;
 	radius: number;
 	target: XY;
@@ -149,7 +150,7 @@ function confuse(victim: Entity, duration: number) {
 export function castConfuse(
 	item: Entity,
 	caster: Entity,
-	fovMap: Map,
+	fovMap: TileMap,
 	duration: number,
 	target: XY
 ) {

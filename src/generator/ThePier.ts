@@ -2,7 +2,7 @@ import { AI, Position } from '../components';
 import ecs from '../ecs';
 import { PierDoorAIVars, pierDoorPrefab } from '../features/pier';
 import GameMap from '../GameMap';
-import { MapGenerator } from '../MapGenerator';
+import MapGenerator from '../MapGenerator';
 import Realm from '../Realm';
 import RNG from '../RNG';
 import XY, { TagtoXY, XYTag, XYtoTag } from '../XY';

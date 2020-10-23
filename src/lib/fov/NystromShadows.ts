@@ -1,6 +1,6 @@
 // translated from http://journal.stuffwithstuff.com/2015/09/07/what-the-hero-sees/
 
-import { Map } from '../Map';
+import TileMap from '../TileMap';
 
 class Vec {
 	constructor(public x: number, public y: number) {}
@@ -81,7 +81,7 @@ class Shadow {
 type octant = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 export function refreshVisibility(
-	map: Map,
+	map: TileMap,
 	x: number,
 	y: number,
 	radius: number,
@@ -116,7 +116,7 @@ function transformOctant(row: number, col: number, oct: octant) {
 }
 
 function refreshOctant(
-	map: Map,
+	map: TileMap,
 	hero: Vec,
 	oct: octant,
 	radius: number,

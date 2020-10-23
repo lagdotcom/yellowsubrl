@@ -1,4 +1,4 @@
-import { Map } from './Map';
+import TileMap from './TileMap';
 
 type coord = { x: number; y: number; key: string };
 type heuristic = (a: coord, b: coord) => number;
@@ -12,7 +12,7 @@ function defaultHeuristic(a: coord, b: coord) {
 }
 
 class GridGraph {
-	constructor(public map: Map) {}
+	constructor(public map: TileMap) {}
 
 	contains(co: coord) {
 		return this.map.contains(co.x, co.y);
@@ -76,9 +76,9 @@ class CoordQueue {
 	}
 }
 
-export class AStar {
+export default class AStar {
 	constructor(
-		public map: Map,
+		public map: TileMap,
 		public diagonalCost: number,
 		public heuristic: heuristic = defaultHeuristic
 	) {}

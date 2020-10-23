@@ -1,5 +1,5 @@
 import Tile from './Tile';
-import { Rect } from './mapObjects';
+import Rect from './Rect';
 import RNG, { RNGSeed } from './RNG';
 import ecs from './ecs';
 import { getBlocker, isAt } from './systems/entities';

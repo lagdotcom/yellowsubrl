@@ -1,5 +1,5 @@
-import { Console } from './Console';
-import { Colours } from '../tcod';
+import Colours from '../Colours';
+import TileConsole from './TileConsole';
 
 function opt<T>(option: T | undefined, def: T) {
 	return option !== undefined ? option : def;
@@ -27,7 +27,7 @@ export interface TerminalMouse {
 	y: number;
 }
 
-export class Terminal {
+export default class Terminal {
 	callback?: FrameRequestCallback;
 	context: CanvasRenderingContext2D;
 	element: HTMLCanvasElement;
@@ -117,7 +117,7 @@ export class Terminal {
 	}
 
 	present(
-		console: Console,
+		console: TileConsole,
 		options: {
 			keepAspect?: boolean;
 			integerScaling?: boolean;

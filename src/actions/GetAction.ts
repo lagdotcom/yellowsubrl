@@ -1,7 +1,7 @@
 import Action from './Action';
 import Engine from '../Engine';
 import MessageResult from '../results/MessageResult';
-import { Colours } from '../tcod';
+import Colours from '../Colours';
 import Result from '../results/Result';
 import ecs, { Entity } from '../ecs';
 import { addItemToInventory } from '../systems/items';

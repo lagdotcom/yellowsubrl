@@ -1,6 +1,7 @@
 import { getBlocker } from './entities';
 import GameMap from '../GameMap';
-import { AStar, Map } from '../tcod';
+import AStar from '../lib/AStar';
+import TileMap from '../lib/TileMap';
 import { Entity } from '../ecs';
 import { Position } from '../components';
 import { blockers } from '../queries';
@@ -42,7 +43,7 @@ export function moveAstar(
 	if (!position || !enemy) return;
 
 	goal = goal || enemy;
-	const fov = new Map(gameMap.width, gameMap.height);
+	const fov = new TileMap(gameMap.width, gameMap.height);
 
 	for (var x = 0; x < gameMap.width; x++)
 		for (var y = 0; y < gameMap.height; y++)

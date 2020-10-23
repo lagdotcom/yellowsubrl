@@ -1,5 +1,5 @@
 import './main.css';
-import { Tileset } from './tcod';
+import Tileset from './lib/Tileset';
 import Engine from './Engine';
 import GroovyTileset from './GroovyTileset';
 
