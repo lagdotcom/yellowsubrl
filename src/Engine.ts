@@ -66,10 +66,11 @@ import EquipItemResult from './results/EquipItemResult';
 import { isAlive } from './systems/combat';
 import { AIRoutines } from './systems/ai';
 import Scenario from './Scenario';
-import Realm, { RealmName } from './Realm';
+import Realm from './Realm';
 import realms from './realms';
-import deprecatedYaml from '../res/data/deprecated.yaml';
-import mainYaml from '../res/data/main.yaml';
+
+const yamlData = require.context('../res/data', true, /\.ya?ml$/);
+const yamlFiles = yamlData.keys().map(k => yamlData(k));
 
 interface SaveData {
 	entities: { [id: string]: [templates: string[], args: any] };
@@ -77,7 +78,7 @@ interface SaveData {
 	map: string;
 	seed: string;
 	floor: number;
-	realm: RealmName;
+	realm: string;
 }
 
 export default class Engine {
@@ -163,10 +164,7 @@ export default class Engine {
 
 		this.resolve = this.resolve.bind(this);
 		this.main = this.main.bind(this);
-
-		this.addPrefabs(mainYaml);
-		this.addPrefabs(deprecatedYaml);
-		Object.values(realms).forEach(r => r.load(this));
+		yamlFiles.forEach(y => this.addPrefabs(y));
 	}
 
 	get gameState() {
@@ -176,8 +174,8 @@ export default class Engine {
 	newGame(scen: Scenario) {
 		this.gameStateStack.swap(GameState.PlayerTurn);
 		this.player = ecs.entity(scen.player);
-		this.realm = scen.realm;
-		this.mapGenerator = scen.realm.generator;
+		this.realm = realms[scen.realm];
+		this.mapGenerator = this.realm!.generator;
 		this.newMap();
 
 		scen.inventory.forEach((prefab, i) => {

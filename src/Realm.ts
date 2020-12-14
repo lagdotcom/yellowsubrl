@@ -1,13 +1,9 @@
-import Engine from './Engine';
 import MapGenerator from './MapGenerator';
 import { WeightTable } from './RNG';
 
-export type RealmName = 'pier';
-
 export default interface Realm {
-	name: RealmName;
+	name: string;
 	generator: MapGenerator;
-	load(engine: Engine): void;
 	getItemSpawnChances(floor: number): WeightTable<string>;
 	getEnemySpawnChances(floor: number): WeightTable<string>;
 }

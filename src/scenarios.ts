@@ -1,19 +1,5 @@
-import { PierRealm } from './realms';
 import Scenario from './Scenario';
+import scenarioYaml from '../res/scenarios.yaml';
 
-const RingoScenario: Scenario = {
-	description: 'Play as Ringo, the hapless drummer.',
-	player: 'player.ringo',
-	realm: PierRealm,
-	inventory: ['item.instrument.snare'],
-};
-
-const scenarios: { [key: string]: Scenario } = {
-	r: RingoScenario,
-};
+const scenarios: { [key: string]: Scenario } = scenarioYaml;
 export default scenarios;
-
-export const scenarioDescriptions: { [key: string]: string } = {};
-Object.entries(scenarios).forEach(([key, val]) => {
-	scenarioDescriptions[key] = val.description;
-});

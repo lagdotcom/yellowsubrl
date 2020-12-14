@@ -1,0 +1,7 @@
+pier:
+  name: The Pier
+  generator: pier
+  items: []
+  enemies:
+    - [1, 'enemy.pier.bowlerhat']
+    - [1, 'enemy.pier.eggcup']

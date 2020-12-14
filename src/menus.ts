@@ -5,7 +5,12 @@ import { Entity } from './ecs';
 import { Fighter, Level } from './components';
 import { xpForNextLevel } from './systems/experience';
 import { getStat } from './systems/stats';
-import { scenarioDescriptions } from './scenarios';
+import scenarios from './scenarios';
+
+const scenarioDescriptions: { [key: string]: string } = {};
+Object.entries(scenarios).forEach(
+	([key, scen]) => (scenarioDescriptions[key] = scen.description)
+);
 
 export function menu(
 	con: TileConsole,

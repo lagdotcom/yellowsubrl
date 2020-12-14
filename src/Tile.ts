@@ -1,7 +1,7 @@
-import { XYtoTag } from './XY';
+import { XYTag, XYtoTag } from './XY';
 
 export default class Tile {
-	tag: string;
+	tag: XYTag;
 	blocked: boolean;
 	blockSight: boolean;
 	explored: boolean;

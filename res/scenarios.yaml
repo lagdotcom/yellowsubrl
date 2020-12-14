@@ -1,0 +1,6 @@
+r:
+  description: Play as Ringo, the hapless drummer.
+  player: player.ringo
+  realm: pier
+  inventory:
+    - item.instrument.snare

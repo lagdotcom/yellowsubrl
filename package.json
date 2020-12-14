@@ -24,6 +24,7 @@
 	"devDependencies": {
 		"@types/lodash.merge": "^4.6.6",
 		"@types/lodash.sum": "^4.0.6",
+		"@types/webpack-env": "^1.16.0",
 		"css-loader": "^5.0.1",
 		"file-loader": "^6.2.0",
 		"prettier": "^2.2.1",

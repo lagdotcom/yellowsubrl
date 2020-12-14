@@ -1,26 +1,32 @@
 import ThePier from './generator/ThePier';
 import Realm from './Realm';
-import yaml from '../res/data/pier.yaml';
-import Engine from './Engine';
+import realmYaml from '../res/realms.yaml';
+import { WeightTable } from './RNG';
 
-export const PierRealm: Realm = {
-	name: 'pier',
-	generator: new ThePier(),
-	load(engine: Engine) {
-		engine.addPrefabs(yaml);
-	},
-	getItemSpawnChances() {
-		return [];
-	},
-	getEnemySpawnChances() {
-		return [
-			[1, 'enemy.pier.bowlerhat'],
-			[1, 'enemy.pier.eggcup'],
-		];
-	},
+const RealmGenerators = {
+	pier: ThePier,
 };
 
-const realms = {
-	pier: PierRealm,
-};
+const realms: { [id: string]: Realm } = {};
 export default realms;
+
+interface YRealm {
+	name: string;
+	generator: keyof typeof RealmGenerators;
+	items: WeightTable<string>;
+	enemies: WeightTable<string>;
+}
+type YRealms = { [id: string]: YRealm };
+
+Object.entries(realmYaml as YRealms).forEach(([id, realm]) => {
+	realms[id] = {
+		name: realm.name,
+		generator: new RealmGenerators[realm.generator](),
+		getItemSpawnChances() {
+			return realm.items;
+		},
+		getEnemySpawnChances() {
+			return realm.enemies;
+		},
+	};
+});
