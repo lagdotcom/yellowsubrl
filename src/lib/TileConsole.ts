@@ -164,6 +164,32 @@ export default class TileConsole {
 		);
 	}
 
+	printBorder(
+		sx: number,
+		sy: number,
+		width: number,
+		height: number,
+		fg?: string
+	) {
+		const ex = width - sx;
+		const ey = height - sy;
+
+		for (var x = sx + 1; x < ex; x++) {
+			this.putChar(x, sy, 'BorderT', fg);
+			this.putChar(x, ey, 'BorderB', fg);
+		}
+
+		for (var y = sy + 1; y < ey; y++) {
+			this.putChar(sx, y, 'BorderL', fg);
+			this.putChar(ex, y, 'BorderR', fg);
+		}
+
+		this.putChar(sx, sy, 'BorderTL', fg);
+		this.putChar(ex, sy, 'BorderTR', fg);
+		this.putChar(sx, ey, 'BorderBL', fg);
+		this.putChar(ex, ey, 'BorderBR', fg);
+	}
+
 	printBox(
 		x: number,
 		y: number,

@@ -27,16 +27,17 @@ export function menu(
 		);
 	}
 
-	const headerHeight = con.getHeightRect(0, 0, width, screenHeight, header);
-	const height = Object.keys(options).length + headerHeight;
+	const headerHeight = con.getHeightRect(0, 0, width, screenHeight, header) + 1;
+	const height = Object.keys(options).length + headerHeight - 1;
 
-	const window = new TileConsole(width, height, con.tileset);
-	window.printBox(0, 0, width, headerHeight, header, Colours.white);
+	const window = new TileConsole(width + 2, height + 2, con.tileset);
+	window.printBorder(0, 0, width + 1, height + 1);
+	window.printBox(1, 1, width, headerHeight, header, Colours.white);
 
 	var optionY = headerHeight;
 	Object.entries(options).forEach(([key, value]) => {
 		const text = `(${key}) ${value}`;
-		window.print(0, optionY, text);
+		window.print(1, optionY, text);
 		optionY++;
 	});
 
@@ -166,11 +167,14 @@ export function characterScreen(
 
 	var row = 1;
 	const show = function (s: string) {
-		window.printBox(0, row, width, height, s, Colours.white);
+		window.printBox(1, row, width, height, s, Colours.white);
 		row++;
 	};
 
+	window.printBorder(0, 0, width - 1, height - 1);
 	show('Character Information');
+	row++;
+
 	show(`Level: ${lvl.currentLevel}`);
 	show(`Experience: ${lvl.currentXp}`);
 	show(`Experience to Level: ${xpForNextLevel(player)}`);

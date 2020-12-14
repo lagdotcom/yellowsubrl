@@ -34,6 +34,15 @@ const GroovyTileset = {
 		':': [26, 0],
 		';': [27, 0],
 
+		BorderTL: [0, 1],
+		BorderT: [1, 1],
+		BorderTR: [2, 1],
+		BorderBL: [3, 1],
+		BorderB: [4, 1],
+		BorderBR: [5, 1],
+		BorderL: [6, 1],
+		BorderR: [7, 1],
+
 		A: [0, 3],
 		B: [1, 3],
 		C: [2, 3],
