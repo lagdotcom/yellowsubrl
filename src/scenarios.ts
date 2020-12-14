@@ -5,7 +5,7 @@ const RingoScenario: Scenario = {
 	description: 'Play as Ringo, the hapless drummer.',
 	player: 'player.ringo',
 	realm: PierRealm,
-	inventory: ['item.dagger'],
+	inventory: ['item.instrument.snare'],
 };
 
 const scenarios: { [key: string]: Scenario } = {

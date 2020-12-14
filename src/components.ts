@@ -1,6 +1,6 @@
 import ecs, { Entity } from './ecs';
 import Result from './results/Result';
-import RenderOrder, { RenderOrders, RenderOrderName } from './RenderOrder';
+import RenderOrder from './RenderOrder';
 import Engine from './Engine';
 import MessageResult from './results/MessageResult';
 import { WeightTable } from './RNG';
@@ -31,12 +31,12 @@ export interface YAppearance {
 	tile: string;
 	tile2?: string;
 	colour: ColourName;
-	order: RenderOrderName;
+	order: keyof typeof RenderOrder;
 	revealforever?: boolean;
 	revealed?: boolean;
 }
 export function convertAppearance(y: YAppearance): IAppearance {
-	return { ...y, colour: Colours[y.colour], order: RenderOrders[y.order] };
+	return { ...y, colour: Colours[y.colour], order: RenderOrder[y.order] };
 }
 
 export interface IBlocks {}
@@ -132,6 +132,12 @@ export enum WeaponCategory {
 export interface IWeapon {
 	category: WeaponCategory;
 }
+export interface YWeapon {
+	category: keyof typeof WeaponCategory;
+}
+export function convertWeapon(y: YWeapon): IWeapon {
+	return { ...y, category: WeaponCategory[y.category] };
+}
 
 export const AI = ecs.register<IAI>('AI');
 export const Appearance = ecs.register<IAppearance>('Appearance');
@@ -165,7 +171,7 @@ export interface EntityData {
 	Player?: IPlayer;
 	Position?: IPosition;
 	Stairs?: IStairs;
-	Weapon?: IWeapon;
+	Weapon?: YWeapon;
 }
 
 export type EntityDataTable = { [id: string]: EntityData };

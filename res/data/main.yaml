@@ -33,3 +33,124 @@ stairs:
     colour: white
     order: Stairs
     revealforever: true
+
+item.instrument:
+  Item: {}
+  Equippable:
+    slot: main
+    stats: {}
+
+item.instrument.acoustic:
+  prefabs: [item.instrument]
+  Appearance:
+    name: acoustic guitar
+    tile: Guitar
+    tile2: Guitar2
+    colour: brown
+    order: Item
+    revealforever: true
+  Weapon:
+    category: String
+
+item.instrument.bass:
+  prefabs: [item.instrument]
+  Appearance:
+    name: bass guitar
+    tile: Guitar
+    tile2: Guitar2
+    colour: black
+    order: Item
+    revealforever: true
+  Weapon:
+    category: String
+
+item.instrument.electric:
+  prefabs: [item.instrument]
+  Appearance:
+    name: electric guitar
+    tile: Guitar
+    tile2: Guitar2
+    colour: red
+    order: Item
+    revealforever: true
+  Weapon:
+    category: String
+
+item.instrument.flute:
+  prefabs: [item.instrument]
+  Appearance:
+    name: flute
+    tile: Flute
+    tile2: Flute2
+    colour: silver
+    order: Item
+    revealforever: true
+  Weapon:
+    category: Woodwind
+
+item.instrument.sitar:
+  prefabs: [item.instrument]
+  Appearance:
+    name: flute
+    tile: \
+    colour: brown
+    order: Item
+    revealforever: true
+  Weapon:
+    category: String
+
+item.instrument.snare:
+  prefabs: [item.instrument]
+  Appearance:
+    name: snare drum
+    tile: Drum
+    tile2: Drum2
+    colour: white
+    order: Item
+    revealforever: true
+  Weapon:
+    category: Percussion
+
+item.instrument.trombone:
+  prefabs: [item.instrument]
+  Appearance:
+    name: trombone
+    tile: c
+    colour: yellow
+    order: Item
+    revealforever: true
+  Weapon:
+    category: Brass
+
+item.instrument.trumpet:
+  prefabs: [item.instrument]
+  Appearance:
+    name: trumpet
+    tile: c
+    colour: silver
+    order: Item
+    revealforever: true
+  Weapon:
+    category: Brass
+
+item.instrument.tuba:
+  prefabs: [item.instrument]
+  Appearance:
+    name: tuba
+    tile: U
+    colour: yellow
+    order: Item
+    revealforever: true
+  Weapon:
+    category: Brass
+
+item.instrument.violin:
+  prefabs: [item.instrument]
+  Appearance:
+    name: violin
+    tile: _
+    colour: brown
+    order: Item
+    revealforever: true
+  Weapon:
+    category: String

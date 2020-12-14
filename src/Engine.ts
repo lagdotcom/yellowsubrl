@@ -44,6 +44,7 @@ import {
 	Blocks,
 	convertAppearance,
 	convertFighter,
+	convertWeapon,
 	Drops,
 	EntityDataTable,
 	Equipment,
@@ -465,7 +466,7 @@ export default class Engine {
 			if (y.Player) obj.add(Player, y.Player);
 			if (y.Position) obj.add(Position, y.Position);
 			if (y.Stairs) obj.add(Stairs, y.Stairs);
-			if (y.Weapon) obj.add(Weapon, y.Weapon);
+			if (y.Weapon) obj.add(Weapon, convertWeapon(y.Weapon));
 		});
 	}
 }
