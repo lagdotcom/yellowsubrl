@@ -70,7 +70,7 @@ import Realm from './Realm';
 import realms from './realms';
 
 const yamlData = require.context('../res/data', true, /\.ya?ml$/);
-const yamlFiles = yamlData.keys().map(k => yamlData(k));
+const yamlFiles: EntityDataTable[] = yamlData.keys().map(k => yamlData(k));
 
 interface SaveData {
 	entities: { [id: string]: [templates: string[], args: any] };
