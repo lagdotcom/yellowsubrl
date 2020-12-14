@@ -3,5 +3,5 @@ pier:
   generator: pier
   items: []
   enemies:
-    - [1, 'enemy.pier.bowlerhat']
-    - [1, 'enemy.pier.eggcup']
+    - [1, enemy.pier.bowlerhat]
+    - [1, enemy.pier.eggcup]

@@ -201,7 +201,7 @@ export default class Engine {
 			seed: toReadable(this.rng.seed),
 			map: toReadable(this.gameMap.seed),
 			floor: this.gameMap.floor,
-			realm: this.realm.name,
+			realm: this.realm.id,
 		};
 		ecs.find().forEach(en => {
 			data.entities[en.id] = [en.prefabNames(), en.diffData()];

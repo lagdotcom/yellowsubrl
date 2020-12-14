@@ -31,8 +31,8 @@ enemy.pier.bowlerhat:
     entries:
       - chance: 100
         table:
-          - [5, 'corpse.bowlerhat']
-          - [1, 'item.bowlerhat']
+          - [5, corpse.bowlerhat]
+          - [1, item.bowlerhat]
 
 item.bowlerhat:
   Appearance:
@@ -49,7 +49,7 @@ item.bowlerhat:
 
 corpse.bowlerhat:
   Appearance:
-    name: 'dented bowler hat'
+    name: dented bowler hat
     tile: ^
     colour: grey
     order: Corpse

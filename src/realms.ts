@@ -20,6 +20,7 @@ type YRealms = { [id: string]: YRealm };
 
 Object.entries(realmYaml as YRealms).forEach(([id, realm]) => {
 	realms[id] = {
+		id,
 		name: realm.name,
 		generator: new RealmGenerators[realm.generator](),
 		getItemSpawnChances() {

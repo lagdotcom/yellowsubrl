@@ -7,7 +7,7 @@ player:
     items: {}
 
 player.ringo:
-  prefabs: ['player']
+  prefabs: [player]
   Appearance:
     name: you
     tile: Player
