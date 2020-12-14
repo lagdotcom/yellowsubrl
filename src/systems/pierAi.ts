@@ -9,29 +9,13 @@ import {
 } from '../components';
 import Direction, { getOffset } from '../Direction';
 import ecs, { Entity } from '../ecs';
-import BowlerHatEnemy from '../enemies/pier/BowlerHatEnemy';
-import EggcupEnemy from '../enemies/pier/EggcupEnemy';
 import Engine from '../Engine';
-import RenderOrder from '../RenderOrder';
-import { attack } from '../systems/combat';
-import { getBlocker } from '../systems/entities';
-import { distance } from '../systems/movement';
-import Colours from '../Colours';
+import { attack } from './combat';
+import { getBlocker } from './entities';
+import { distance } from './movement';
 import { pointSum, atSamePosition } from '../XY';
 
-const pierEnemies = [BowlerHatEnemy, EggcupEnemy];
 const doors = ecs.query({ all: [PierDoor] });
-
-export const pierDoorPrefab = ecs
-	.prefab('feature.pier.door')
-	.add(PierDoor, {})
-	.add(Appearance, {
-		name: 'door',
-		tile: 'Door',
-		tile2: 'Door2',
-		colour: Colours.white,
-		order: RenderOrder.Stairs,
-	});
 
 function open(app: IAppearance) {
 	app.tile = 'DoorOpen';
@@ -68,12 +52,15 @@ export function pierDoorThink(me: Entity, engine: Engine) {
 	const destination = pointSum(pos, offset);
 	if (getBlocker(destination.x, destination.y)) return [];
 
-	const prefab = engine.rng.choose(pierEnemies);
-	const enemy = ecs.entity(prefab).add(Position, destination);
-	const aiVars = enemy.get(AI).vars as PierEnemyAIVars;
-	aiVars.direction = direction;
+	const spawns = engine.realm?.getEnemySpawnChances(engine.gameMap.floor);
+	if (spawns) {
+		const prefab = engine.rng.weighted(spawns);
+		const enemy = ecs.entity(prefab).add(Position, destination);
+		const aiVars = enemy.get(AI).vars as PierEnemyAIVars;
+		aiVars.direction = direction;
 
-	vars.cooldown = engine.rng.randint(100, 200);
+		vars.cooldown = engine.rng.randint(100, 200);
+	}
 	return [];
 }
 

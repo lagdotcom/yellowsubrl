@@ -170,9 +170,13 @@ export class Manager {
 		return this.idGenerator();
 	}
 
-	entity(...prefabs: readonly Prefab[]): Entity {
+	entity(...prefabs: readonly string[]): Entity {
 		const id = this.nextId();
-		const en = new Entity(this, id, ...prefabs);
+		const en = new Entity(
+			this,
+			id,
+			...prefabs.map(name => this.getPrefab(name))
+		);
 		return this.attach(en);
 	}
 

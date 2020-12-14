@@ -20,6 +20,11 @@ module.exports = {
 	module: {
 		rules: [
 			{
+				test: /\.ya?ml$/,
+				type: 'json',
+				loader: 'yaml-loader',
+			},
+			{
 				test: /\.(png|wav)$/,
 				loader: 'file-loader',
 				options: { name: '[name].[ext]' },

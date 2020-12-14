@@ -147,6 +147,7 @@ export default class GameMap {
 
 			if (!getBlocker(x, y)) {
 				const prefab = rng.weighted(realm.getEnemySpawnChances(this.floor));
+				ecs.entity(prefab).add(Position, { x, y });
 			}
 		}
 
@@ -158,6 +159,7 @@ export default class GameMap {
 				ecs.find({ all: [Position] }).filter(en => isAt(en, x, y)).length == 0
 			) {
 				const prefab = rng.weighted(realm.getItemSpawnChances(this.floor));
+				ecs.entity(prefab).add(Position, { x, y });
 			}
 		}
 	}

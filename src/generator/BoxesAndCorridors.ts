@@ -2,7 +2,6 @@ import RNG from '../RNG';
 import Rect from '../Rect';
 import GameMap from '../GameMap';
 import ecs from '../ecs';
-import { stairsPrefab } from '../features/stairs';
 import { Stairs, Position } from '../components';
 import MapGenerator from '../MapGenerator';
 import Realm from '../Realm';
@@ -80,7 +79,7 @@ export default class BoxesAndCorridors implements MapGenerator {
 		}
 
 		ecs
-			.entity(stairsPrefab)
+			.entity('stairs')
 			.add(Stairs, { floor: gameMap.floor + 1 })
 			.add(Position, { x: last[0], y: last[1] });
 

@@ -1,6 +1,6 @@
 import { AI, Position } from '../components';
 import ecs from '../ecs';
-import { PierDoorAIVars, pierDoorPrefab } from '../features/pier';
+import { PierDoorAIVars } from '../systems/pierAi';
 import GameMap from '../GameMap';
 import MapGenerator from '../MapGenerator';
 import Realm from '../Realm';
@@ -108,7 +108,9 @@ export default class ThePier implements MapGenerator {
 					const left = x > 0 && !gameMap.tiles[x - 1][y].blocked;
 
 					if (up || right || down || left) {
-						const door = ecs.entity(pierDoorPrefab).add(Position, { x, y });
+						const door = ecs
+							.entity('feature.pier.door')
+							.add(Position, { x, y });
 						const vars = {
 							directions: [],
 							cooldown: rng.randint(10, 100),

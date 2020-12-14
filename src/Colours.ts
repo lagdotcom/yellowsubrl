@@ -30,3 +30,4 @@ const Colours = {
 	yellow: toRGB(255, 255, 0),
 };
 export default Colours;
+export type ColourName = keyof typeof Colours;

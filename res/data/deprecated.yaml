@@ -1,0 +1,11 @@
+item.dagger:
+  Appearance:
+    name: dagger
+    tile: /
+    colour: sky
+    order: Item
+  Item: {}
+  Equippable:
+    slot: main
+    stats:
+      power: 2

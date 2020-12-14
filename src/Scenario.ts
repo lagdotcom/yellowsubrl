@@ -1,9 +1,8 @@
-import { Prefab } from './ecs';
 import Realm from './Realm';
 
 export default interface Scenario {
 	description: string;
-	player: Prefab;
+	player: string;
 	realm: Realm;
-	inventory: Prefab[];
+	inventory: string[];
 }

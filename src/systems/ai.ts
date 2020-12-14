@@ -15,7 +15,7 @@ import {
 	AIRoutine,
 	AIRoutineName,
 } from '../components';
-import { pierDoorThink, pierEnemyHurt, pierEnemyThink } from '../features/pier';
+import { pierDoorThink, pierEnemyHurt, pierEnemyThink } from './pierAi';
 
 interface BasicAIVars {
 	goal?: XY;

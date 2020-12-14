@@ -38,7 +38,26 @@ import {
 } from './constants';
 import MessageResult from './results/MessageResult';
 import { mainMenu, setupMenu } from './menus';
-import { AI, Equippable, Player, Position } from './components';
+import {
+	AI,
+	Appearance,
+	Blocks,
+	convertAppearance,
+	convertFighter,
+	Drops,
+	EntityDataTable,
+	Equipment,
+	Equippable,
+	Fighter,
+	Inventory,
+	Item,
+	Level,
+	PierDoor,
+	Player,
+	Position,
+	Stairs,
+	Weapon,
+} from './components';
 import { hasAI } from './queries';
 import merge from 'lodash.merge';
 import ItemAddedResult from './results/ItemAddedResult';
@@ -48,6 +67,8 @@ import { AIRoutines } from './systems/ai';
 import Scenario from './Scenario';
 import Realm, { RealmName } from './Realm';
 import realms from './realms';
+import deprecatedYaml from '../res/data/deprecated.yaml';
+import mainYaml from '../res/data/main.yaml';
 
 interface SaveData {
 	entities: { [id: string]: [templates: string[], args: any] };
@@ -141,6 +162,10 @@ export default class Engine {
 
 		this.resolve = this.resolve.bind(this);
 		this.main = this.main.bind(this);
+
+		this.addPrefabs(mainYaml);
+		this.addPrefabs(deprecatedYaml);
+		Object.values(realms).forEach(r => r.load(this));
 	}
 
 	get gameState() {
@@ -416,5 +441,31 @@ export default class Engine {
 			Colours.white,
 			Colours.black
 		);
+	}
+
+	addPrefabs(r: EntityDataTable) {
+		Object.entries(r).forEach(([name, y]) => {
+			const prefabs = y.prefabs ? y.prefabs : [];
+			const obj = ecs.prefab(
+				name,
+				...prefabs.map(prefab => ecs.getPrefab(prefab))
+			);
+
+			if (y.AI) obj.add(AI, y.AI);
+			if (y.Appearance) obj.add(Appearance, convertAppearance(y.Appearance));
+			if (y.Blocks) obj.add(Blocks, y.Blocks);
+			if (y.Drops) obj.add(Drops, y.Drops);
+			if (y.Equipment) obj.add(Equipment, y.Equipment);
+			if (y.Equippable) obj.add(Equippable, y.Equippable);
+			if (y.Fighter) obj.add(Fighter, convertFighter(y.Fighter));
+			if (y.Inventory) obj.add(Inventory, y.Inventory);
+			if (y.Item) obj.add(Item, y.Item);
+			if (y.Level) obj.add(Level, y.Level);
+			if (y.PierDoor) obj.add(PierDoor, y.PierDoor);
+			if (y.Player) obj.add(Player, y.Player);
+			if (y.Position) obj.add(Position, y.Position);
+			if (y.Stairs) obj.add(Stairs, y.Stairs);
+			if (y.Weapon) obj.add(Weapon, y.Weapon);
+		});
 	}
 }

@@ -1,0 +1,69 @@
+feature.pier.door:
+  PierDoor: {}
+  Appearance:
+    name: door
+    tile: Door
+    tile2: Door2
+    colour: white
+    order: Stairs
+
+enemy.pier:
+  Blocks: {}
+  AI:
+    routine: pierEnemy
+    vars: {}
+
+enemy.pier.bowlerhat:
+  prefabs: [enemy.pier]
+  Appearance:
+    name: bowler hat
+    tile: BowlerHat
+    tile2: BowlerHat2
+    colour: black
+    order: Actor
+  Fighter:
+    stats:
+      defense: 0
+      power: 2
+      maxHp: 4
+    xp: 1
+  Drops:
+    entries:
+      - chance: 100
+        table:
+          - [5, 'corpse.bowlerhat']
+          - [1, 'item.bowlerhat']
+
+item.bowlerhat:
+  Appearance:
+    name: bowler hat
+    tile: ^
+    colour: black
+    order: Item
+  Item: {}
+  Equippable:
+    slot: head
+    stats:
+      defense: 1
+
+corpse.bowlerhat:
+  Appearance:
+    name: 'dented bowler hat'
+    tile: ^
+    colour: grey
+    order: Corpse
+
+enemy.pier.eggcup:
+  prefabs: [enemy.pier]
+  Appearance:
+    name: eggcup
+    tile: Eggcup
+    tile2: Eggcup2
+    colour: white
+    order: Actor
+  Fighter:
+    stats:
+      defense: 1
+      power: 1
+      maxHp: 10
+    xp: 1

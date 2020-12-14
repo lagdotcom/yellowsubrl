@@ -1,4 +1,4 @@
-import { Prefab } from './ecs';
+import Engine from './Engine';
 import MapGenerator from './MapGenerator';
 import { WeightTable } from './RNG';
 
@@ -7,6 +7,7 @@ export type RealmName = 'pier';
 export default interface Realm {
 	name: RealmName;
 	generator: MapGenerator;
-	getItemSpawnChances(floor: number): WeightTable<Prefab>;
-	getEnemySpawnChances(floor: number): WeightTable<Prefab>;
+	load(engine: Engine): void;
+	getItemSpawnChances(floor: number): WeightTable<string>;
+	getEnemySpawnChances(floor: number): WeightTable<string>;
 }

@@ -1,9 +1,10 @@
 import ecs, { Entity } from './ecs';
 import Result from './results/Result';
-import RenderOrder from './RenderOrder';
+import RenderOrder, { RenderOrders, RenderOrderName } from './RenderOrder';
 import Engine from './Engine';
 import MessageResult from './results/MessageResult';
 import { WeightTable } from './RNG';
+import Colours, { ColourName } from './Colours';
 
 export interface AIRoutine {
 	hurt?: (me: Entity, attacker: Entity, amount: number) => Result[];
@@ -24,6 +25,18 @@ export interface IAppearance {
 	order: RenderOrder;
 	revealforever?: boolean;
 	revealed?: boolean;
+}
+export interface YAppearance {
+	name: string;
+	tile: string;
+	tile2?: string;
+	colour: ColourName;
+	order: RenderOrderName;
+	revealforever?: boolean;
+	revealed?: boolean;
+}
+export function convertAppearance(y: YAppearance): IAppearance {
+	return { ...y, colour: Colours[y.colour], order: RenderOrders[y.order] };
 }
 
 export interface IBlocks {}
@@ -61,12 +74,20 @@ export interface IFighter {
 	stats: Stats;
 	xp: number;
 }
+export interface YFighter {
+	stats: Stats;
+	xp?: number;
+}
+export function convertFighter(y: YFighter): IFighter {
+	return { ...y, hp: y.stats.maxHp, xp: y.xp || 0 };
+}
 
 export interface IInventory {
 	capacity: number;
 	items: { [ch: string]: string };
 }
 
+// TODO: this will clearly not serialize
 export type ItemUseFn = (
 	item: Entity,
 	entity: Entity,
@@ -112,8 +133,8 @@ export interface IWeapon {
 	category: WeaponCategory;
 }
 
-export const Appearance = ecs.register<IAppearance>('Appearance');
 export const AI = ecs.register<IAI>('AI');
+export const Appearance = ecs.register<IAppearance>('Appearance');
 export const Blocks = ecs.register<IBlocks>('Blocks');
 export const Drops = ecs.register<IDrops>('Drops');
 export const Equipment = ecs.register<IEquipment>('Equipment');
@@ -127,3 +148,24 @@ export const Player = ecs.register<IPlayer>('Player');
 export const Position = ecs.register<IPosition>('Position');
 export const Stairs = ecs.register<IStairs>('Stairs');
 export const Weapon = ecs.register<IWeapon>('Weapon');
+
+export interface EntityData {
+	prefabs?: string[];
+	AI?: IAI;
+	Appearance?: YAppearance;
+	Blocks?: IBlocks;
+	Drops?: IDrops;
+	Equipment?: IEquipment;
+	Equippable?: IEquippable;
+	Fighter?: YFighter;
+	Inventory?: IInventory;
+	Item?: IItem;
+	Level?: ILevel;
+	PierDoor?: IPierDoor;
+	Player?: IPlayer;
+	Position?: IPosition;
+	Stairs?: IStairs;
+	Weapon?: IWeapon;
+}
+
+export type EntityDataTable = { [id: string]: EntityData };

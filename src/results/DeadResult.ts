@@ -23,7 +23,7 @@ export default class DeadResult implements Result {
 			drops.entries.forEach(entry => {
 				if (engine.rng.randint(1, 100) <= entry.chance) {
 					const prefab = engine.rng.weighted(entry.table);
-					ecs.entity(ecs.getPrefab(prefab)).add(Position, { x: at.x, y: at.y });
+					ecs.entity(prefab).add(Position, { x: at.x, y: at.y });
 				}
 			});
 		}

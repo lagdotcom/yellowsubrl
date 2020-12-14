@@ -39,7 +39,8 @@
 		"deep-object-diff": "^1.1.0",
 		"lodash.merge": "^4.6.2",
 		"lodash.sum": "^4.0.2",
-		"nanoid": "^3.1.20"
+		"nanoid": "^3.1.20",
+		"yaml-loader": "^0.6.0"
 	},
 	"resolutions": {
 		"node-forge": ">=0.10.0"
