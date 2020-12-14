@@ -40,6 +40,7 @@ item.bowlerhat:
     tile: ^
     colour: black
     order: Item
+    revealforever: true
   Item: {}
   Equippable:
     slot: head
