@@ -48,6 +48,7 @@ export function getInventoryMenu(owner: Entity) {
 			var entry = nameOf(item);
 			if (equipment.main === item.id) entry += ' (in main hand)';
 			else if (equipment.offhand === item.id) entry += ' (in off hand)';
+			else if (equipment.head === item.id) entry += ' (on head)';
 
 			menu[slot] = entry;
 		}
