@@ -1,6 +1,11 @@
 import Colours from '../Colours';
 import Tileset from './Tileset';
 
+export const EmbedTile = '\x02';
+export const EmbedFG = '\x03';
+export const EmbedBG = '\x04';
+export const EmbedEnd = '\x0f';
+
 export enum BlendMode {
 	None = 'source-over', // TODO?
 	Set = 'source-over', // TODO?
@@ -35,6 +40,20 @@ interface ConsoleTile {
 	dirty: boolean;
 	blend: BlendMode;
 }
+
+interface TileInstruction {
+	type: 'tile';
+	tile: string;
+}
+interface FGInstruction {
+	type: 'fg';
+	fg: string;
+}
+interface BGInstruction {
+	type: 'bg';
+	bg: string;
+}
+type Instruction = TileInstruction | FGInstruction | BGInstruction;
 
 export default class TileConsole {
 	cols: number;
@@ -118,11 +137,11 @@ export default class TileConsole {
 		});
 	}
 
-	putChar(x: number, y: number, c: number | string) {
+	putChar(x: number, y: number, c: number | string, overrideFg?: string) {
 		if (!this.contains(x, y)) return;
 
 		const ch = typeof c === 'number' ? String.fromCharCode(c) : c;
-		const fg = this.defaultFg;
+		const fg = overrideFg || this.defaultFg;
 		const tile = this.tiles[x][y];
 
 		if (tile.ch != ch || tile.fg != fg) {
@@ -151,14 +170,16 @@ export default class TileConsole {
 		width: number,
 		height: number,
 		str: string,
-		fg: string = '',
-		bg: string = '',
+		startFg: string = '',
+		startBg: string = '',
 		bgBlend: BlendMode = BlendMode.Set,
 		alignment: PrintAlign = PrintAlign.Left
 	) {
+		var fg = startFg;
+		var bg = startBg;
 		if (fg) this.setDefaultForeground(fg);
 
-		const lines = this.splitLines(width, height, str);
+		const lines = this.parseWrap(width, height, str);
 		lines.forEach((line, ly) => {
 			var lx = 0;
 
@@ -167,11 +188,23 @@ export default class TileConsole {
 				lx = Math.floor((width - line.length) / 2);
 
 			for (var i = 0; i < line.length; i++) {
-				const ch = line[i];
-				if (bg) this.setCharBackground(x + lx, y + ly, bg, bgBlend);
-				if (fg) this.putChar(x + lx, y + ly, ch);
+				const item = line[i];
 
-				lx++;
+				switch (item.type) {
+					case 'tile':
+						if (bg) this.setCharBackground(x + lx, y + ly, bg, bgBlend);
+						if (fg) this.putChar(x + lx, y + ly, item.tile, fg);
+						lx++;
+						break;
+
+					case 'fg':
+						fg = item.fg === 'reset' ? startFg : item.fg;
+						break;
+
+					case 'bg':
+						bg = item.bg === 'reset' ? startBg : item.bg;
+						break;
+				}
 			}
 		});
 
@@ -270,25 +303,53 @@ export default class TileConsole {
 		return height + lines.length - 1;
 	}
 
-	private splitLines(width: number, height: number, str: string) {
+	private parseWrap(width: number, height: number, str: string) {
 		const lines = [];
-		var cline = '';
+		var cline: Instruction[] = [];
 		var x = 0;
 		var y = 0;
 
 		for (var i = 0; i < str.length; i++) {
 			const ch = str[i];
 
+			if (ch === EmbedTile) {
+				const [tile, nexti] = this.parseScan(str, i);
+				if (tile) {
+					i = nexti;
+					x += 2;
+					cline.push({ type: 'tile', tile });
+					continue;
+				}
+			}
+
+			if (ch == EmbedFG) {
+				const [fg, nexti] = this.parseScan(str, i);
+				if (fg) {
+					i = nexti;
+					cline.push({ type: 'fg', fg });
+					continue;
+				}
+			}
+
+			if (ch == EmbedBG) {
+				const [bg, nexti] = this.parseScan(str, i);
+				if (bg) {
+					i = nexti;
+					cline.push({ type: 'bg', bg });
+					continue;
+				}
+			}
+
 			if (ch != '\n') {
 				if (ch != ' ' || x) {
-					cline += ch;
+					cline.push({ type: 'tile', tile: ch });
 					x++;
 				}
 			}
 
 			if (x >= width || ch == '\n') {
 				lines.push(cline);
-				cline = '';
+				cline = [];
 				y++;
 
 				if (y >= height) return lines;
@@ -298,6 +359,11 @@ export default class TileConsole {
 
 		if (cline) lines.push(cline);
 		return lines;
+	}
+
+	private parseScan(str: string, i: number): [found: string, nexti: number] {
+		const j = str.indexOf(EmbedEnd, i);
+		return j >= 0 ? [str.slice(i + 1, j), j] : ['', i];
 	}
 
 	private drawTile(tile: ConsoleTile) {

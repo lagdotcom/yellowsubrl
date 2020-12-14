@@ -17,10 +17,6 @@ export const messageHeight = panelHeight - 1;
 export const mapWidth = width;
 export const mapHeight = height - panelHeight;
 
-export const roomMaxSize = 10;
-export const roomMinSize = 6;
-export const maxRooms = 30;
-
 export const fovAlgorithm = FovAlgorithm.RedBlob;
 export const fovLightWalls = true;
 export const fovRadius = 10;

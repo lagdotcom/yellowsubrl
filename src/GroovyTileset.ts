@@ -116,10 +116,12 @@ const GroovyTileset = {
 		Door2: [1, 9],
 		DoorOpen: [2, 9],
 		DoorOpen2: [3, 9],
-		BowlerHat: [4, 9],
-		BowlerHat2: [5, 9],
+		FlyingBowlerHat: [4, 9],
+		FlyingBowlerHat2: [5, 9],
 		Eggcup: [6, 9],
 		Eggcup2: [7, 9],
+		BowlerHat: [8, 9],
+		BowlerHat2: [9, 9],
 	} as Charmap,
 };
 export default GroovyTileset;

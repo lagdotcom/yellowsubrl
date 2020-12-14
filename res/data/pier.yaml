@@ -17,8 +17,8 @@ enemy.pier.bowlerhat:
   prefabs: [enemy.pier]
   Appearance:
     name: bowler hat
-    tile: BowlerHat
-    tile2: BowlerHat2
+    tile: FlyingBowlerHat
+    tile2: FlyingBowlerHat2
     colour: black
     order: Actor
   Fighter:
@@ -37,8 +37,9 @@ enemy.pier.bowlerhat:
 item.bowlerhat:
   Appearance:
     name: bowler hat
-    tile: ^
-    colour: black
+    tile: BowlerHat
+    tile2: BowlerHat2
+    colour: darkGrey
     order: Item
     revealforever: true
   Item: {}
@@ -50,7 +51,8 @@ item.bowlerhat:
 corpse.bowlerhat:
   Appearance:
     name: dented bowler hat
-    tile: ^
+    tile: BowlerHat
+    tile2: BowlerHat2
     colour: grey
     order: Corpse
 

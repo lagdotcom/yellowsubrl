@@ -1,6 +1,6 @@
 import ecs, { Entity } from '../ecs';
 import Colours from '../Colours';
-import { nameOf } from './entities';
+import { iconOf, nameOf } from './entities';
 import ItemAddedResult from '../results/ItemAddedResult';
 import Result from '../results/Result';
 import MessageResult from '../results/MessageResult';
@@ -45,7 +45,7 @@ export function getInventoryMenu(owner: Entity) {
 	for (var slot in inventory.items) {
 		const item = ecs.getEntity(inventory.items[slot]);
 		if (item) {
-			var entry = nameOf(item);
+			var entry = iconOf(item) + nameOf(item);
 			if (equipment.main === item.id) entry += ' (in main hand)';
 			else if (equipment.offhand === item.id) entry += ' (in off hand)';
 			else if (equipment.head === item.id) entry += ' (on head)';
