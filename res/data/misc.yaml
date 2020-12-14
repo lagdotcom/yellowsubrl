@@ -1,0 +1,8 @@
+stairs:
+  Appearance:
+    name: stairs
+    tile: Stairs
+    tile2: Stairs2
+    colour: white
+    order: Stairs
+    revealforever: true

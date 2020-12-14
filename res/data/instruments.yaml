@@ -1,39 +1,3 @@
-player:
-  Player: {}
-  Blocks: {}
-  Equipment: {}
-  Inventory:
-    capacity: 26
-    items: {}
-
-player.ringo:
-  prefabs: ['player']
-  Appearance:
-    name: you
-    tile: Player
-    tile2: Player2
-    colour: default
-    order: Actor
-  Fighter:
-    stats:
-      power: 2
-      defense: 1
-      maxHp: 100
-  Level:
-    currentLevel: 1
-    currentXp: 0
-    levelUpBase: 200
-    levelUpFactor: 150
-
-stairs:
-  Appearance:
-    name: stairs
-    tile: Stairs
-    tile2: Stairs2
-    colour: white
-    order: Stairs
-    revealforever: true
-
 item.instrument:
   Item: {}
   Equippable:
