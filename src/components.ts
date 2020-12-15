@@ -48,12 +48,12 @@ export interface IDrops {
 	}[];
 }
 
-export interface EquipmentSlots {
-	head?: string;
-	main?: string;
-	offhand?: string;
+export enum Slot {
+	head = 'head',
+	main = 'main',
+	offhand = 'offhand',
 }
-export type Slot = keyof EquipmentSlots;
+export type EquipmentSlots = { [slot in Slot]?: string };
 
 export interface Stats {
 	defense: number;
@@ -154,24 +154,3 @@ export const Player = ecs.register<IPlayer>('Player');
 export const Position = ecs.register<IPosition>('Position');
 export const Stairs = ecs.register<IStairs>('Stairs');
 export const Weapon = ecs.register<IWeapon>('Weapon');
-
-export interface EntityData {
-	prefabs?: string[];
-	AI?: IAI;
-	Appearance?: YAppearance;
-	Blocks?: IBlocks;
-	Drops?: IDrops;
-	Equipment?: IEquipment;
-	Equippable?: IEquippable;
-	Fighter?: YFighter;
-	Inventory?: IInventory;
-	Item?: IItem;
-	Level?: ILevel;
-	PierDoor?: IPierDoor;
-	Player?: IPlayer;
-	Position?: IPosition;
-	Stairs?: IStairs;
-	Weapon?: YWeapon;
-}
-
-export type EntityDataTable = { [id: string]: EntityData };
