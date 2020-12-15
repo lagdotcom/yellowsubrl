@@ -133,13 +133,18 @@ const yamlData = require.context('../res/data', true, /\.ya?ml$/);
 const yamlFiles = yamlData.keys().map(k => yamlData(k));
 
 export default function loadAllYaml() {
+	var loaded = 0,
+		failed = 0;
+
 	yamlFiles.forEach(docs => {
 		Object.entries(docs).forEach(([id, doc]) => {
 			const def = EcsCodec.decode(doc);
 
 			if (isRight(def)) {
+				loaded++;
 				loadPrefab(id, def.right);
 			} else {
+				failed++;
 				console.error(
 					id,
 					def.left.map(e =>
@@ -152,10 +157,12 @@ export default function loadAllYaml() {
 			}
 		});
 	});
+
+	console.log('YAML data processed', { loaded, failed });
 }
 
 function loadPrefab(id: string, y: EntityData) {
-	const prefabs = y.prefabs ? y.prefabs : [];
+	const prefabs = y.prefabs || [];
 	const obj = ecs.prefab(id, ...prefabs.map(prefab => ecs.getPrefab(prefab)));
 
 	// AllComponents.forEach(comp => {
