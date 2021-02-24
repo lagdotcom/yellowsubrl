@@ -153,7 +153,7 @@ export default class Engine {
 		this.gameStateStack.swap(GameState.PlayerTurn);
 		this.player = ecs.entity(scen.player);
 		this.realm = realms[scen.realm];
-		this.mapGenerator = this.realm!.generator;
+		this.mapGenerator = this.realm.generator;
 		this.newMap();
 
 		scen.inventory.forEach((prefab, i) => {
