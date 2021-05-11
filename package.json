@@ -12,7 +12,6 @@
 	},
 	"main": "src/main.ts",
 	"scripts": {
-		"preinstall": "npx npm-force-resolutions",
 		"build": "webpack --mode production",
 		"dev": "webpack --mode development",
 		"profile": "webpack --progress --profile",
@@ -25,27 +24,24 @@
 		"@types/lodash.merge": "^4.6.6",
 		"@types/lodash.sum": "^4.0.6",
 		"@types/webpack-env": "^1.16.0",
-		"css-loader": "^5.0.2",
+		"css-loader": "^5.2.4",
 		"file-loader": "^6.2.0",
-		"prettier": "^2.2.1",
+		"prettier": "^2.3.0",
 		"source-map-loader": "^2.0.1",
 		"style-loader": "^2.0.0",
-		"ts-loader": "^8.0.17",
-		"typescript": "^4.2.2",
-		"webpack": "^5.24.1",
-		"webpack-cli": "^4.5.0",
+		"ts-loader": "^9.1.2",
+		"typescript": "^4.2.4",
+		"webpack": "^5.37.0",
+		"webpack-cli": "^4.7.0",
 		"webpack-dev-server": "^3.11.2"
 	},
 	"dependencies": {
 		"deep-object-diff": "^1.1.0",
-		"fp-ts": "^2.9.5",
-		"io-ts": "^2.2.15",
+		"fp-ts": "^2.10.5",
+		"io-ts": "^2.2.16",
 		"lodash.merge": "^4.6.2",
 		"lodash.sum": "^4.0.2",
-		"nanoid": "^3.1.20",
+		"nanoid": "^3.1.23",
 		"yaml-loader": "^0.6.0"
-	},
-	"resolutions": {
-		"node-forge": ">=0.10.0"
 	}
 }
