@@ -10,7 +10,7 @@ module.exports = {
 	},
 	devtool: 'source-map',
 	devServer: {
-		contentBase: dist,
+		static: dist,
 		compress: true,
 		open: true,
 	},
