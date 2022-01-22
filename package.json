@@ -41,7 +41,7 @@
 		"io-ts": "^2.2.16",
 		"lodash.merge": "^4.6.2",
 		"lodash.sum": "^4.0.2",
-		"nanoid": "^3.1.23",
+		"nanoid": "^3.1.31",
 		"yaml-loader": "^0.6.0"
 	}
 }
